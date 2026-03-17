@@ -1,30 +1,96 @@
-/* 
+/*
 Theme Name: Chama Inn
 Theme URI: https://chamastationinn.com
-Author: Suleman Saleem
+Author: Your Name
 Description: Custom theme for Chama Station Inn
 Version: 0.1.0
-Requires at least: 6.9.4
-Requires PHP: 8.2
+Requires at least: 6.0
+Requires PHP: 8.1
 Text Domain: chama-inn
 */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
-.home-hero {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding: 2rem;
-}
-
-.home-hero__inner {
-  max-width: 40rem;
-}
-
-.home-hero__title {
-  margin: 0 0 1rem;
-}
-
-.home-hero__subtitle {
+html,
+body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body.home-page {
+  background: #000;
+  color: #fff;
+  font-family: "Roboto", sans-serif;
+}
+
+.billboard {
+  position: relative;
+  min-height: calc(100vh - 58px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #111;
+}
+
+.billboard__media {
+  position: absolute;
+  inset: 0;
+}
+
+.billboard__poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.billboard__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.38);
+}
+
+.billboard__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 720px;
+  padding: 48px 24px 64px;
+  text-align: center;
+}
+
+.billboard__logo {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  margin: 0 auto 24px;
+}
+
+.billboard__title {
+  color: black;
+  margin: 0 0 16px;
+  font-size: clamp(2.75rem, 5vw, 4.75rem);
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.billboard__text {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.site-footer {
+  background: #000;
+  text-align: center;
+  padding: 18px 16px;
+}
+
+.site-footer__text {
+  margin: 0;
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
