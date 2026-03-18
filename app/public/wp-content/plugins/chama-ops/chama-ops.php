@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 0.3.0
+ * Version: 0.4.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -392,7 +392,7 @@ function chama_ops_save_stay_meta(int $post_id): void
         return;
     }
 
-    $linked_guest_id = isset($_POST['chama_stay_guest_id']) ? absint($_POST['chama_stay_guest_id']) : 0;
+    $linked_guest_id = isset($_POST['chama_stay_guest_id']) ? absint(wp_unslash($_POST['chama_stay_guest_id'])) : 0;
     $check_in        = isset($_POST['chama_stay_check_in']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_check_in'])) : '';
     $check_out       = isset($_POST['chama_stay_check_out']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_check_out'])) : '';
     $status          = isset($_POST['chama_stay_status']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_status'])) : 'lead';
@@ -514,3 +514,88 @@ function chama_ops_render_stay_columns(string $column, int $post_id): void
     }
 }
 add_action('manage_stay_posts_custom_column', 'chama_ops_render_stay_columns', 10, 2);
+
+/**
+ * Register dashboard widgets.
+ */
+function chama_ops_register_dashboard_widgets(): void
+{
+    wp_add_dashboard_widget(
+        'chama_ops_dashboard_summary',
+        __('Chama Ops Summary', 'chama-ops'),
+        'chama_ops_render_dashboard_summary_widget'
+    );
+}
+add_action('wp_dashboard_setup', 'chama_ops_register_dashboard_widgets');
+
+/**
+ * Render the Chama Ops dashboard summary widget.
+ */
+function chama_ops_render_dashboard_summary_widget(): void
+{
+    $guest_counts = wp_count_posts('guest');
+    $stay_counts  = wp_count_posts('stay');
+
+    $guest_total = isset($guest_counts->publish) ? (int) $guest_counts->publish : 0;
+    $stay_total  = isset($stay_counts->publish) ? (int) $stay_counts->publish : 0;
+
+    $recent_guests = get_posts([
+        'post_type'      => 'guest',
+        'posts_per_page' => 5,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+
+    $recent_stays = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => 5,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+    ?>
+    <div class="chama-ops-dashboard-widget">
+        <p>
+            <strong><?php esc_html_e('Published Guests:', 'chama-ops'); ?></strong>
+            <?php echo esc_html((string) $guest_total); ?>
+        </p>
+        <p>
+            <strong><?php esc_html_e('Published Stays:', 'chama-ops'); ?></strong>
+            <?php echo esc_html((string) $stay_total); ?>
+        </p>
+
+        <hr>
+
+        <h4><?php esc_html_e('Recent Guests', 'chama-ops'); ?></h4>
+        <?php if (!empty($recent_guests)) : ?>
+            <ul>
+                <?php foreach ($recent_guests as $guest_post) : ?>
+                    <li>
+                        <a href="<?php echo esc_url(get_edit_post_link($guest_post->ID)); ?>">
+                            <?php echo esc_html($guest_post->post_title); ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else : ?>
+            <p><?php esc_html_e('No guest records yet.', 'chama-ops'); ?></p>
+        <?php endif; ?>
+
+        <h4><?php esc_html_e('Recent Stays', 'chama-ops'); ?></h4>
+        <?php if (!empty($recent_stays)) : ?>
+            <ul>
+                <?php foreach ($recent_stays as $stay_post) : ?>
+                    <li>
+                        <a href="<?php echo esc_url(get_edit_post_link($stay_post->ID)); ?>">
+                            <?php echo esc_html($stay_post->post_title); ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else : ?>
+            <p><?php esc_html_e('No stay records yet.', 'chama-ops'); ?></p>
+        <?php endif; ?>
+    </div>
+    <?php
+}
