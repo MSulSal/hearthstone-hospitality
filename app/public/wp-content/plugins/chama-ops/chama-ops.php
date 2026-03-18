@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 0.4.0
+ * Version: 0.5.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -596,6 +596,140 @@ function chama_ops_render_dashboard_summary_widget(): void
         <?php else : ?>
             <p><?php esc_html_e('No stay records yet.', 'chama-ops'); ?></p>
         <?php endif; ?>
+    </div>
+    <?php
+}
+
+/**
+ * Register the Chama Ops overview page under Dashboard.
+ */
+function chama_ops_register_admin_pages(): void
+{
+    add_dashboard_page(
+        __('Chama Ops Overview', 'chama-ops'),
+        __('Chama Ops Overview', 'chama-ops'),
+        'edit_posts',
+        'chama-ops-overview',
+        'chama_ops_render_overview_page'
+    );
+}
+add_action('admin_menu', 'chama_ops_register_admin_pages');
+
+/**
+ * Render the Chama Ops overview dashboard page.
+ */
+function chama_ops_render_overview_page(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You do not have permission to access this page.', 'chama-ops'));
+    }
+
+    $guest_counts = wp_count_posts('guest');
+    $stay_counts  = wp_count_posts('stay');
+
+    $guest_total = isset($guest_counts->publish) ? (int) $guest_counts->publish : 0;
+    $stay_total  = isset($stay_counts->publish) ? (int) $stay_counts->publish : 0;
+
+    $recent_guests = get_posts([
+        'post_type'      => 'guest',
+        'posts_per_page' => 5,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+
+    $recent_stays = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => 5,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+
+    $revenue_stays = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => 20,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'meta_query'     => [
+            [
+                'key'     => '_chama_stay_status',
+                'value'   => ['booked', 'checked_in', 'checked_out'],
+                'compare' => 'IN',
+            ],
+        ],
+    ]);
+
+    $revenue_total = 0.0;
+
+    foreach ($revenue_stays as $revenue_stay) {
+        $amount = (string) get_post_meta($revenue_stay->ID, '_chama_stay_revenue', true);
+
+        if ($amount !== '') {
+            $revenue_total += (float) $amount;
+        }
+    }
+    ?>
+    <div class="wrap">
+        <h1><?php esc_html_e('Chama Ops Overview', 'chama-ops'); ?></h1>
+        <p><?php esc_html_e('Quick snapshot of guest and stay activity for the current prototype.', 'chama-ops'); ?></p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:24px 0;">
+            <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Guests', 'chama-ops'); ?></h2>
+                <p style="font-size:28px;margin:0;"><?php echo esc_html((string) $guest_total); ?></p>
+                <p style="margin-bottom:0;"><?php esc_html_e('Published guest records', 'chama-ops'); ?></p>
+            </div>
+
+            <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Stays', 'chama-ops'); ?></h2>
+                <p style="font-size:28px;margin:0;"><?php echo esc_html((string) $stay_total); ?></p>
+                <p style="margin-bottom:0;"><?php esc_html_e('Published stay records', 'chama-ops'); ?></p>
+            </div>
+
+            <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Recent Revenue Snapshot', 'chama-ops'); ?></h2>
+                <p style="font-size:28px;margin:0;"><?php echo esc_html('$' . number_format($revenue_total, 2)); ?></p>
+                <p style="margin-bottom:0;"><?php esc_html_e('Booked / active / completed stays in recent records', 'chama-ops'); ?></p>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;">
+            <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Recent Guests', 'chama-ops'); ?></h2>
+                <?php if (!empty($recent_guests)) : ?>
+                    <ul>
+                        <?php foreach ($recent_guests as $guest_post) : ?>
+                            <li>
+                                <a href="<?php echo esc_url(get_edit_post_link($guest_post->ID)); ?>">
+                                    <?php echo esc_html($guest_post->post_title); ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else : ?>
+                    <p><?php esc_html_e('No guest records yet.', 'chama-ops'); ?></p>
+                <?php endif; ?>
+            </div>
+
+            <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Recent Stays', 'chama-ops'); ?></h2>
+                <?php if (!empty($recent_stays)) : ?>
+                    <ul>
+                        <?php foreach ($recent_stays as $stay_post) : ?>
+                            <li>
+                                <a href="<?php echo esc_url(get_edit_post_link($stay_post->ID)); ?>">
+                                    <?php echo esc_html($stay_post->post_title); ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else : ?>
+                    <p><?php esc_html_e('No stay records yet.', 'chama-ops'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
     <?php
 }
