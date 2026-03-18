@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 0.2.0
+ * Version: 0.3.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -405,3 +405,112 @@ function chama_ops_save_stay_meta(int $post_id): void
     update_post_meta($post_id, '_chama_stay_revenue', $revenue);
 }
 add_action('save_post', 'chama_ops_save_stay_meta');
+
+/**
+ * Customize guest admin columns.
+ *
+ * @param array $columns Existing columns.
+ * @return array
+ */
+function chama_ops_guest_columns(array $columns): array
+{
+    return [
+        'cb'                  => $columns['cb'],
+        'title'               => __('Guest', 'chama-ops'),
+        'guest_email'         => __('Email', 'chama-ops'),
+        'guest_phone'         => __('Phone', 'chama-ops'),
+        'guest_marketing_src' => __('Source', 'chama-ops'),
+        'guest_vip'           => __('VIP', 'chama-ops'),
+        'date'                => $columns['date'],
+    ];
+}
+add_filter('manage_guest_posts_columns', 'chama_ops_guest_columns');
+
+/**
+ * Render guest admin column values.
+ *
+ * @param string $column  Column key.
+ * @param int    $post_id Post ID.
+ */
+function chama_ops_render_guest_columns(string $column, int $post_id): void
+{
+    switch ($column) {
+        case 'guest_email':
+            echo esc_html((string) get_post_meta($post_id, '_chama_guest_email', true));
+            break;
+
+        case 'guest_phone':
+            echo esc_html((string) get_post_meta($post_id, '_chama_guest_phone', true));
+            break;
+
+        case 'guest_marketing_src':
+            echo esc_html((string) get_post_meta($post_id, '_chama_guest_marketing_source', true));
+            break;
+
+        case 'guest_vip':
+            echo get_post_meta($post_id, '_chama_guest_vip', true) === '1'
+                ? esc_html__('Yes', 'chama-ops')
+                : '—';
+            break;
+    }
+}
+add_action('manage_guest_posts_custom_column', 'chama_ops_render_guest_columns', 10, 2);
+
+/**
+ * Customize stay admin columns.
+ *
+ * @param array $columns Existing columns.
+ * @return array
+ */
+function chama_ops_stay_columns(array $columns): array
+{
+    return [
+        'cb'           => $columns['cb'],
+        'title'        => __('Stay', 'chama-ops'),
+        'stay_guest'   => __('Guest', 'chama-ops'),
+        'stay_dates'   => __('Dates', 'chama-ops'),
+        'stay_status'  => __('Status', 'chama-ops'),
+        'stay_revenue' => __('Revenue', 'chama-ops'),
+        'date'         => $columns['date'],
+    ];
+}
+add_filter('manage_stay_posts_columns', 'chama_ops_stay_columns');
+
+/**
+ * Render stay admin column values.
+ *
+ * @param string $column  Column key.
+ * @param int    $post_id Post ID.
+ */
+function chama_ops_render_stay_columns(string $column, int $post_id): void
+{
+    switch ($column) {
+        case 'stay_guest':
+            $guest_id = (int) get_post_meta($post_id, '_chama_stay_guest_id', true);
+
+            echo $guest_id ? esc_html(get_the_title($guest_id)) : '—';
+            break;
+
+        case 'stay_dates':
+            $check_in  = (string) get_post_meta($post_id, '_chama_stay_check_in', true);
+            $check_out = (string) get_post_meta($post_id, '_chama_stay_check_out', true);
+
+            if ($check_in || $check_out) {
+                echo esc_html(trim($check_in . ' → ' . $check_out));
+            } else {
+                echo '—';
+            }
+            break;
+
+        case 'stay_status':
+            echo esc_html((string) get_post_meta($post_id, '_chama_stay_status', true));
+            break;
+
+        case 'stay_revenue':
+            $revenue = (string) get_post_meta($post_id, '_chama_stay_revenue', true);
+
+            echo $revenue !== '' ? esc_html('$' . $revenue) : '—';
+            break;
+    }
+}
+add_action('manage_stay_posts_custom_column', 'chama_ops_render_stay_columns', 10, 2);
