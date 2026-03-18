@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 0.5.0
+ * Version: 0.6.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -733,3 +733,90 @@ function chama_ops_render_overview_page(): void
     </div>
     <?php
 }
+
+/**
+ * Render custom filters on Guest and Stay list screens.
+ *
+ * @param string $post_type Current post type.
+ * @param string $which     Table nav location.
+ */
+function chama_ops_render_admin_filters(string $post_type, string $which): void
+{
+    if ($which !== 'top') {
+        return;
+    }
+
+    if ($post_type === 'guest') {
+        $selected_source = isset($_GET['chama_guest_source']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_source'])) : '';
+        ?>
+        <label class="screen-reader-text" for="chama_guest_source"><?php esc_html_e('Filter guests by source', 'chama-ops'); ?></label>
+        <select name="chama_guest_source" id="chama_guest_source">
+            <option value=""><?php esc_html_e('All Sources', 'chama-ops'); ?></option>
+            <option value="direct" <?php selected($selected_source, 'direct'); ?>><?php esc_html_e('Direct', 'chama-ops'); ?></option>
+            <option value="google" <?php selected($selected_source, 'google'); ?>><?php esc_html_e('Google Search', 'chama-ops'); ?></option>
+            <option value="referral" <?php selected($selected_source, 'referral'); ?>><?php esc_html_e('Referral', 'chama-ops'); ?></option>
+            <option value="social" <?php selected($selected_source, 'social'); ?>><?php esc_html_e('Social Media', 'chama-ops'); ?></option>
+            <option value="repeat" <?php selected($selected_source, 'repeat'); ?>><?php esc_html_e('Repeat Guest', 'chama-ops'); ?></option>
+        </select>
+        <?php
+    }
+
+    if ($post_type === 'stay') {
+        $selected_status = isset($_GET['chama_stay_status_filter']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_status_filter'])) : '';
+        ?>
+        <label class="screen-reader-text" for="chama_stay_status_filter"><?php esc_html_e('Filter stays by status', 'chama-ops'); ?></label>
+        <select name="chama_stay_status_filter" id="chama_stay_status_filter">
+            <option value=""><?php esc_html_e('All Statuses', 'chama-ops'); ?></option>
+            <option value="lead" <?php selected($selected_status, 'lead'); ?>><?php esc_html_e('Lead', 'chama-ops'); ?></option>
+            <option value="booked" <?php selected($selected_status, 'booked'); ?>><?php esc_html_e('Booked', 'chama-ops'); ?></option>
+            <option value="checked_in" <?php selected($selected_status, 'checked_in'); ?>><?php esc_html_e('Checked In', 'chama-ops'); ?></option>
+            <option value="checked_out" <?php selected($selected_status, 'checked_out'); ?>><?php esc_html_e('Checked Out', 'chama-ops'); ?></option>
+            <option value="cancelled" <?php selected($selected_status, 'cancelled'); ?>><?php esc_html_e('Cancelled', 'chama-ops'); ?></option>
+        </select>
+        <?php
+    }
+}
+add_action('restrict_manage_posts', 'chama_ops_render_admin_filters', 10, 2);
+
+/**
+ * Apply custom admin list filters to Guest and Stay queries.
+ *
+ * @param WP_Query $query The current query.
+ */
+function chama_ops_apply_admin_filters(WP_Query $query): void
+{
+    if (!is_admin() || !$query->is_main_query()) {
+        return;
+    }
+
+    $post_type = $query->get('post_type');
+
+    if ($post_type === 'guest') {
+        $selected_source = isset($_GET['chama_guest_source']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_source'])) : '';
+
+        if ($selected_source !== '') {
+            $meta_query   = (array) $query->get('meta_query');
+            $meta_query[] = [
+                'key'   => '_chama_guest_marketing_source',
+                'value' => $selected_source,
+            ];
+
+            $query->set('meta_query', $meta_query);
+        }
+    }
+
+    if ($post_type === 'stay') {
+        $selected_status = isset($_GET['chama_stay_status_filter']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_status_filter'])) : '';
+
+        if ($selected_status !== '') {
+            $meta_query   = (array) $query->get('meta_query');
+            $meta_query[] = [
+                'key'   => '_chama_stay_status',
+                'value' => $selected_status,
+            ];
+
+            $query->set('meta_query', $meta_query);
+        }
+    }
+}
+add_action('pre_get_posts', 'chama_ops_apply_admin_filters');
