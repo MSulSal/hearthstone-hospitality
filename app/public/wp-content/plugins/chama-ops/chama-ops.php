@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -266,6 +266,53 @@ function chama_ops_calculate_stay_nights(string $check_in, string $check_out): ?
 }
 
 /**
+ * Build aggregate stay metrics for the overview page.
+ *
+ * @return array<string, float|int|null>
+ */
+function chama_ops_get_stay_rollup_metrics(): array
+{
+    $stays = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+
+    $active_statuses      = ['booked', 'checked_in', 'checked_out'];
+    $booked_active_nights = 0;
+    $revenue_total        = 0.0;
+    $revenue_count        = 0;
+
+    foreach ($stays as $stay_post) {
+        $status    = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
+        $check_in  = (string) get_post_meta($stay_post->ID, '_chama_stay_check_in', true);
+        $check_out = (string) get_post_meta($stay_post->ID, '_chama_stay_check_out', true);
+        $revenue   = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
+        $nights    = chama_ops_calculate_stay_nights($check_in, $check_out);
+
+        if (in_array($status, $active_statuses, true) && $nights !== null) {
+            $booked_active_nights += $nights;
+        }
+
+        if ($revenue !== '') {
+            $revenue_total += (float) $revenue;
+            $revenue_count++;
+        }
+    }
+
+    $average_revenue = $revenue_count > 0 ? $revenue_total / $revenue_count : null;
+
+    return [
+        'booked_active_nights' => $booked_active_nights,
+        'average_revenue'      => $average_revenue,
+        'revenue_total'        => $revenue_total,
+        'revenue_count'        => $revenue_count,
+    ];
+}
+
+/**
  * Render the related stays summary on the Guest edit screen.
  *
  * @param WP_Post $post The current Guest post object.
@@ -294,12 +341,12 @@ function chama_ops_render_guest_related_stays_meta_box(WP_Post $post): void
     echo '<ul style="margin:0;">';
 
     foreach ($related_stays as $stay_post) {
-        $status     = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
-        $check_in   = (string) get_post_meta($stay_post->ID, '_chama_stay_check_in', true);
-        $check_out  = (string) get_post_meta($stay_post->ID, '_chama_stay_check_out', true);
-        $revenue    = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
-        $nights     = chama_ops_calculate_stay_nights($check_in, $check_out);
-        $edit_link  = get_edit_post_link($stay_post->ID);
+        $status    = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
+        $check_in  = (string) get_post_meta($stay_post->ID, '_chama_stay_check_in', true);
+        $check_out = (string) get_post_meta($stay_post->ID, '_chama_stay_check_out', true);
+        $revenue   = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
+        $nights    = chama_ops_calculate_stay_nights($check_in, $check_out);
+        $edit_link = get_edit_post_link($stay_post->ID);
 
         echo '<li style="margin-bottom:12px;">';
         echo '<strong>' . esc_html($stay_post->post_title) . '</strong><br>';
@@ -964,34 +1011,11 @@ function chama_ops_render_overview_page(): void
         'order'          => 'DESC',
     ]);
 
-    $revenue_stays = get_posts([
-        'post_type'      => 'stay',
-        'posts_per_page' => 20,
-        'post_status'    => ['publish', 'draft'],
-        'orderby'        => 'date',
-        'order'          => 'DESC',
-        'meta_query'     => [
-            [
-                'key'     => '_chama_stay_status',
-                'value'   => ['booked', 'checked_in', 'checked_out'],
-                'compare' => 'IN',
-            ],
-        ],
-    ]);
-
-    $revenue_total = 0.0;
-
-    foreach ($revenue_stays as $revenue_stay) {
-        $amount = (string) get_post_meta($revenue_stay->ID, '_chama_stay_revenue', true);
-
-        if ($amount !== '') {
-            $revenue_total += (float) $amount;
-        }
-    }
-
     $stay_status_summary  = chama_ops_get_stay_status_summary();
     $guest_source_summary = chama_ops_get_guest_source_summary();
     $action_links         = chama_ops_get_overview_action_links();
+    $rollup_metrics       = chama_ops_get_stay_rollup_metrics();
+    $average_revenue      = $rollup_metrics['average_revenue'];
     ?>
     <div class="wrap">
         <h1><?php esc_html_e('Chama Ops Overview', 'chama-ops'); ?></h1>
@@ -1038,9 +1062,21 @@ function chama_ops_render_overview_page(): void
             </div>
 
             <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
-                <h2 style="margin-top:0;"><?php esc_html_e('Recent Revenue Snapshot', 'chama-ops'); ?></h2>
-                <p style="font-size:28px;margin:0;"><?php echo esc_html('$' . number_format($revenue_total, 2)); ?></p>
-                <p style="margin-bottom:0;"><?php esc_html_e('Booked / active / completed stays in recent records', 'chama-ops'); ?></p>
+                <h2 style="margin-top:0;"><?php esc_html_e('Booked / Active Nights', 'chama-ops'); ?></h2>
+                <p style="font-size:28px;margin:0;"><?php echo esc_html((string) $rollup_metrics['booked_active_nights']); ?></p>
+                <p style="margin-bottom:0;"><?php esc_html_e('Across booked, checked-in, and checked-out stays', 'chama-ops'); ?></p>
+            </div>
+
+            <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Average Revenue / Stay', 'chama-ops'); ?></h2>
+                <p style="font-size:28px;margin:0;">
+                    <?php
+                    echo $average_revenue !== null
+                        ? esc_html('$' . number_format((float) $average_revenue, 2))
+                        : '—';
+                    ?>
+                </p>
+                <p style="margin-bottom:0;"><?php esc_html_e('Across stays with revenue entered', 'chama-ops'); ?></p>
             </div>
         </div>
 
