@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 0.9.0
+ * Version: 1.0.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -95,6 +95,15 @@ function chama_ops_add_meta_boxes(): void
         'guest',
         'normal',
         'default'
+    );
+
+    add_meta_box(
+        'chama_guest_related_stays',
+        __('Related Stays', 'chama-ops'),
+        'chama_ops_render_guest_related_stays_meta_box',
+        'guest',
+        'side',
+        'high'
     );
 
     add_meta_box(
@@ -228,6 +237,63 @@ function chama_ops_render_guest_details_meta_box(WP_Post $post): void
 }
 
 /**
+ * Render the related stays summary on the Guest edit screen.
+ *
+ * @param WP_Post $post The current Guest post object.
+ */
+function chama_ops_render_guest_related_stays_meta_box(WP_Post $post): void
+{
+    $related_stays = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => 10,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'meta_query'     => [
+            [
+                'key'   => '_chama_stay_guest_id',
+                'value' => (string) $post->ID,
+            ],
+        ],
+    ]);
+
+    if (empty($related_stays)) {
+        echo '<p>' . esc_html__('No stays linked to this guest yet.', 'chama-ops') . '</p>';
+        return;
+    }
+
+    echo '<ul style="margin:0;">';
+
+    foreach ($related_stays as $stay_post) {
+        $status     = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
+        $check_in   = (string) get_post_meta($stay_post->ID, '_chama_stay_check_in', true);
+        $check_out  = (string) get_post_meta($stay_post->ID, '_chama_stay_check_out', true);
+        $revenue    = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
+        $edit_link  = get_edit_post_link($stay_post->ID);
+
+        echo '<li style="margin-bottom:12px;">';
+        echo '<strong>' . esc_html($stay_post->post_title) . '</strong><br>';
+        echo esc_html__('Status:', 'chama-ops') . ' ' . esc_html(chama_ops_format_stay_status_label($status)) . '<br>';
+
+        if ($check_in !== '' || $check_out !== '') {
+            echo esc_html__('Dates:', 'chama-ops') . ' ' . esc_html(trim($check_in . ' → ' . $check_out)) . '<br>';
+        }
+
+        if ($revenue !== '') {
+            echo esc_html__('Revenue:', 'chama-ops') . ' ' . esc_html('$' . $revenue) . '<br>';
+        }
+
+        if ($edit_link) {
+            echo '<a href="' . esc_url($edit_link) . '">' . esc_html__('Edit Stay', 'chama-ops') . '</a>';
+        }
+
+        echo '</li>';
+    }
+
+    echo '</ul>';
+}
+
+/**
  * Render the stay details meta box.
  *
  * @param WP_Post $post The current post object.
@@ -352,13 +418,13 @@ function chama_ops_render_stay_guest_summary_meta_box(WP_Post $post): void
         return;
     }
 
-    $guest_email          = (string) get_post_meta($linked_guest_id, '_chama_guest_email', true);
-    $guest_phone          = (string) get_post_meta($linked_guest_id, '_chama_guest_phone', true);
-    $guest_source         = (string) get_post_meta($linked_guest_id, '_chama_guest_marketing_source', true);
-    $guest_preference     = (string) get_post_meta($linked_guest_id, '_chama_guest_preferred_room', true);
-    $guest_vip            = (string) get_post_meta($linked_guest_id, '_chama_guest_vip', true);
-    $guest_consent        = (string) get_post_meta($linked_guest_id, '_chama_guest_marketing_consent', true);
-    $guest_edit_link      = get_edit_post_link($linked_guest_id);
+    $guest_email      = (string) get_post_meta($linked_guest_id, '_chama_guest_email', true);
+    $guest_phone      = (string) get_post_meta($linked_guest_id, '_chama_guest_phone', true);
+    $guest_source     = (string) get_post_meta($linked_guest_id, '_chama_guest_marketing_source', true);
+    $guest_preference = (string) get_post_meta($linked_guest_id, '_chama_guest_preferred_room', true);
+    $guest_vip        = (string) get_post_meta($linked_guest_id, '_chama_guest_vip', true);
+    $guest_consent    = (string) get_post_meta($linked_guest_id, '_chama_guest_marketing_consent', true);
+    $guest_edit_link  = get_edit_post_link($linked_guest_id);
     ?>
     <p><strong><?php esc_html_e('Guest', 'chama-ops'); ?>:</strong><br><?php echo esc_html($guest_post->post_title); ?></p>
 
