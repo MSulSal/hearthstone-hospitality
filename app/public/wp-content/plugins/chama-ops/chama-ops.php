@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -18,68 +18,390 @@ if (!defined('ABSPATH')) {
 function chama_ops_register_post_types(): void
 {
     $guest_labels = [
-        'name'                  => __('Guests', 'chama-ops'),
-        'singular_name'         => __('Guest', 'chama-ops'),
-        'menu_name'             => __('Guests', 'chama-ops'),
-        'name_admin_bar'        => __('Guest', 'chama-ops'),
-        'add_new'               => __('Add New', 'chama-ops'),
-        'add_new_item'          => __('Add New Guest', 'chama-ops'),
-        'new_item'              => __('New Guest', 'chama-ops'),
-        'edit_item'             => __('Edit Guest', 'chama-ops'),
-        'view_item'             => __('View Guest', 'chama-ops'),
-        'all_items'             => __('All Guests', 'chama-ops'),
-        'search_items'          => __('Search Guests', 'chama-ops'),
-        'not_found'             => __('No guests found.', 'chama-ops'),
-        'not_found_in_trash'    => __('No guests found in Trash.', 'chama-ops'),
+        'name'               => __('Guests', 'chama-ops'),
+        'singular_name'      => __('Guest', 'chama-ops'),
+        'menu_name'          => __('Guests', 'chama-ops'),
+        'name_admin_bar'     => __('Guest', 'chama-ops'),
+        'add_new'            => __('Add New', 'chama-ops'),
+        'add_new_item'       => __('Add New Guest', 'chama-ops'),
+        'new_item'           => __('New Guest', 'chama-ops'),
+        'edit_item'          => __('Edit Guest', 'chama-ops'),
+        'view_item'          => __('View Guest', 'chama-ops'),
+        'all_items'          => __('All Guests', 'chama-ops'),
+        'search_items'       => __('Search Guests', 'chama-ops'),
+        'not_found'          => __('No guests found.', 'chama-ops'),
+        'not_found_in_trash' => __('No guests found in Trash.', 'chama-ops'),
     ];
 
     $guest_args = [
-        'labels'                => $guest_labels,
-        'public'                => false,
-        'publicly_queryable'    => false,
-        'show_ui'               => true,
-        'show_in_menu'          => true,
-        'show_in_rest'          => true,
-        'menu_position'         => 25,
-        'menu_icon'             => 'dashicons-id',
-        'supports'              => ['title', 'editor', 'custom-fields'],
-        'has_archive'           => false,
-        'rewrite'               => false,
+        'labels'             => $guest_labels,
+        'public'             => false,
+        'publicly_queryable' => false,
+        'show_ui'            => true,
+        'show_in_menu'       => true,
+        'show_in_rest'       => true,
+        'menu_position'      => 25,
+        'menu_icon'          => 'dashicons-id',
+        'supports'           => ['title', 'editor'],
+        'has_archive'        => false,
+        'rewrite'            => false,
     ];
 
     register_post_type('guest', $guest_args);
 
     $stay_labels = [
-        'name'                  => __('Stays', 'chama-ops'),
-        'singular_name'         => __('Stay', 'chama-ops'),
-        'menu_name'             => __('Stays', 'chama-ops'),
-        'name_admin_bar'        => __('Stay', 'chama-ops'),
-        'add_new'               => __('Add New', 'chama-ops'),
-        'add_new_item'          => __('Add New Stay', 'chama-ops'),
-        'new_item'              => __('New Stay', 'chama-ops'),
-        'edit_item'             => __('Edit Stay', 'chama-ops'),
-        'view_item'             => __('View Stay', 'chama-ops'),
-        'all_items'             => __('All Stays', 'chama-ops'),
-        'search_items'          => __('Search Stays', 'chama-ops'),
-        'not_found'             => __('No stays found.', 'chama-ops'),
-        'not_found_in_trash'    => __('No stays found in Trash.', 'chama-ops'),
+        'name'               => __('Stays', 'chama-ops'),
+        'singular_name'      => __('Stay', 'chama-ops'),
+        'menu_name'          => __('Stays', 'chama-ops'),
+        'name_admin_bar'     => __('Stay', 'chama-ops'),
+        'add_new'            => __('Add New', 'chama-ops'),
+        'add_new_item'       => __('Add New Stay', 'chama-ops'),
+        'new_item'           => __('New Stay', 'chama-ops'),
+        'edit_item'          => __('Edit Stay', 'chama-ops'),
+        'view_item'          => __('View Stay', 'chama-ops'),
+        'all_items'          => __('All Stays', 'chama-ops'),
+        'search_items'       => __('Search Stays', 'chama-ops'),
+        'not_found'          => __('No stays found.', 'chama-ops'),
+        'not_found_in_trash' => __('No stays found in Trash.', 'chama-ops'),
     ];
 
     $stay_args = [
-        'labels'                => $stay_labels,
-        'public'                => false,
-        'publicly_queryable'    => false,
-        'show_ui'               => true,
-        'show_in_menu'          => true,
-        'show_in_rest'          => true,
-        'menu_position'         => 26,
-        'menu_icon'             => 'dashicons-calendar-alt',
-        'supports'              => ['title', 'editor', 'custom-fields'],
-        'has_archive'           => false,
-        'rewrite'               => false,
+        'labels'             => $stay_labels,
+        'public'             => false,
+        'publicly_queryable' => false,
+        'show_ui'            => true,
+        'show_in_menu'       => true,
+        'show_in_rest'       => true,
+        'menu_position'      => 26,
+        'menu_icon'          => 'dashicons-calendar-alt',
+        'supports'           => ['title', 'editor'],
+        'has_archive'        => false,
+        'rewrite'            => false,
     ];
 
     register_post_type('stay', $stay_args);
 }
-
 add_action('init', 'chama_ops_register_post_types');
+
+/**
+ * Register meta boxes for guest and stay records.
+ */
+function chama_ops_add_meta_boxes(): void
+{
+    add_meta_box(
+        'chama_guest_details',
+        __('Guest Details', 'chama-ops'),
+        'chama_ops_render_guest_details_meta_box',
+        'guest',
+        'normal',
+        'default'
+    );
+
+    add_meta_box(
+        'chama_stay_details',
+        __('Stay Details', 'chama-ops'),
+        'chama_ops_render_stay_details_meta_box',
+        'stay',
+        'normal',
+        'default'
+    );
+}
+add_action('add_meta_boxes', 'chama_ops_add_meta_boxes');
+
+/**
+ * Render the guest details meta box.
+ *
+ * @param WP_Post $post The current post object.
+ */
+function chama_ops_render_guest_details_meta_box(WP_Post $post): void
+{
+    wp_nonce_field('chama_ops_save_guest_details', 'chama_ops_guest_nonce');
+
+    $email          = get_post_meta($post->ID, '_chama_guest_email', true);
+    $phone          = get_post_meta($post->ID, '_chama_guest_phone', true);
+    $marketing_src  = get_post_meta($post->ID, '_chama_guest_marketing_source', true);
+    $preferred_room = get_post_meta($post->ID, '_chama_guest_preferred_room', true);
+    $vip            = get_post_meta($post->ID, '_chama_guest_vip', true);
+    $consent        = get_post_meta($post->ID, '_chama_guest_marketing_consent', true);
+    ?>
+    <table class="form-table" role="presentation">
+        <tbody>
+            <tr>
+                <th scope="row">
+                    <label for="chama_guest_email"><?php esc_html_e('Email', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="email"
+                        id="chama_guest_email"
+                        name="chama_guest_email"
+                        value="<?php echo esc_attr($email); ?>"
+                        class="regular-text"
+                    >
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="chama_guest_phone"><?php esc_html_e('Phone', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="text"
+                        id="chama_guest_phone"
+                        name="chama_guest_phone"
+                        value="<?php echo esc_attr($phone); ?>"
+                        class="regular-text"
+                    >
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="chama_guest_marketing_source"><?php esc_html_e('Marketing Source', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <select id="chama_guest_marketing_source" name="chama_guest_marketing_source">
+                        <option value=""><?php esc_html_e('Select a source', 'chama-ops'); ?></option>
+                        <option value="direct" <?php selected($marketing_src, 'direct'); ?>><?php esc_html_e('Direct', 'chama-ops'); ?></option>
+                        <option value="google" <?php selected($marketing_src, 'google'); ?>><?php esc_html_e('Google Search', 'chama-ops'); ?></option>
+                        <option value="referral" <?php selected($marketing_src, 'referral'); ?>><?php esc_html_e('Referral', 'chama-ops'); ?></option>
+                        <option value="social" <?php selected($marketing_src, 'social'); ?>><?php esc_html_e('Social Media', 'chama-ops'); ?></option>
+                        <option value="repeat" <?php selected($marketing_src, 'repeat'); ?>><?php esc_html_e('Repeat Guest', 'chama-ops'); ?></option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="chama_guest_preferred_room"><?php esc_html_e('Preferred Room / Preference', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="text"
+                        id="chama_guest_preferred_room"
+                        name="chama_guest_preferred_room"
+                        value="<?php echo esc_attr($preferred_room); ?>"
+                        class="regular-text"
+                    >
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row"><?php esc_html_e('Flags', 'chama-ops'); ?></th>
+                <td>
+                    <label for="chama_guest_vip">
+                        <input
+                            type="checkbox"
+                            id="chama_guest_vip"
+                            name="chama_guest_vip"
+                            value="1"
+                            <?php checked($vip, '1'); ?>
+                        >
+                        <?php esc_html_e('VIP guest', 'chama-ops'); ?>
+                    </label>
+                    <br>
+                    <label for="chama_guest_marketing_consent">
+                        <input
+                            type="checkbox"
+                            id="chama_guest_marketing_consent"
+                            name="chama_guest_marketing_consent"
+                            value="1"
+                            <?php checked($consent, '1'); ?>
+                        >
+                        <?php esc_html_e('Marketing consent received', 'chama-ops'); ?>
+                    </label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <?php
+}
+
+/**
+ * Render the stay details meta box.
+ *
+ * @param WP_Post $post The current post object.
+ */
+function chama_ops_render_stay_details_meta_box(WP_Post $post): void
+{
+    wp_nonce_field('chama_ops_save_stay_details', 'chama_ops_stay_nonce');
+
+    $linked_guest_id = get_post_meta($post->ID, '_chama_stay_guest_id', true);
+    $check_in        = get_post_meta($post->ID, '_chama_stay_check_in', true);
+    $check_out       = get_post_meta($post->ID, '_chama_stay_check_out', true);
+    $status          = get_post_meta($post->ID, '_chama_stay_status', true);
+    $revenue         = get_post_meta($post->ID, '_chama_stay_revenue', true);
+
+    $guest_posts = get_posts([
+        'post_type'      => 'guest',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    ]);
+    ?>
+    <table class="form-table" role="presentation">
+        <tbody>
+            <tr>
+                <th scope="row">
+                    <label for="chama_stay_guest_id"><?php esc_html_e('Linked Guest', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <select id="chama_stay_guest_id" name="chama_stay_guest_id">
+                        <option value=""><?php esc_html_e('Select a guest', 'chama-ops'); ?></option>
+                        <?php foreach ($guest_posts as $guest_post) : ?>
+                            <option value="<?php echo esc_attr($guest_post->ID); ?>" <?php selected((string) $linked_guest_id, (string) $guest_post->ID); ?>>
+                                <?php echo esc_html($guest_post->post_title); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="chama_stay_check_in"><?php esc_html_e('Check-in Date', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="date"
+                        id="chama_stay_check_in"
+                        name="chama_stay_check_in"
+                        value="<?php echo esc_attr($check_in); ?>"
+                    >
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="chama_stay_check_out"><?php esc_html_e('Check-out Date', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="date"
+                        id="chama_stay_check_out"
+                        name="chama_stay_check_out"
+                        value="<?php echo esc_attr($check_out); ?>"
+                    >
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="chama_stay_status"><?php esc_html_e('Stay Status', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <select id="chama_stay_status" name="chama_stay_status">
+                        <option value="lead" <?php selected($status, 'lead'); ?>><?php esc_html_e('Lead', 'chama-ops'); ?></option>
+                        <option value="booked" <?php selected($status, 'booked'); ?>><?php esc_html_e('Booked', 'chama-ops'); ?></option>
+                        <option value="checked_in" <?php selected($status, 'checked_in'); ?>><?php esc_html_e('Checked In', 'chama-ops'); ?></option>
+                        <option value="checked_out" <?php selected($status, 'checked_out'); ?>><?php esc_html_e('Checked Out', 'chama-ops'); ?></option>
+                        <option value="cancelled" <?php selected($status, 'cancelled'); ?>><?php esc_html_e('Cancelled', 'chama-ops'); ?></option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="chama_stay_revenue"><?php esc_html_e('Estimated Revenue', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        id="chama_stay_revenue"
+                        name="chama_stay_revenue"
+                        value="<?php echo esc_attr($revenue); ?>"
+                    >
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <?php
+}
+
+/**
+ * Save guest meta box data.
+ *
+ * @param int $post_id The current post ID.
+ */
+function chama_ops_save_guest_meta(int $post_id): void
+{
+    if (!isset($_POST['chama_ops_guest_nonce'])) {
+        return;
+    }
+
+    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['chama_ops_guest_nonce'])), 'chama_ops_save_guest_details')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (get_post_type($post_id) !== 'guest') {
+        return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    $email          = isset($_POST['chama_guest_email']) ? sanitize_email(wp_unslash($_POST['chama_guest_email'])) : '';
+    $phone          = isset($_POST['chama_guest_phone']) ? sanitize_text_field(wp_unslash($_POST['chama_guest_phone'])) : '';
+    $marketing_src  = isset($_POST['chama_guest_marketing_source']) ? sanitize_text_field(wp_unslash($_POST['chama_guest_marketing_source'])) : '';
+    $preferred_room = isset($_POST['chama_guest_preferred_room']) ? sanitize_text_field(wp_unslash($_POST['chama_guest_preferred_room'])) : '';
+    $vip            = isset($_POST['chama_guest_vip']) ? '1' : '';
+    $consent        = isset($_POST['chama_guest_marketing_consent']) ? '1' : '';
+
+    update_post_meta($post_id, '_chama_guest_email', $email);
+    update_post_meta($post_id, '_chama_guest_phone', $phone);
+    update_post_meta($post_id, '_chama_guest_marketing_source', $marketing_src);
+    update_post_meta($post_id, '_chama_guest_preferred_room', $preferred_room);
+    update_post_meta($post_id, '_chama_guest_vip', $vip);
+    update_post_meta($post_id, '_chama_guest_marketing_consent', $consent);
+}
+add_action('save_post', 'chama_ops_save_guest_meta');
+
+/**
+ * Save stay meta box data.
+ *
+ * @param int $post_id The current post ID.
+ */
+function chama_ops_save_stay_meta(int $post_id): void
+{
+    if (!isset($_POST['chama_ops_stay_nonce'])) {
+        return;
+    }
+
+    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['chama_ops_stay_nonce'])), 'chama_ops_save_stay_details')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (get_post_type($post_id) !== 'stay') {
+        return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    $linked_guest_id = isset($_POST['chama_stay_guest_id']) ? absint($_POST['chama_stay_guest_id']) : 0;
+    $check_in        = isset($_POST['chama_stay_check_in']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_check_in'])) : '';
+    $check_out       = isset($_POST['chama_stay_check_out']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_check_out'])) : '';
+    $status          = isset($_POST['chama_stay_status']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_status'])) : 'lead';
+    $revenue         = isset($_POST['chama_stay_revenue']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_revenue'])) : '';
+
+    update_post_meta($post_id, '_chama_stay_guest_id', $linked_guest_id);
+    update_post_meta($post_id, '_chama_stay_check_in', $check_in);
+    update_post_meta($post_id, '_chama_stay_check_out', $check_out);
+    update_post_meta($post_id, '_chama_stay_status', $status);
+    update_post_meta($post_id, '_chama_stay_revenue', $revenue);
+}
+add_action('save_post', 'chama_ops_save_stay_meta');
