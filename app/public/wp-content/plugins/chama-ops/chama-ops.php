@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -699,6 +699,21 @@ function chama_ops_stay_columns(array $columns): array
 add_filter('manage_stay_posts_columns', 'chama_ops_stay_columns');
 
 /**
+ * Register sortable stay admin columns.
+ *
+ * @param array $sortable_columns Existing sortable columns.
+ * @return array
+ */
+function chama_ops_stay_sortable_columns(array $sortable_columns): array
+{
+    $sortable_columns['stay_nights']  = 'stay_nights';
+    $sortable_columns['stay_revenue'] = 'stay_revenue';
+
+    return $sortable_columns;
+}
+add_filter('manage_edit-stay_sortable_columns', 'chama_ops_stay_sortable_columns');
+
+/**
  * Render stay admin column values.
  *
  * @param string $column  Column key.
@@ -744,6 +759,39 @@ function chama_ops_render_stay_columns(string $column, int $post_id): void
     }
 }
 add_action('manage_stay_posts_custom_column', 'chama_ops_render_stay_columns', 10, 2);
+
+/**
+ * Apply custom ordering for sortable stay admin columns.
+ *
+ * @param WP_Query $query The current query.
+ */
+function chama_ops_apply_stay_sorting(WP_Query $query): void
+{
+    if (!is_admin() || !$query->is_main_query()) {
+        return;
+    }
+
+    if ($query->get('post_type') !== 'stay') {
+        return;
+    }
+
+    $orderby = $query->get('orderby');
+
+    if ($orderby === 'stay_revenue') {
+        $query->set('meta_key', '_chama_stay_revenue');
+        $query->set('orderby', 'meta_value_num');
+    }
+
+    /**
+     * Nights are derived from dates, so we approximate sortable nights by sorting on check-out date,
+     * then check-in date. This keeps the list deterministic without storing a separate nights meta value.
+     */
+    if ($orderby === 'stay_nights') {
+        $query->set('meta_key', '_chama_stay_check_out');
+        $query->set('orderby', 'meta_value');
+    }
+}
+add_action('pre_get_posts', 'chama_ops_apply_stay_sorting');
 
 /**
  * Register dashboard widgets.
