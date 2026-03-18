@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 0.7.0
+ * Version: 0.8.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -616,7 +616,7 @@ function chama_ops_register_admin_pages(): void
 add_action('admin_menu', 'chama_ops_register_admin_pages');
 
 /**
- * Build stay status counts from recent stay records.
+ * Build stay status counts from all stay records.
  *
  * @return array<string, int>
  */
@@ -650,7 +650,7 @@ function chama_ops_get_stay_status_summary(): array
 }
 
 /**
- * Build guest acquisition-source counts from recent guest records.
+ * Build guest acquisition-source counts from all guest records.
  *
  * @return array<string, int>
  */
@@ -729,6 +729,28 @@ function chama_ops_format_guest_source_label(string $source): string
 }
 
 /**
+ * Build quick action URLs for the overview page.
+ *
+ * @return array<string, string>
+ */
+function chama_ops_get_overview_action_links(): array
+{
+    $guest_list_url = admin_url('edit.php?post_type=guest');
+    $stay_list_url  = admin_url('edit.php?post_type=stay');
+
+    return [
+        'add_guest'        => admin_url('post-new.php?post_type=guest'),
+        'add_stay'         => admin_url('post-new.php?post_type=stay'),
+        'view_guests'      => $guest_list_url,
+        'view_stays'       => $stay_list_url,
+        'booked_stays'     => add_query_arg('chama_stay_status_filter', 'booked', $stay_list_url),
+        'checked_in_stays' => add_query_arg('chama_stay_status_filter', 'checked_in', $stay_list_url),
+        'google_guests'    => add_query_arg('chama_guest_source', 'google', $guest_list_url),
+        'repeat_guests'    => add_query_arg('chama_guest_source', 'repeat', $guest_list_url),
+    ];
+}
+
+/**
  * Render the Chama Ops overview dashboard page.
  */
 function chama_ops_render_overview_page(): void
@@ -786,10 +808,38 @@ function chama_ops_render_overview_page(): void
 
     $stay_status_summary  = chama_ops_get_stay_status_summary();
     $guest_source_summary = chama_ops_get_guest_source_summary();
+    $action_links         = chama_ops_get_overview_action_links();
     ?>
     <div class="wrap">
         <h1><?php esc_html_e('Chama Ops Overview', 'chama-ops'); ?></h1>
         <p><?php esc_html_e('Quick snapshot of guest and stay activity for the current prototype.', 'chama-ops'); ?></p>
+
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 24px;">
+            <a class="button button-primary" href="<?php echo esc_url($action_links['add_guest']); ?>">
+                <?php esc_html_e('Add New Guest', 'chama-ops'); ?>
+            </a>
+            <a class="button button-primary" href="<?php echo esc_url($action_links['add_stay']); ?>">
+                <?php esc_html_e('Add New Stay', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($action_links['view_guests']); ?>">
+                <?php esc_html_e('View Guests', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($action_links['view_stays']); ?>">
+                <?php esc_html_e('View Stays', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($action_links['booked_stays']); ?>">
+                <?php esc_html_e('Booked Stays', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($action_links['checked_in_stays']); ?>">
+                <?php esc_html_e('Checked-In Stays', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($action_links['google_guests']); ?>">
+                <?php esc_html_e('Google Guests', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($action_links['repeat_guests']); ?>">
+                <?php esc_html_e('Repeat Guests', 'chama-ops'); ?>
+            </a>
+        </div>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:24px 0;">
             <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
