@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 0.6.0
+ * Version: 0.7.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -616,6 +616,119 @@ function chama_ops_register_admin_pages(): void
 add_action('admin_menu', 'chama_ops_register_admin_pages');
 
 /**
+ * Build stay status counts from recent stay records.
+ *
+ * @return array<string, int>
+ */
+function chama_ops_get_stay_status_summary(): array
+{
+    $summary = [
+        'lead'        => 0,
+        'booked'      => 0,
+        'checked_in'  => 0,
+        'checked_out' => 0,
+        'cancelled'   => 0,
+    ];
+
+    $stays = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+
+    foreach ($stays as $stay_post) {
+        $status = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
+
+        if (array_key_exists($status, $summary)) {
+            $summary[$status]++;
+        }
+    }
+
+    return $summary;
+}
+
+/**
+ * Build guest acquisition-source counts from recent guest records.
+ *
+ * @return array<string, int>
+ */
+function chama_ops_get_guest_source_summary(): array
+{
+    $summary = [
+        'direct'   => 0,
+        'google'   => 0,
+        'referral' => 0,
+        'social'   => 0,
+        'repeat'   => 0,
+        'unknown'  => 0,
+    ];
+
+    $guests = get_posts([
+        'post_type'      => 'guest',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+
+    foreach ($guests as $guest_post) {
+        $source = (string) get_post_meta($guest_post->ID, '_chama_guest_marketing_source', true);
+
+        if ($source === '') {
+            $summary['unknown']++;
+            continue;
+        }
+
+        if (array_key_exists($source, $summary)) {
+            $summary[$source]++;
+        }
+    }
+
+    return $summary;
+}
+
+/**
+ * Convert internal stay status key to readable label.
+ *
+ * @param string $status Internal status key.
+ * @return string
+ */
+function chama_ops_format_stay_status_label(string $status): string
+{
+    $labels = [
+        'lead'        => __('Lead', 'chama-ops'),
+        'booked'      => __('Booked', 'chama-ops'),
+        'checked_in'  => __('Checked In', 'chama-ops'),
+        'checked_out' => __('Checked Out', 'chama-ops'),
+        'cancelled'   => __('Cancelled', 'chama-ops'),
+    ];
+
+    return $labels[$status] ?? $status;
+}
+
+/**
+ * Convert internal guest source key to readable label.
+ *
+ * @param string $source Internal source key.
+ * @return string
+ */
+function chama_ops_format_guest_source_label(string $source): string
+{
+    $labels = [
+        'direct'   => __('Direct', 'chama-ops'),
+        'google'   => __('Google Search', 'chama-ops'),
+        'referral' => __('Referral', 'chama-ops'),
+        'social'   => __('Social Media', 'chama-ops'),
+        'repeat'   => __('Repeat Guest', 'chama-ops'),
+        'unknown'  => __('Unknown / Not Set', 'chama-ops'),
+    ];
+
+    return $labels[$source] ?? $source;
+}
+
+/**
  * Render the Chama Ops overview dashboard page.
  */
 function chama_ops_render_overview_page(): void
@@ -670,6 +783,9 @@ function chama_ops_render_overview_page(): void
             $revenue_total += (float) $amount;
         }
     }
+
+    $stay_status_summary  = chama_ops_get_stay_status_summary();
+    $guest_source_summary = chama_ops_get_guest_source_summary();
     ?>
     <div class="wrap">
         <h1><?php esc_html_e('Chama Ops Overview', 'chama-ops'); ?></h1>
@@ -692,6 +808,32 @@ function chama_ops_render_overview_page(): void
                 <h2 style="margin-top:0;"><?php esc_html_e('Recent Revenue Snapshot', 'chama-ops'); ?></h2>
                 <p style="font-size:28px;margin:0;"><?php echo esc_html('$' . number_format($revenue_total, 2)); ?></p>
                 <p style="margin-bottom:0;"><?php esc_html_e('Booked / active / completed stays in recent records', 'chama-ops'); ?></p>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:16px;">
+            <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Stay Status Breakdown', 'chama-ops'); ?></h2>
+                <ul style="margin:0;">
+                    <?php foreach ($stay_status_summary as $status_key => $count) : ?>
+                        <li>
+                            <strong><?php echo esc_html(chama_ops_format_stay_status_label($status_key)); ?>:</strong>
+                            <?php echo esc_html((string) $count); ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+
+            <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Guest Source Breakdown', 'chama-ops'); ?></h2>
+                <ul style="margin:0;">
+                    <?php foreach ($guest_source_summary as $source_key => $count) : ?>
+                        <li>
+                            <strong><?php echo esc_html(chama_ops_format_guest_source_label($source_key)); ?>:</strong>
+                            <?php echo esc_html((string) $count); ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         </div>
 
