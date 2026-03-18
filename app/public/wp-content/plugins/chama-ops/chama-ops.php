@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -237,6 +237,35 @@ function chama_ops_render_guest_details_meta_box(WP_Post $post): void
 }
 
 /**
+ * Calculate stay nights from check-in and check-out dates.
+ *
+ * @param string $check_in  Check-in date in Y-m-d format.
+ * @param string $check_out Check-out date in Y-m-d format.
+ * @return int|null
+ */
+function chama_ops_calculate_stay_nights(string $check_in, string $check_out): ?int
+{
+    if ($check_in === '' || $check_out === '') {
+        return null;
+    }
+
+    try {
+        $check_in_date  = new DateTimeImmutable($check_in);
+        $check_out_date = new DateTimeImmutable($check_out);
+    } catch (Exception $exception) {
+        return null;
+    }
+
+    if ($check_out_date <= $check_in_date) {
+        return null;
+    }
+
+    $interval = $check_in_date->diff($check_out_date);
+
+    return isset($interval->days) ? (int) $interval->days : null;
+}
+
+/**
  * Render the related stays summary on the Guest edit screen.
  *
  * @param WP_Post $post The current Guest post object.
@@ -269,6 +298,7 @@ function chama_ops_render_guest_related_stays_meta_box(WP_Post $post): void
         $check_in   = (string) get_post_meta($stay_post->ID, '_chama_stay_check_in', true);
         $check_out  = (string) get_post_meta($stay_post->ID, '_chama_stay_check_out', true);
         $revenue    = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
+        $nights     = chama_ops_calculate_stay_nights($check_in, $check_out);
         $edit_link  = get_edit_post_link($stay_post->ID);
 
         echo '<li style="margin-bottom:12px;">';
@@ -277,6 +307,10 @@ function chama_ops_render_guest_related_stays_meta_box(WP_Post $post): void
 
         if ($check_in !== '' || $check_out !== '') {
             echo esc_html__('Dates:', 'chama-ops') . ' ' . esc_html(trim($check_in . ' → ' . $check_out)) . '<br>';
+        }
+
+        if ($nights !== null) {
+            echo esc_html__('Nights:', 'chama-ops') . ' ' . esc_html((string) $nights) . '<br>';
         }
 
         if ($revenue !== '') {
@@ -303,10 +337,11 @@ function chama_ops_render_stay_details_meta_box(WP_Post $post): void
     wp_nonce_field('chama_ops_save_stay_details', 'chama_ops_stay_nonce');
 
     $linked_guest_id = get_post_meta($post->ID, '_chama_stay_guest_id', true);
-    $check_in        = get_post_meta($post->ID, '_chama_stay_check_in', true);
-    $check_out       = get_post_meta($post->ID, '_chama_stay_check_out', true);
+    $check_in        = (string) get_post_meta($post->ID, '_chama_stay_check_in', true);
+    $check_out       = (string) get_post_meta($post->ID, '_chama_stay_check_out', true);
     $status          = get_post_meta($post->ID, '_chama_stay_status', true);
     $revenue         = get_post_meta($post->ID, '_chama_stay_revenue', true);
+    $nights          = chama_ops_calculate_stay_nights($check_in, $check_out);
 
     $guest_posts = get_posts([
         'post_type'      => 'guest',
@@ -359,6 +394,17 @@ function chama_ops_render_stay_details_meta_box(WP_Post $post): void
                         name="chama_stay_check_out"
                         value="<?php echo esc_attr($check_out); ?>"
                     >
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row"><?php esc_html_e('Calculated Nights', 'chama-ops'); ?></th>
+                <td>
+                    <?php
+                    echo $nights !== null
+                        ? esc_html((string) $nights)
+                        : esc_html__('Set both dates with check-out after check-in to calculate nights.', 'chama-ops');
+                    ?>
                 </td>
             </tr>
 
@@ -597,6 +643,7 @@ function chama_ops_stay_columns(array $columns): array
         'title'        => __('Stay', 'chama-ops'),
         'stay_guest'   => __('Guest', 'chama-ops'),
         'stay_dates'   => __('Dates', 'chama-ops'),
+        'stay_nights'  => __('Nights', 'chama-ops'),
         'stay_status'  => __('Status', 'chama-ops'),
         'stay_revenue' => __('Revenue', 'chama-ops'),
         'date'         => $columns['date'],
@@ -628,6 +675,14 @@ function chama_ops_render_stay_columns(string $column, int $post_id): void
             } else {
                 echo '—';
             }
+            break;
+
+        case 'stay_nights':
+            $check_in  = (string) get_post_meta($post_id, '_chama_stay_check_in', true);
+            $check_out = (string) get_post_meta($post_id, '_chama_stay_check_out', true);
+            $nights    = chama_ops_calculate_stay_nights($check_in, $check_out);
+
+            echo $nights !== null ? esc_html((string) $nights) : '—';
             break;
 
         case 'stay_status':
