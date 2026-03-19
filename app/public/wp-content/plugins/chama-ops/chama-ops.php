@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.12.0
+ * Version: 1.13.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1592,6 +1592,16 @@ function chama_ops_render_overview_page(): void
         'chama_ops_clear_sample_data_action',
         'chama_ops_clear_sample_data_nonce'
     );
+    $export_guests_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_export_guests_csv'),
+        'chama_ops_export_guests_csv_action',
+        'chama_ops_export_guests_csv_nonce'
+    );
+    $export_stays_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_export_stays_csv'),
+        'chama_ops_export_stays_csv_action',
+        'chama_ops_export_stays_csv_nonce'
+    );
     ?>
     <div class="wrap">
         <?php if (isset($seed_notice_messages[$notice_key])) : ?>
@@ -1648,6 +1658,12 @@ function chama_ops_render_overview_page(): void
                 onclick="return confirm('<?php echo esc_attr__('Clear all sample guest and stay records?', 'chama-ops'); ?>');"
             >
                 <?php esc_html_e('Clear Sample Data', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($export_guests_url); ?>">
+                <?php esc_html_e('Export Guests CSV', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($export_stays_url); ?>">
+                <?php esc_html_e('Export Stays CSV', 'chama-ops'); ?>
             </a>
         </div>
 
@@ -2149,6 +2165,159 @@ function chama_ops_clear_sample_data(): void
     exit;
 }
 add_action('admin_post_chama_ops_clear_sample_data', 'chama_ops_clear_sample_data');
+
+/**
+ * Send shared CSV response headers.
+ *
+ * @param string $filename Download file name.
+ */
+function chama_ops_send_csv_headers(string $filename): void
+{
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=' . $filename);
+    header('Pragma: no-cache');
+    header('Expires: 0');
+}
+
+/**
+ * Export all guest records to CSV.
+ */
+function chama_ops_export_guests_csv(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You do not have permission to export guests.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer('chama_ops_export_guests_csv_action', 'chama_ops_export_guests_csv_nonce');
+
+    $guests = get_posts([
+        'post_type'      => 'guest',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+
+    $filename = 'chama-ops-guests-' . wp_date('Ymd-His') . '.csv';
+    chama_ops_send_csv_headers($filename);
+
+    $output = fopen('php://output', 'w');
+
+    if ($output === false) {
+        wp_die(esc_html__('Unable to open CSV output stream.', 'chama-ops'), '', ['response' => 500]);
+    }
+
+    fputcsv($output, [
+        'Guest ID',
+        'Guest Name',
+        'Email',
+        'Phone',
+        'Marketing Source',
+        'Preferred Room',
+        'VIP',
+        'Marketing Consent',
+        'Created Date',
+    ]);
+
+    foreach ($guests as $guest_post) {
+        $guest_id          = (int) $guest_post->ID;
+        $email             = (string) get_post_meta($guest_id, '_chama_guest_email', true);
+        $phone             = (string) get_post_meta($guest_id, '_chama_guest_phone', true);
+        $source_key        = (string) get_post_meta($guest_id, '_chama_guest_marketing_source', true);
+        $preferred_room    = (string) get_post_meta($guest_id, '_chama_guest_preferred_room', true);
+        $vip               = (string) get_post_meta($guest_id, '_chama_guest_vip', true);
+        $marketing_consent = (string) get_post_meta($guest_id, '_chama_guest_marketing_consent', true);
+
+        fputcsv($output, [
+            $guest_id,
+            $guest_post->post_title,
+            $email,
+            $phone,
+            $source_key !== '' ? chama_ops_format_guest_source_label($source_key) : 'N/A',
+            $preferred_room,
+            $vip === '1' ? 'Yes' : 'No',
+            $marketing_consent === '1' ? 'Yes' : 'No',
+            get_the_date('Y-m-d', $guest_id),
+        ]);
+    }
+
+    fclose($output);
+    exit;
+}
+add_action('admin_post_chama_ops_export_guests_csv', 'chama_ops_export_guests_csv');
+
+/**
+ * Export all stay records to CSV.
+ */
+function chama_ops_export_stays_csv(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You do not have permission to export stays.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer('chama_ops_export_stays_csv_action', 'chama_ops_export_stays_csv_nonce');
+
+    $stays = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+
+    $filename = 'chama-ops-stays-' . wp_date('Ymd-His') . '.csv';
+    chama_ops_send_csv_headers($filename);
+
+    $output = fopen('php://output', 'w');
+
+    if ($output === false) {
+        wp_die(esc_html__('Unable to open CSV output stream.', 'chama-ops'), '', ['response' => 500]);
+    }
+
+    fputcsv($output, [
+        'Stay ID',
+        'Stay Title',
+        'Guest ID',
+        'Guest Name',
+        'Check-In',
+        'Check-Out',
+        'Nights',
+        'Status',
+        'Estimated Revenue',
+        'Revenue Per Night',
+        'Created Date',
+    ]);
+
+    foreach ($stays as $stay_post) {
+        $stay_id           = (int) $stay_post->ID;
+        $guest_id          = (int) get_post_meta($stay_id, '_chama_stay_guest_id', true);
+        $check_in          = (string) get_post_meta($stay_id, '_chama_stay_check_in', true);
+        $check_out         = (string) get_post_meta($stay_id, '_chama_stay_check_out', true);
+        $nights            = (int) get_post_meta($stay_id, '_chama_stay_nights', true);
+        $status            = (string) get_post_meta($stay_id, '_chama_stay_status', true);
+        $revenue           = (string) get_post_meta($stay_id, '_chama_stay_revenue', true);
+        $revenue_per_night = $nights > 0 ? chama_ops_calculate_revenue_per_night($revenue, $nights) : null;
+        $guest_name        = $guest_id > 0 ? get_the_title($guest_id) : 'N/A';
+
+        fputcsv($output, [
+            $stay_id,
+            $stay_post->post_title,
+            $guest_id > 0 ? $guest_id : '',
+            $guest_name,
+            $check_in,
+            $check_out,
+            $nights > 0 ? $nights : '',
+            $status !== '' ? chama_ops_format_stay_status_label($status) : 'N/A',
+            $revenue,
+            $revenue_per_night !== null ? number_format($revenue_per_night, 2) : '',
+            get_the_date('Y-m-d', $stay_id),
+        ]);
+    }
+
+    fclose($output);
+    exit;
+}
+add_action('admin_post_chama_ops_export_stays_csv', 'chama_ops_export_stays_csv');
 
 /**
  * Render custom filters on Guest and Stay list screens.
