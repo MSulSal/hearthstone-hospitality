@@ -37,4 +37,6 @@ Ready for client review and noun/verb customization.
 ## Presentation Workflow
 1. Open `notebooks/01-prototype-presentation.ipynb` for the current prototype walkthrough.
 2. Open `notebooks/02-finished-app-vision-presentation.ipynb` for the future-state roadmap walkthrough.
-3. Update KPI values and talking points as implementation milestones are completed.
+3. Open `notebooks/03-dashboard-deep-dive.ipynb` to explain every dashboard section in detail.
+4. Open `notebooks/04-layout-deep-dive.ipynb` to explain every frontend/admin layout surface.
+5. Update KPI values and talking points as implementation milestones are completed.

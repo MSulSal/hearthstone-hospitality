@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <defs>
+    <style>
+      .bg{fill:#10141d}
+      .title{fill:#f6f7fb;font:700 30px Arial,sans-serif}
+      .card{fill:#1b2435;stroke:#4a5f83;stroke-width:2;rx:14}
+      .h{fill:#dce8ff;font:700 21px Arial,sans-serif}
+      .p{fill:#afc0dd;font:400 16px Arial,sans-serif}
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1280" height="760"/>
+  <text class="title" x="50" y="60">Layout Inventory: Frontend + Admin Surfaces</text>
+
+  <rect class="card" x="60" y="110" width="560" height="170"/>
+  <text class="h" x="90" y="150">Frontend Layout</text>
+  <text class="p" x="90" y="180">front-page.php + style.css</text>
+  <text class="p" x="90" y="208">Billboard media + logo + coming-soon title + footer</text>
+  <text class="p" x="90" y="236">Primary role: brand positioning and conversion handoff</text>
+
+  <rect class="card" x="660" y="110" width="560" height="170"/>
+  <text class="h" x="690" y="150">WP Dashboard Widget</text>
+  <text class="p" x="690" y="180">Chama Ops Summary widget</text>
+  <text class="p" x="690" y="208">Published counts + recent guest/stay links</text>
+  <text class="p" x="690" y="236">Primary role: quick situational glance</text>
+
+  <rect class="card" x="60" y="320" width="560" height="170"/>
+  <text class="h" x="90" y="360">Guest Layouts</text>
+  <text class="p" x="90" y="390">Guest list: columns + source/quality/origin filters</text>
+  <text class="p" x="90" y="418">Guest edit: contact, source, room theme preference</text>
+  <text class="p" x="90" y="446">Primary role: profile quality and preference memory</text>
+
+  <rect class="card" x="660" y="320" width="560" height="170"/>
+  <text class="h" x="690" y="360">Stay Layouts</text>
+  <text class="p" x="690" y="390">Stay list: status/today/quality/origin filters + sorting</text>
+  <text class="p" x="690" y="418">Stay edit: lifecycle fields + nights/revenue calculations</text>
+  <text class="p" x="690" y="446">Primary role: execution and day-of operations</text>
+
+  <rect class="card" x="60" y="530" width="1160" height="170"/>
+  <text class="h" x="90" y="570">Overview Dashboard Layout</text>
+  <text class="p" x="90" y="600">Operations control center with readiness, quality, and action signals</text>
+  <text class="p" x="90" y="628">Primary role: owner + operator daily command surface</text>
+  <text class="p" x="90" y="656">Maps directly to PWA module priorities in later phases</text>
+</svg>

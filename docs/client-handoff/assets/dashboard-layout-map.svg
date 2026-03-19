@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760">
+  <defs>
+    <style>
+      .bg{fill:#0f1115}
+      .card{fill:#1a2130;stroke:#425678;stroke-width:2;rx:14}
+      .h{fill:#e9f0ff;font:700 22px Arial,sans-serif}
+      .p{fill:#aec0dd;font:400 16px Arial,sans-serif}
+      .title{fill:#f7f8fb;font:700 30px Arial,sans-serif}
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1280" height="760"/>
+  <text class="title" x="50" y="60">Chama Ops Overview Dashboard Layout Map</text>
+
+  <rect class="card" x="50" y="95" width="1180" height="100"/>
+  <text class="h" x="80" y="138">Action + Control Row</text>
+  <text class="p" x="80" y="168">Generate/Regenerate/Clear/Preserve sample data, exports, and queue shortcuts</text>
+
+  <rect class="card" x="50" y="215" width="580" height="150"/>
+  <text class="h" x="80" y="255">Record Origin Snapshot</text>
+  <text class="p" x="80" y="282">Sample vs persistent counts + drill-down links</text>
+
+  <rect class="card" x="650" y="215" width="580" height="150"/>
+  <text class="h" x="680" y="255">Today Operations Board</text>
+  <text class="p" x="680" y="282">Arrivals, departures, in-house, contact readiness, overdue arrivals</text>
+
+  <rect class="card" x="50" y="385" width="580" height="150"/>
+  <text class="h" x="80" y="425">Upcoming Arrivals + Readiness</text>
+  <text class="p" x="80" y="452">Per-stay readiness cards with issue badges and links</text>
+
+  <rect class="card" x="650" y="385" width="580" height="150"/>
+  <text class="h" x="680" y="425">Action Board</text>
+  <text class="p" x="680" y="452">Priority recommendations generated from live metrics</text>
+
+  <rect class="card" x="50" y="555" width="380" height="145"/>
+  <text class="h" x="80" y="595">KPI Tiles</text>
+  <text class="p" x="80" y="622">Guests, stays, nights, avg revenue</text>
+
+  <rect class="card" x="450" y="555" width="380" height="145"/>
+  <text class="h" x="480" y="595">Pipeline Snapshot</text>
+  <text class="p" x="480" y="622">Conversion and cancellation rates</text>
+
+  <rect class="card" x="850" y="555" width="380" height="145"/>
+  <text class="h" x="880" y="595">Data Quality Radar</text>
+  <text class="p" x="880" y="622">Missing data and queue links</text>
+</svg>
