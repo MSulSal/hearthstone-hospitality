@@ -1886,6 +1886,15 @@ function chama_ops_render_overview_page(): void
     $notice_promoted_stay_count = isset($_GET['chama_ops_promoted_stay_count'])
         ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_promoted_stay_count'])))
         : 0;
+    $notice_phone_updated = isset($_GET['chama_ops_phone_updated'])
+        ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_phone_updated'])))
+        : 0;
+    $notice_phone_unchanged = isset($_GET['chama_ops_phone_unchanged'])
+        ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_phone_unchanged'])))
+        : 0;
+    $notice_phone_scanned = isset($_GET['chama_ops_phone_scanned'])
+        ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_phone_scanned'])))
+        : 0;
     $scenario_labels = chama_ops_get_demo_scenario_labels();
     $seed_notice_messages = [
         'sample_data_seeded' => [
@@ -1918,6 +1927,10 @@ function chama_ops_render_overview_page(): void
         ],
         'stay_nights_rebuilt' => [
             'message' => __('Stay nights were recalculated from current check-in/check-out dates.', 'chama-ops'),
+            'type'    => 'notice-success',
+        ],
+        'guest_phones_normalized' => [
+            'message' => __('Guest phone values were normalized for consistent display format.', 'chama-ops'),
             'type'    => 'notice-success',
         ],
     ];
@@ -1982,6 +1995,11 @@ function chama_ops_render_overview_page(): void
         'chama_ops_rebuild_stay_nights_action',
         'chama_ops_rebuild_stay_nights_nonce'
     );
+    $normalize_guest_phones_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_normalize_guest_phones'),
+        'chama_ops_normalize_guest_phones_action',
+        'chama_ops_normalize_guest_phones_nonce'
+    );
     $export_guests_url = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_export_guests_csv'),
         'chama_ops_export_guests_csv_action',
@@ -2036,6 +2054,15 @@ function chama_ops_render_overview_page(): void
                             __('Converted: %1$d guests, %2$d stays.', 'chama-ops'),
                             $notice_promoted_guest_count,
                             $notice_promoted_stay_count
+                        );
+                    }
+                    if ($notice_key === 'guest_phones_normalized') {
+                        $notice_message .= ' ' . sprintf(
+                            /* translators: 1: updated count, 2: unchanged count, 3: scanned count. */
+                            __('Updated: %1$d, unchanged: %2$d, scanned guests: %3$d.', 'chama-ops'),
+                            $notice_phone_updated,
+                            $notice_phone_unchanged,
+                            $notice_phone_scanned
                         );
                     }
 
@@ -2098,6 +2125,9 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button button-secondary" href="<?php echo esc_url($rebuild_nights_url); ?>">
                 <?php esc_html_e('Recalculate Stay Nights', 'chama-ops'); ?>
+            </a>
+            <a class="button button-secondary" href="<?php echo esc_url($normalize_guest_phones_url); ?>">
+                <?php esc_html_e('Normalize Guest Phones', 'chama-ops'); ?>
             </a>
             <a
                 class="button button-secondary"
@@ -3018,6 +3048,53 @@ function chama_ops_rebuild_stay_nights(): void
     exit;
 }
 add_action('admin_post_chama_ops_rebuild_stay_nights', 'chama_ops_rebuild_stay_nights');
+
+/**
+ * Normalize all stored guest phone values into the standard display format.
+ */
+function chama_ops_normalize_guest_phones(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('You do not have permission to normalize guest phones.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer('chama_ops_normalize_guest_phones_action', 'chama_ops_normalize_guest_phones_nonce');
+
+    $guest_ids = get_posts([
+        'post_type'      => 'guest',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+    ]);
+
+    $updated   = 0;
+    $unchanged = 0;
+
+    foreach ($guest_ids as $guest_id) {
+        $guest_id       = (int) $guest_id;
+        $existing_phone = (string) get_post_meta($guest_id, '_chama_guest_phone', true);
+        $formatted      = chama_ops_format_guest_phone($existing_phone);
+
+        if ($formatted === $existing_phone) {
+            $unchanged++;
+            continue;
+        }
+
+        update_post_meta($guest_id, '_chama_guest_phone', $formatted);
+        $updated++;
+    }
+
+    $redirect = add_query_arg([
+        'chama_ops_notice'         => 'guest_phones_normalized',
+        'chama_ops_phone_updated'  => $updated,
+        'chama_ops_phone_unchanged' => $unchanged,
+        'chama_ops_phone_scanned'  => count($guest_ids),
+    ], wp_get_referer() ?: admin_url('admin.php?page=chama-ops-overview'));
+
+    wp_safe_redirect($redirect);
+    exit;
+}
+add_action('admin_post_chama_ops_normalize_guest_phones', 'chama_ops_normalize_guest_phones');
 
 /**
  * Send shared CSV response headers.
