@@ -2071,6 +2071,11 @@ function chama_ops_render_overview_page(): void
         'chama_ops_export_missing_contact_guests_csv_action',
         'chama_ops_export_missing_contact_guests_csv_nonce'
     );
+    $export_quality_snapshot_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_export_data_quality_snapshot_csv'),
+        'chama_ops_export_data_quality_snapshot_csv_action',
+        'chama_ops_export_data_quality_snapshot_csv_nonce'
+    );
     $export_stays_url = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_export_stays_csv'),
         'chama_ops_export_stays_csv_action',
@@ -2210,6 +2215,9 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button" href="<?php echo esc_url($export_missing_contact_guests_url); ?>">
                 <?php esc_html_e('Export Missing-Contact Guests CSV', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($export_quality_snapshot_url); ?>">
+                <?php esc_html_e('Export Data Quality Snapshot CSV', 'chama-ops'); ?>
             </a>
             <a class="button" href="<?php echo esc_url($export_stays_url); ?>">
                 <?php esc_html_e('Export Stays CSV', 'chama-ops'); ?>
@@ -3341,6 +3349,56 @@ function chama_ops_export_missing_contact_guests_csv(): void
     exit;
 }
 add_action('admin_post_chama_ops_export_missing_contact_guests_csv', 'chama_ops_export_missing_contact_guests_csv');
+
+/**
+ * Export a compact data-quality snapshot with queue links.
+ */
+function chama_ops_export_data_quality_snapshot_csv(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You do not have permission to export data quality snapshots.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer(
+        'chama_ops_export_data_quality_snapshot_csv_action',
+        'chama_ops_export_data_quality_snapshot_csv_nonce'
+    );
+
+    $metrics               = chama_ops_get_data_quality_metrics();
+    $action_links          = chama_ops_get_overview_action_links();
+    $guest_missing_contact = count(chama_ops_get_guest_missing_contact_ids());
+
+    $rows = [
+        ['Guests Missing Contact (Email or Phone)', $guest_missing_contact, $action_links['quality_guest_missing_contact']],
+        ['Guests Missing Email', (int) $metrics['guest_missing_email'], $action_links['quality_guest_missing_email']],
+        ['Guests Missing Phone', (int) $metrics['guest_missing_phone'], $action_links['quality_guest_missing_phone']],
+        ['Guests Missing Consent', (int) $metrics['guest_missing_consent'], $action_links['quality_guest_missing_consent']],
+        ['Stays Missing Guest Link', (int) $metrics['stay_missing_guest_link'], $action_links['quality_stay_missing_guest_link']],
+        ['Stays Missing Dates', (int) $metrics['stay_missing_dates'], $action_links['quality_stay_missing_dates']],
+        ['Stays Invalid Date Range', (int) $metrics['stay_invalid_date_range'], $action_links['quality_stay_invalid_dates']],
+        ['Stays Missing Revenue', (int) $metrics['stay_missing_revenue'], $action_links['quality_stay_missing_revenue']],
+        ['Arrival Contact Gaps (48h)', (int) $metrics['stay_arrival_contact_gaps_48h'], $action_links['today_arrival_contact_gaps_48h']],
+    ];
+
+    $filename = 'chama-ops-data-quality-snapshot-' . wp_date('Ymd-His') . '.csv';
+    chama_ops_send_csv_headers($filename);
+
+    $output = fopen('php://output', 'w');
+
+    if ($output === false) {
+        wp_die(esc_html__('Unable to open CSV output stream.', 'chama-ops'), '', ['response' => 500]);
+    }
+
+    fputcsv($output, ['Issue', 'Count', 'Queue URL']);
+
+    foreach ($rows as $row) {
+        fputcsv($output, $row);
+    }
+
+    fclose($output);
+    exit;
+}
+add_action('admin_post_chama_ops_export_data_quality_snapshot_csv', 'chama_ops_export_data_quality_snapshot_csv');
 
 /**
  * Export all stay records to CSV.
