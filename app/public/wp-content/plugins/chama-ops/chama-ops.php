@@ -2086,6 +2086,11 @@ function chama_ops_render_overview_page(): void
         'chama_ops_export_action_board_snapshot_csv_action',
         'chama_ops_export_action_board_snapshot_csv_nonce'
     );
+    $export_upcoming_arrivals_snapshot_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_export_upcoming_arrivals_snapshot_csv'),
+        'chama_ops_export_upcoming_arrivals_snapshot_csv_action',
+        'chama_ops_export_upcoming_arrivals_snapshot_csv_nonce'
+    );
     $export_stays_url = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_export_stays_csv'),
         'chama_ops_export_stays_csv_action',
@@ -2234,6 +2239,9 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button" href="<?php echo esc_url($export_action_board_snapshot_url); ?>">
                 <?php esc_html_e('Export Action Board CSV', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($export_upcoming_arrivals_snapshot_url); ?>">
+                <?php esc_html_e('Export Upcoming Arrivals CSV', 'chama-ops'); ?>
             </a>
             <a class="button" href="<?php echo esc_url($export_stays_url); ?>">
                 <?php esc_html_e('Export Stays CSV', 'chama-ops'); ?>
@@ -3523,6 +3531,70 @@ function chama_ops_export_action_board_snapshot_csv(): void
     exit;
 }
 add_action('admin_post_chama_ops_export_action_board_snapshot_csv', 'chama_ops_export_action_board_snapshot_csv');
+
+/**
+ * Export upcoming-arrivals readiness snapshot.
+ */
+function chama_ops_export_upcoming_arrivals_snapshot_csv(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You do not have permission to export upcoming arrivals snapshots.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer(
+        'chama_ops_export_upcoming_arrivals_snapshot_csv_action',
+        'chama_ops_export_upcoming_arrivals_snapshot_csv_nonce'
+    );
+
+    $upcoming_arrivals = chama_ops_get_upcoming_arrivals(14, 200);
+
+    $filename = 'chama-ops-upcoming-arrivals-snapshot-' . wp_date('Ymd-His') . '.csv';
+    chama_ops_send_csv_headers($filename);
+
+    $output = fopen('php://output', 'w');
+
+    if ($output === false) {
+        wp_die(esc_html__('Unable to open CSV output stream.', 'chama-ops'), '', ['response' => 500]);
+    }
+
+    fputcsv($output, [
+        'Stay ID',
+        'Stay Title',
+        'Stay URL',
+        'Guest Name',
+        'Guest URL',
+        'Check-In',
+        'Check-Out',
+        'Nights',
+        'Status',
+        'Readiness',
+        'Issues',
+    ]);
+
+    foreach ($upcoming_arrivals as $arrival) {
+        $issues = isset($arrival['issues']) && is_array($arrival['issues'])
+            ? implode('; ', array_map('strval', $arrival['issues']))
+            : '';
+
+        fputcsv($output, [
+            isset($arrival['stay_id']) ? (int) $arrival['stay_id'] : '',
+            isset($arrival['stay_title']) ? (string) $arrival['stay_title'] : '',
+            isset($arrival['stay_link']) ? html_entity_decode((string) $arrival['stay_link'], ENT_QUOTES, 'UTF-8') : '',
+            isset($arrival['guest_name']) ? (string) $arrival['guest_name'] : '',
+            isset($arrival['guest_link']) ? html_entity_decode((string) $arrival['guest_link'], ENT_QUOTES, 'UTF-8') : '',
+            isset($arrival['check_in']) ? (string) $arrival['check_in'] : '',
+            isset($arrival['check_out']) ? (string) $arrival['check_out'] : '',
+            isset($arrival['nights']) ? (int) $arrival['nights'] : '',
+            isset($arrival['status']) ? chama_ops_format_stay_status_label((string) $arrival['status']) : '',
+            !empty($arrival['is_ready']) ? 'Ready' : 'Needs Attention',
+            $issues,
+        ]);
+    }
+
+    fclose($output);
+    exit;
+}
+add_action('admin_post_chama_ops_export_upcoming_arrivals_snapshot_csv', 'chama_ops_export_upcoming_arrivals_snapshot_csv');
 
 /**
  * Export all stay records to CSV.
