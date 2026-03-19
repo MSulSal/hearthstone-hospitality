@@ -23,6 +23,8 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 - `03-demo-walkthrough-and-acceptance.md` - stakeholder demo flow and acceptance checklist.
 - `04-delivery-plan-and-next-phases.md` - staged implementation from prototype to production.
 - `05-brand-and-experience-alignment.md` - ties spa-like brand direction to operations UX decisions.
+- `notebooks/` - presentation notebooks with visuals for prototype and final-app roadmap storytelling.
+- `assets/` - supporting visuals used by docs and notebooks.
 
 ## Audience
 - Owner / GM
@@ -31,3 +33,8 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 
 ## Status
 Ready for client review and noun/verb customization.
+
+## Presentation Workflow
+1. Open `notebooks/01-prototype-presentation.ipynb` for the current prototype walkthrough.
+2. Open `notebooks/02-finished-app-vision-presentation.ipynb` for the future-state roadmap walkthrough.
+3. Update KPI values and talking points as implementation milestones are completed.

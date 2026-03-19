@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#11161f"/>
+  <rect x="60" y="60" width="1160" height="600" rx="20" fill="#1a2330" stroke="#445873" stroke-width="3"/>
+  <text x="100" y="150" fill="#f3f7ff" font-family="Arial, sans-serif" font-size="44" font-weight="700">Landing Page Screenshot Placeholder</text>
+  <text x="100" y="220" fill="#b8c6dc" font-family="Arial, sans-serif" font-size="28">Drop a screenshot here and rename it to:</text>
+  <text x="100" y="270" fill="#8bc6ff" font-family="Consolas, monospace" font-size="30">landing-page-current.png</text>
+  <text x="100" y="350" fill="#d0dbed" font-family="Arial, sans-serif" font-size="26">Path:</text>
+  <text x="190" y="350" fill="#8bc6ff" font-family="Consolas, monospace" font-size="24">docs/client-handoff/assets/landing-page-current.png</text>
+  <text x="100" y="430" fill="#b8c6dc" font-family="Arial, sans-serif" font-size="26">Notebook slides will automatically display it if present.</text>
+</svg>

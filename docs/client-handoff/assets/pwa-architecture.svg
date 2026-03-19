@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <style>
+      .bg{fill:#0f1115}
+      .card{fill:#171a21;stroke:#3c4457;stroke-width:2;rx:14}
+      .title{fill:#f7f8fa;font:700 30px Arial, sans-serif}
+      .h{fill:#d5dcf1;font:600 22px Arial, sans-serif}
+      .p{fill:#aeb8d1;font:400 18px Arial, sans-serif}
+      .arrow{stroke:#6ea8fe;stroke-width:3;marker-end:url(#m)}
+    </style>
+    <marker id="m" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0,0 8,4 0,8" fill="#6ea8fe"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1280" height="720"/>
+  <text class="title" x="60" y="70">Chama Station Inn: Prototype -> Operations PWA Architecture</text>
+
+  <rect class="card" x="70" y="130" width="350" height="190"/>
+  <text class="h" x="95" y="170">Guest-Facing Website</text>
+  <text class="p" x="95" y="205">- Brand story + room themes</text>
+  <text class="p" x="95" y="235">- Booking intent capture</text>
+  <text class="p" x="95" y="265">- Spa-like premium positioning</text>
+
+  <rect class="card" x="470" y="130" width="350" height="190"/>
+  <text class="h" x="495" y="170">WordPress Ops Core (Now)</text>
+  <text class="p" x="495" y="205">- Guest + Stay data model</text>
+  <text class="p" x="495" y="235">- Quality radar + action board</text>
+  <text class="p" x="495" y="265">- Scenario demos + CSV exports</text>
+
+  <rect class="card" x="870" y="130" width="350" height="190"/>
+  <text class="h" x="895" y="170">PWA Operations Layer (Next)</text>
+  <text class="p" x="895" y="205">- Fast staff workflows</text>
+  <text class="p" x="895" y="235">- Mobile-first check-in/out</text>
+  <text class="p" x="895" y="265">- Realtime readiness signals</text>
+
+  <line class="arrow" x1="420" y1="225" x2="460" y2="225"/>
+  <line class="arrow" x1="820" y1="225" x2="860" y2="225"/>
+
+  <rect class="card" x="270" y="390" width="740" height="220"/>
+  <text class="h" x="300" y="435">Why this matters for a 9-room boutique inn</text>
+  <text class="p" x="300" y="475">1) Small data misses have big service impact.</text>
+  <text class="p" x="300" y="510">2) Calm premium guest experience depends on back-of-house clarity.</text>
+  <text class="p" x="300" y="545">3) WordPress-first de-risks delivery; PWA layer scales operator speed.</text>
+  <text class="p" x="300" y="580">4) Same model supports both prototype sales and final product build.</text>
+</svg>
