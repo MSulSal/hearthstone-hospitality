@@ -3608,13 +3608,34 @@ function chama_ops_render_stay_filter_context_notice(): void
     $arrivals_next_48h  = count(chama_ops_get_booked_arrival_stay_ids(1));
     $contact_gap_count  = count(chama_ops_get_arrival_contact_gap_stay_ids(1));
     $contact_ready_count = max(0, $arrivals_next_48h - $contact_gap_count);
+    $stay_list_url      = admin_url('edit.php?post_type=stay');
+    $ready_url          = add_query_arg([
+        'chama_stay_today'         => 'arrivals_contact_ready',
+        'chama_stay_status_filter' => 'booked',
+    ], $stay_list_url);
+    $gap_url            = add_query_arg([
+        'chama_stay_today'         => 'arrivals_contact_gap',
+        'chama_stay_status_filter' => 'booked',
+    ], $stay_list_url);
+
+    if ($arrivals_next_48h === 0) {
+        echo '<div class="notice notice-info is-dismissible"><p>';
+        esc_html_e('No booked arrivals are scheduled in the next 48 hours.', 'chama-ops');
+        echo '</p></div>';
+        return;
+    }
 
     if ($selected_today === 'arrivals_contact_gap') {
         echo '<div class="notice notice-warning is-dismissible"><p>';
         printf(
-            esc_html__('%1$d of %2$d booked arrivals in the next 48 hours are missing contact readiness.', 'chama-ops'),
+            wp_kses_post(
+                /* translators: 1: number of contact-gap stays, 2: total booked arrivals in 48h, 3: opening anchor tag, 4: closing anchor tag. */
+                __('%1$d of %2$d booked arrivals in the next 48 hours are missing contact readiness. %3$sView contact-ready queue%4$s.', 'chama-ops')
+            ),
             (int) $contact_gap_count,
-            (int) $arrivals_next_48h
+            (int) $arrivals_next_48h,
+            '<a href="' . esc_url($ready_url) . '">',
+            '</a>'
         );
         echo '</p></div>';
         return;
@@ -3623,9 +3644,14 @@ function chama_ops_render_stay_filter_context_notice(): void
     if ($selected_today === 'arrivals_contact_ready') {
         echo '<div class="notice notice-success is-dismissible"><p>';
         printf(
-            esc_html__('%1$d of %2$d booked arrivals in the next 48 hours are contact-ready.', 'chama-ops'),
+            wp_kses_post(
+                /* translators: 1: number of contact-ready stays, 2: total booked arrivals in 48h, 3: opening anchor tag, 4: closing anchor tag. */
+                __('%1$d of %2$d booked arrivals in the next 48 hours are contact-ready. %3$sView contact-gap queue%4$s.', 'chama-ops')
+            ),
             (int) $contact_ready_count,
-            (int) $arrivals_next_48h
+            (int) $arrivals_next_48h,
+            '<a href="' . esc_url($gap_url) . '">',
+            '</a>'
         );
         echo '</p></div>';
         return;
@@ -3634,8 +3660,17 @@ function chama_ops_render_stay_filter_context_notice(): void
     if ($selected_today === 'arrivals_next_48h') {
         echo '<div class="notice notice-info is-dismissible"><p>';
         printf(
-            esc_html__('%d booked arrivals are scheduled in the next 48 hours.', 'chama-ops'),
-            (int) $arrivals_next_48h
+            wp_kses_post(
+                /* translators: 1: total booked arrivals in 48h, 2: contact-ready count, 3: contact-gap count, 4: opening anchor tag for ready queue, 5: closing anchor tag, 6: opening anchor tag for gap queue, 7: closing anchor tag. */
+                __('%1$d booked arrivals are scheduled in the next 48 hours: %2$d ready, %3$d with contact gaps. %4$sReady queue%5$s | %6$sGap queue%7$s.', 'chama-ops')
+            ),
+            (int) $arrivals_next_48h,
+            (int) $contact_ready_count,
+            (int) $contact_gap_count,
+            '<a href="' . esc_url($ready_url) . '">',
+            '</a>',
+            '<a href="' . esc_url($gap_url) . '">',
+            '</a>'
         );
         echo '</p></div>';
     }
