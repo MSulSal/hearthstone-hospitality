@@ -3217,6 +3217,16 @@ function chama_ops_send_csv_headers(string $filename): void
 }
 
 /**
+ * Normalize text values for CSV readability.
+ *
+ * @param string $value Raw text value.
+ */
+function chama_ops_prepare_csv_text(string $value): string
+{
+    return html_entity_decode(wp_strip_all_tags($value), ENT_QUOTES, 'UTF-8');
+}
+
+/**
  * Export all guest records to CSV.
  */
 function chama_ops_export_guests_csv(): void
@@ -3273,7 +3283,7 @@ function chama_ops_export_guests_csv(): void
 
         fputcsv($output, [
             $guest_id,
-            $guest_post->post_title,
+            chama_ops_prepare_csv_text((string) $guest_post->post_title),
             $email,
             $phone,
             $contact_ready ? 'Yes' : 'No',
@@ -3356,7 +3366,7 @@ function chama_ops_export_missing_contact_guests_csv(): void
 
         fputcsv($output, [
             $guest_id,
-            $guest_post->post_title,
+            chama_ops_prepare_csv_text((string) $guest_post->post_title),
             $email,
             $phone,
             $missing_email ? 'Yes' : 'No',
@@ -3578,9 +3588,9 @@ function chama_ops_export_upcoming_arrivals_snapshot_csv(): void
 
         fputcsv($output, [
             isset($arrival['stay_id']) ? (int) $arrival['stay_id'] : '',
-            isset($arrival['stay_title']) ? (string) $arrival['stay_title'] : '',
+            isset($arrival['stay_title']) ? chama_ops_prepare_csv_text((string) $arrival['stay_title']) : '',
             isset($arrival['stay_link']) ? html_entity_decode((string) $arrival['stay_link'], ENT_QUOTES, 'UTF-8') : '',
-            isset($arrival['guest_name']) ? (string) $arrival['guest_name'] : '',
+            isset($arrival['guest_name']) ? chama_ops_prepare_csv_text((string) $arrival['guest_name']) : '',
             isset($arrival['guest_link']) ? html_entity_decode((string) $arrival['guest_link'], ENT_QUOTES, 'UTF-8') : '',
             isset($arrival['check_in']) ? (string) $arrival['check_in'] : '',
             isset($arrival['check_out']) ? (string) $arrival['check_out'] : '',
@@ -3658,9 +3668,9 @@ function chama_ops_export_stays_csv(): void
 
         fputcsv($output, [
             $stay_id,
-            $stay_post->post_title,
+            chama_ops_prepare_csv_text((string) $stay_post->post_title),
             $guest_id > 0 ? $guest_id : '',
-            $guest_name,
+            chama_ops_prepare_csv_text((string) $guest_name),
             $check_in,
             $check_out,
             $nights > 0 ? $nights : '',
@@ -3737,11 +3747,11 @@ function chama_ops_export_arrival_contact_gaps_csv(): void
 
         fputcsv($output, [
             $stay_id,
-            $stay_post->post_title,
+            chama_ops_prepare_csv_text((string) $stay_post->post_title),
             $check_in,
             $check_out,
             $guest_id > 0 ? $guest_id : '',
-            $guest_name,
+            chama_ops_prepare_csv_text((string) $guest_name),
             $guest_email,
             $guest_phone,
             $missing_mail ? 'Yes' : 'No',
