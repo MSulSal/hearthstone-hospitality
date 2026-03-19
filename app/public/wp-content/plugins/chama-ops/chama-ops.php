@@ -2076,6 +2076,11 @@ function chama_ops_render_overview_page(): void
         'chama_ops_export_data_quality_snapshot_csv_action',
         'chama_ops_export_data_quality_snapshot_csv_nonce'
     );
+    $export_today_ops_snapshot_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_export_today_ops_snapshot_csv'),
+        'chama_ops_export_today_ops_snapshot_csv_action',
+        'chama_ops_export_today_ops_snapshot_csv_nonce'
+    );
     $export_stays_url = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_export_stays_csv'),
         'chama_ops_export_stays_csv_action',
@@ -2218,6 +2223,9 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button" href="<?php echo esc_url($export_quality_snapshot_url); ?>">
                 <?php esc_html_e('Export Data Quality Snapshot CSV', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($export_today_ops_snapshot_url); ?>">
+                <?php esc_html_e('Export Today Ops Snapshot CSV', 'chama-ops'); ?>
             </a>
             <a class="button" href="<?php echo esc_url($export_stays_url); ?>">
                 <?php esc_html_e('Export Stays CSV', 'chama-ops'); ?>
@@ -3399,6 +3407,62 @@ function chama_ops_export_data_quality_snapshot_csv(): void
     exit;
 }
 add_action('admin_post_chama_ops_export_data_quality_snapshot_csv', 'chama_ops_export_data_quality_snapshot_csv');
+
+/**
+ * Export a compact same-day operations snapshot with queue links.
+ */
+function chama_ops_export_today_ops_snapshot_csv(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You do not have permission to export today operations snapshots.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer(
+        'chama_ops_export_today_ops_snapshot_csv_action',
+        'chama_ops_export_today_ops_snapshot_csv_nonce'
+    );
+
+    $metrics      = chama_ops_get_today_operations_metrics();
+    $action_links = chama_ops_get_overview_action_links();
+
+    $rows = [
+        ['Arrivals Today', (int) $metrics['arrivals_today'], $action_links['today_arrivals']],
+        ['Departures Today', (int) $metrics['departures_today'], $action_links['today_departures']],
+        ['In-House Tonight', (int) $metrics['in_house_today'], $action_links['today_in_house']],
+        ['Pending Check-Ins', (int) $metrics['pending_check_ins'], $action_links['today_pending_check_ins']],
+        ['Pending Check-Outs', (int) $metrics['pending_check_outs'], $action_links['today_pending_check_outs']],
+        ['Overdue Arrivals', (int) $metrics['overdue_arrivals'], $action_links['today_overdue_arrivals']],
+        ['Booked Arrivals (Next 48h)', (int) $metrics['arrivals_next_48h'], $action_links['today_arrivals_next_48h']],
+        ['Arrival Contact Ready (48h)', (int) $metrics['arrival_contact_ready_48h'], $action_links['today_arrival_contact_ready_48h']],
+        ['Arrival Contact Gaps (48h)', (int) $metrics['arrival_contact_gaps_48h'], $action_links['today_arrival_contact_gaps_48h']],
+        [
+            'Arrival Contact Ready Rate (48h)',
+            $metrics['arrival_contact_ready_rate_48h'] !== null
+                ? number_format((float) $metrics['arrival_contact_ready_rate_48h'], 1) . '%'
+                : 'N/A',
+            $action_links['today_arrival_contact_ready_48h'],
+        ],
+    ];
+
+    $filename = 'chama-ops-today-ops-snapshot-' . wp_date('Ymd-His') . '.csv';
+    chama_ops_send_csv_headers($filename);
+
+    $output = fopen('php://output', 'w');
+
+    if ($output === false) {
+        wp_die(esc_html__('Unable to open CSV output stream.', 'chama-ops'), '', ['response' => 500]);
+    }
+
+    fputcsv($output, ['Metric', 'Value', 'Queue URL']);
+
+    foreach ($rows as $row) {
+        fputcsv($output, $row);
+    }
+
+    fclose($output);
+    exit;
+}
+add_action('admin_post_chama_ops_export_today_ops_snapshot_csv', 'chama_ops_export_today_ops_snapshot_csv');
 
 /**
  * Export all stay records to CSV.
