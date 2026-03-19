@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.8.0
+ * Version: 1.9.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1128,6 +1128,35 @@ function chama_ops_format_guest_source_label(string $source): string
 }
 
 /**
+ * Build pipeline-level KPIs from stay status counts.
+ *
+ * @param array<string, int> $stay_status_summary Status totals by key.
+ * @return array<string, float|int|null>
+ */
+function chama_ops_get_pipeline_metrics(array $stay_status_summary): array
+{
+    $lead_count            = (int) ($stay_status_summary['lead'] ?? 0);
+    $booked_count          = (int) ($stay_status_summary['booked'] ?? 0);
+    $checked_in_count      = (int) ($stay_status_summary['checked_in'] ?? 0);
+    $checked_out_count     = (int) ($stay_status_summary['checked_out'] ?? 0);
+    $cancelled_count       = (int) ($stay_status_summary['cancelled'] ?? 0);
+    $total_stays_in_mix    = $lead_count + $booked_count + $checked_in_count + $checked_out_count + $cancelled_count;
+    $booked_or_later_count = $booked_count + $checked_in_count + $checked_out_count;
+
+    $booked_or_later_rate = $total_stays_in_mix > 0 ? ($booked_or_later_count / $total_stays_in_mix) * 100 : null;
+    $cancellation_rate    = $total_stays_in_mix > 0 ? ($cancelled_count / $total_stays_in_mix) * 100 : null;
+    $lead_backlog_rate    = $total_stays_in_mix > 0 ? ($lead_count / $total_stays_in_mix) * 100 : null;
+
+    return [
+        'total_stays_in_mix'    => $total_stays_in_mix,
+        'booked_or_later_count' => $booked_or_later_count,
+        'booked_or_later_rate'  => $booked_or_later_rate,
+        'cancellation_rate'     => $cancellation_rate,
+        'lead_backlog_rate'     => $lead_backlog_rate,
+    ];
+}
+
+/**
  * Build quick action URLs for the overview page.
  *
  * @return array<string, string>
@@ -1142,8 +1171,11 @@ function chama_ops_get_overview_action_links(): array
         'add_stay'         => admin_url('post-new.php?post_type=stay'),
         'view_guests'      => $guest_list_url,
         'view_stays'       => $stay_list_url,
+        'lead_stays'       => add_query_arg('chama_stay_status_filter', 'lead', $stay_list_url),
         'booked_stays'     => add_query_arg('chama_stay_status_filter', 'booked', $stay_list_url),
         'checked_in_stays' => add_query_arg('chama_stay_status_filter', 'checked_in', $stay_list_url),
+        'checked_out_stays' => add_query_arg('chama_stay_status_filter', 'checked_out', $stay_list_url),
+        'cancelled_stays'  => add_query_arg('chama_stay_status_filter', 'cancelled', $stay_list_url),
         'google_guests'    => add_query_arg('chama_guest_source', 'google', $guest_list_url),
         'repeat_guests'    => add_query_arg('chama_guest_source', 'repeat', $guest_list_url),
         'quality_guest_missing_email'     => add_query_arg('chama_guest_quality', 'missing_email', $guest_list_url),
@@ -1297,6 +1329,7 @@ function chama_ops_render_overview_page(): void
 
     $stay_status_summary    = chama_ops_get_stay_status_summary();
     $guest_source_summary   = chama_ops_get_guest_source_summary();
+    $pipeline_metrics       = chama_ops_get_pipeline_metrics($stay_status_summary);
     $action_links           = chama_ops_get_overview_action_links();
     $rollup_metrics         = chama_ops_get_stay_rollup_metrics();
     $data_quality_metrics   = chama_ops_get_data_quality_metrics();
@@ -1341,8 +1374,17 @@ function chama_ops_render_overview_page(): void
             <a class="button" href="<?php echo esc_url($action_links['booked_stays']); ?>">
                 <?php esc_html_e('Booked Stays', 'chama-ops'); ?>
             </a>
+            <a class="button" href="<?php echo esc_url($action_links['lead_stays']); ?>">
+                <?php esc_html_e('Lead Stays', 'chama-ops'); ?>
+            </a>
             <a class="button" href="<?php echo esc_url($action_links['checked_in_stays']); ?>">
                 <?php esc_html_e('Checked-In Stays', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($action_links['checked_out_stays']); ?>">
+                <?php esc_html_e('Checked-Out Stays', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($action_links['cancelled_stays']); ?>">
+                <?php esc_html_e('Cancelled Stays', 'chama-ops'); ?>
             </a>
             <a class="button" href="<?php echo esc_url($action_links['google_guests']); ?>">
                 <?php esc_html_e('Google Guests', 'chama-ops'); ?>
@@ -1416,6 +1458,47 @@ function chama_ops_render_overview_page(): void
                     ?>
                 </p>
                 <p style="margin-bottom:0;"><?php esc_html_e('Across stays with both revenue and nights', 'chama-ops'); ?></p>
+            </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
+            <h2 style="margin-top:0;"><?php esc_html_e('Pipeline Snapshot', 'chama-ops'); ?></h2>
+            <p style="margin-top:0;"><?php esc_html_e('High-level booking flow health from current stay status mix.', 'chama-ops'); ?></p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Total Stays In Pipeline Mix', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $pipeline_metrics['total_stays_in_mix']); ?>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Booked-Or-Later Rate', 'chama-ops'); ?></strong><br>
+                    <?php
+                    echo $pipeline_metrics['booked_or_later_rate'] !== null
+                        ? esc_html(number_format((float) $pipeline_metrics['booked_or_later_rate'], 1) . '%')
+                        : esc_html__('N/A', 'chama-ops');
+                    ?>
+                    <br>
+                    <a href="<?php echo esc_url($action_links['booked_stays']); ?>"><?php esc_html_e('Open booked queue', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Cancellation Rate', 'chama-ops'); ?></strong><br>
+                    <?php
+                    echo $pipeline_metrics['cancellation_rate'] !== null
+                        ? esc_html(number_format((float) $pipeline_metrics['cancellation_rate'], 1) . '%')
+                        : esc_html__('N/A', 'chama-ops');
+                    ?>
+                    <br>
+                    <a href="<?php echo esc_url($action_links['cancelled_stays']); ?>"><?php esc_html_e('Open cancelled queue', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Lead Backlog Rate', 'chama-ops'); ?></strong><br>
+                    <?php
+                    echo $pipeline_metrics['lead_backlog_rate'] !== null
+                        ? esc_html(number_format((float) $pipeline_metrics['lead_backlog_rate'], 1) . '%')
+                        : esc_html__('N/A', 'chama-ops');
+                    ?>
+                    <br>
+                    <a href="<?php echo esc_url($action_links['lead_stays']); ?>"><?php esc_html_e('Open lead queue', 'chama-ops'); ?></a>
+                </div>
             </div>
         </div>
 
