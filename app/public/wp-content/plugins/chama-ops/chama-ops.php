@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.16.0
+ * Version: 1.17.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -502,6 +502,58 @@ function chama_ops_get_upcoming_arrivals(int $days_ahead = 14, int $limit = 8): 
 }
 
 /**
+ * Get booked arrivals in the next N days that are missing guest contact readiness.
+ *
+ * A stay is considered a contact gap when it is booked to arrive between today and
+ * the given day window and either has no linked guest or that guest is missing
+ * email or phone.
+ *
+ * @param int $days_ahead Number of days ahead (inclusive) to inspect.
+ * @return array<int, int>
+ */
+function chama_ops_get_arrival_contact_gap_stay_ids(int $days_ahead = 1): array
+{
+    $today_obj  = new DateTimeImmutable(wp_date('Y-m-d'));
+    $today      = $today_obj->format('Y-m-d');
+    $window_end = $today_obj->modify('+' . max(0, $days_ahead) . ' day')->format('Y-m-d');
+
+    $stay_ids = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+    ]);
+
+    $gap_ids = [];
+
+    foreach ($stay_ids as $stay_id) {
+        $stay_id  = (int) $stay_id;
+        $status   = (string) get_post_meta($stay_id, '_chama_stay_status', true);
+        $check_in = (string) get_post_meta($stay_id, '_chama_stay_check_in', true);
+
+        if ($status !== 'booked' || $check_in === '' || $check_in < $today || $check_in > $window_end) {
+            continue;
+        }
+
+        $guest_id = (int) get_post_meta($stay_id, '_chama_stay_guest_id', true);
+
+        if ($guest_id <= 0 || get_post_type($guest_id) !== 'guest') {
+            $gap_ids[] = $stay_id;
+            continue;
+        }
+
+        $guest_email = trim((string) get_post_meta($guest_id, '_chama_guest_email', true));
+        $guest_phone = trim((string) get_post_meta($guest_id, '_chama_guest_phone', true));
+
+        if ($guest_email === '' || $guest_phone === '') {
+            $gap_ids[] = $stay_id;
+        }
+    }
+
+    return $gap_ids;
+}
+
+/**
  * Build same-day operations metrics for arrivals, departures, and in-house stays.
  *
  * @return array<string, int>
@@ -517,6 +569,7 @@ function chama_ops_get_today_operations_metrics(): array
         'pending_check_ins'    => 0,
         'pending_check_outs'   => 0,
         'overdue_arrivals'     => 0,
+        'arrival_contact_gaps_48h' => 0,
     ];
 
     $stay_ids = get_posts([
@@ -563,6 +616,8 @@ function chama_ops_get_today_operations_metrics(): array
             $metrics['overdue_arrivals']++;
         }
     }
+
+    $metrics['arrival_contact_gaps_48h'] = count(chama_ops_get_arrival_contact_gap_stay_ids(1));
 
     return $metrics;
 }
@@ -1432,6 +1487,10 @@ function chama_ops_get_overview_action_links(): array
             'chama_stay_today'         => 'overdue_arrivals',
             'chama_stay_status_filter' => 'booked',
         ], $stay_list_url),
+        'today_arrival_contact_gaps_48h' => add_query_arg([
+            'chama_stay_today'         => 'arrivals_contact_gap',
+            'chama_stay_status_filter' => 'booked',
+        ], $stay_list_url),
         'google_guests'    => add_query_arg('chama_guest_source', 'google', $guest_list_url),
         'repeat_guests'    => add_query_arg('chama_guest_source', 'repeat', $guest_list_url),
         'quality_guest_missing_email'     => add_query_arg('chama_guest_quality', 'missing_email', $guest_list_url),
@@ -1831,6 +1890,11 @@ function chama_ops_render_overview_page(): void
                     <?php echo esc_html((string) $today_ops_metrics['overdue_arrivals']); ?><br>
                     <a href="<?php echo esc_url($action_links['today_overdue_arrivals']); ?>"><?php esc_html_e('Open overdue arrivals', 'chama-ops'); ?></a>
                 </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Arrival Contact Gaps (48h)', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $today_ops_metrics['arrival_contact_gaps_48h']); ?><br>
+                    <a href="<?php echo esc_url($action_links['today_arrival_contact_gaps_48h']); ?>"><?php esc_html_e('Open contact-gap queue', 'chama-ops'); ?></a>
+                </div>
             </div>
         </div>
 
@@ -2180,7 +2244,7 @@ function chama_ops_seed_sample_data(): void
                 'handle'           => 'nate',
                 'title'            => 'Sample Guest - Nate Morales',
                 'email'            => 'nate+ops@chamastationinn.com',
-                'phone'            => '(505) 222-0144',
+                'phone'            => '',
                 'marketing_source' => 'google',
                 'preferred_room'   => 'Hilltop Suite',
                 'vip'              => '',
@@ -2828,6 +2892,7 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
             <option value="departures" <?php selected($selected_today, 'departures'); ?>><?php esc_html_e('Departures Today', 'chama-ops'); ?></option>
             <option value="in_house" <?php selected($selected_today, 'in_house'); ?>><?php esc_html_e('In-House Tonight', 'chama-ops'); ?></option>
             <option value="overdue_arrivals" <?php selected($selected_today, 'overdue_arrivals'); ?>><?php esc_html_e('Overdue Arrivals', 'chama-ops'); ?></option>
+            <option value="arrivals_contact_gap" <?php selected($selected_today, 'arrivals_contact_gap'); ?>><?php esc_html_e('Arrival Contact Gaps (48h)', 'chama-ops'); ?></option>
         </select>
         <?php
     }
@@ -3082,6 +3147,11 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
                         'type'    => 'DATE',
                     ],
                 ];
+            }
+
+            if ($selected_today === 'arrivals_contact_gap') {
+                $gap_ids = chama_ops_get_arrival_contact_gap_stay_ids(1);
+                $query->set('post__in', !empty($gap_ids) ? $gap_ids : [0]);
             }
 
             $query->set('meta_query', $meta_query);
