@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.9.0
+ * Version: 1.10.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1157,6 +1157,95 @@ function chama_ops_get_pipeline_metrics(array $stay_status_summary): array
 }
 
 /**
+ * Build prioritized operational recommendations for the overview dashboard.
+ *
+ * @param array<string, float|int|null> $pipeline_metrics Pipeline KPI values.
+ * @param array<string, int>            $data_quality_metrics Data-quality counts.
+ * @param array<string, string>         $action_links Quick action URLs.
+ * @return array<int, array<string, string>>
+ */
+function chama_ops_get_operational_recommendations(
+    array $pipeline_metrics,
+    array $data_quality_metrics,
+    array $action_links
+): array {
+    $recommendations = [];
+    $quality_issue_total = array_sum($data_quality_metrics);
+    $lead_backlog_rate = isset($pipeline_metrics['lead_backlog_rate']) ? (float) $pipeline_metrics['lead_backlog_rate'] : 0.0;
+    $cancellation_rate = isset($pipeline_metrics['cancellation_rate']) ? (float) $pipeline_metrics['cancellation_rate'] : 0.0;
+    $booked_or_later_rate = isset($pipeline_metrics['booked_or_later_rate']) ? (float) $pipeline_metrics['booked_or_later_rate'] : 0.0;
+    $total_stays_in_mix = isset($pipeline_metrics['total_stays_in_mix']) ? (int) $pipeline_metrics['total_stays_in_mix'] : 0;
+
+    if ($quality_issue_total > 0) {
+        $recommendations[] = [
+            'priority' => __('High', 'chama-ops'),
+            'title'    => __('Resolve data quality gaps', 'chama-ops'),
+            'detail'   => sprintf(
+                /* translators: %d is the number of records needing data cleanup. */
+                __('%d records are missing required guest/stay fields. Clean these first to improve reporting accuracy.', 'chama-ops'),
+                $quality_issue_total
+            ),
+            'link'     => $action_links['quality_stay_missing_dates'],
+            'link_label' => __('Open quality queues', 'chama-ops'),
+        ];
+    }
+
+    if ($lead_backlog_rate >= 35.0 && $total_stays_in_mix > 0) {
+        $recommendations[] = [
+            'priority' => __('High', 'chama-ops'),
+            'title'    => __('Reduce lead backlog', 'chama-ops'),
+            'detail'   => sprintf(
+                /* translators: %s is a percentage like 42.3%. */
+                __('Lead backlog is %s of your stay pipeline. Prioritize follow-up and conversion workflows.', 'chama-ops'),
+                number_format($lead_backlog_rate, 1) . '%'
+            ),
+            'link'     => $action_links['lead_stays'],
+            'link_label' => __('Open lead queue', 'chama-ops'),
+        ];
+    }
+
+    if ($cancellation_rate >= 20.0 && $total_stays_in_mix > 0) {
+        $recommendations[] = [
+            'priority' => __('Medium', 'chama-ops'),
+            'title'    => __('Investigate cancellation trend', 'chama-ops'),
+            'detail'   => sprintf(
+                /* translators: %s is a percentage like 23.0%. */
+                __('Cancellation rate is %s. Review cancelled stays for policy, communication, or pricing issues.', 'chama-ops'),
+                number_format($cancellation_rate, 1) . '%'
+            ),
+            'link'     => $action_links['cancelled_stays'],
+            'link_label' => __('Open cancelled queue', 'chama-ops'),
+        ];
+    }
+
+    if ($booked_or_later_rate < 60.0 && $total_stays_in_mix > 0) {
+        $recommendations[] = [
+            'priority' => __('Medium', 'chama-ops'),
+            'title'    => __('Improve booking conversion', 'chama-ops'),
+            'detail'   => sprintf(
+                /* translators: %s is a percentage like 55.4%. */
+                __('Booked-or-later rate is %s. Focus on lead qualification and response speed.', 'chama-ops'),
+                number_format($booked_or_later_rate, 1) . '%'
+            ),
+            'link'     => $action_links['booked_stays'],
+            'link_label' => __('Open booked queue', 'chama-ops'),
+        ];
+    }
+
+    if (empty($recommendations)) {
+        $recommendations[] = [
+            'priority' => __('On Track', 'chama-ops'),
+            'title'    => __('No urgent operational alerts', 'chama-ops'),
+            'detail'   => __('Current metrics look stable. Keep logging complete stay and guest data to preserve accuracy.', 'chama-ops'),
+            'link'     => $action_links['view_stays'],
+            'link_label' => __('Review stays', 'chama-ops'),
+        ];
+    }
+
+    return array_slice($recommendations, 0, 3);
+}
+
+/**
  * Build quick action URLs for the overview page.
  *
  * @return array<string, string>
@@ -1333,6 +1422,7 @@ function chama_ops_render_overview_page(): void
     $action_links           = chama_ops_get_overview_action_links();
     $rollup_metrics         = chama_ops_get_stay_rollup_metrics();
     $data_quality_metrics   = chama_ops_get_data_quality_metrics();
+    $recommendations        = chama_ops_get_operational_recommendations($pipeline_metrics, $data_quality_metrics, $action_links);
     $quality_issue_total    = array_sum($data_quality_metrics);
     $average_revenue        = $rollup_metrics['average_revenue'];
     $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
@@ -1416,6 +1506,23 @@ function chama_ops_render_overview_page(): void
             );
             ?>
         </p>
+
+        <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
+            <h2 style="margin-top:0;"><?php esc_html_e('Action Board', 'chama-ops'); ?></h2>
+            <p style="margin-top:0;"><?php esc_html_e('Prioritized operational recommendations based on live pipeline and data quality metrics.', 'chama-ops'); ?></p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+                <?php foreach ($recommendations as $recommendation) : ?>
+                    <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                        <p style="margin:0 0 8px;"><strong><?php echo esc_html($recommendation['priority']); ?></strong></p>
+                        <p style="margin:0 0 8px;"><strong><?php echo esc_html($recommendation['title']); ?></strong></p>
+                        <p style="margin:0 0 8px;"><?php echo esc_html($recommendation['detail']); ?></p>
+                        <a href="<?php echo esc_url($recommendation['link']); ?>">
+                            <?php echo esc_html($recommendation['link_label']); ?>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:24px 0;">
             <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
