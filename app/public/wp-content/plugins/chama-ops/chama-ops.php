@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.4.0
+ * Version: 1.5.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -266,6 +266,28 @@ function chama_ops_calculate_stay_nights(string $check_in, string $check_out): ?
 }
 
 /**
+ * Calculate revenue per night when both values are valid.
+ *
+ * @param string $revenue Revenue value as stored.
+ * @param int    $nights  Persisted nights value.
+ * @return float|null
+ */
+function chama_ops_calculate_revenue_per_night(string $revenue, int $nights): ?float
+{
+    if ($revenue === '' || $nights <= 0) {
+        return null;
+    }
+
+    $revenue_amount = (float) $revenue;
+
+    if ($revenue_amount <= 0) {
+        return null;
+    }
+
+    return $revenue_amount / $nights;
+}
+
+/**
  * Build aggregate stay metrics for the overview page.
  *
  * @return array<string, float|int|null>
@@ -280,15 +302,18 @@ function chama_ops_get_stay_rollup_metrics(): array
         'order'          => 'DESC',
     ]);
 
-    $active_statuses      = ['booked', 'checked_in', 'checked_out'];
-    $booked_active_nights = 0;
-    $revenue_total        = 0.0;
-    $revenue_count        = 0;
+    $active_statuses         = ['booked', 'checked_in', 'checked_out'];
+    $booked_active_nights    = 0;
+    $revenue_total           = 0.0;
+    $revenue_count           = 0;
+    $revenue_per_night_total = 0.0;
+    $revenue_per_night_count = 0;
 
     foreach ($stays as $stay_post) {
-        $status    = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
-        $nights    = (int) get_post_meta($stay_post->ID, '_chama_stay_nights', true);
-        $revenue   = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
+        $status            = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
+        $nights            = (int) get_post_meta($stay_post->ID, '_chama_stay_nights', true);
+        $revenue           = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
+        $revenue_per_night = chama_ops_calculate_revenue_per_night($revenue, $nights);
 
         if (in_array($status, $active_statuses, true) && $nights > 0) {
             $booked_active_nights += $nights;
@@ -298,15 +323,22 @@ function chama_ops_get_stay_rollup_metrics(): array
             $revenue_total += (float) $revenue;
             $revenue_count++;
         }
+
+        if ($revenue_per_night !== null) {
+            $revenue_per_night_total += $revenue_per_night;
+            $revenue_per_night_count++;
+        }
     }
 
-    $average_revenue = $revenue_count > 0 ? $revenue_total / $revenue_count : null;
+    $average_revenue           = $revenue_count > 0 ? $revenue_total / $revenue_count : null;
+    $average_revenue_per_night = $revenue_per_night_count > 0 ? $revenue_per_night_total / $revenue_per_night_count : null;
 
     return [
-        'booked_active_nights' => $booked_active_nights,
-        'average_revenue'      => $average_revenue,
-        'revenue_total'        => $revenue_total,
-        'revenue_count'        => $revenue_count,
+        'booked_active_nights'    => $booked_active_nights,
+        'average_revenue'         => $average_revenue,
+        'average_revenue_per_night' => $average_revenue_per_night,
+        'revenue_total'           => $revenue_total,
+        'revenue_count'           => $revenue_count,
     ];
 }
 
@@ -339,12 +371,13 @@ function chama_ops_render_guest_related_stays_meta_box(WP_Post $post): void
     echo '<ul style="margin:0;">';
 
     foreach ($related_stays as $stay_post) {
-        $status    = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
-        $check_in  = (string) get_post_meta($stay_post->ID, '_chama_stay_check_in', true);
-        $check_out = (string) get_post_meta($stay_post->ID, '_chama_stay_check_out', true);
-        $revenue   = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
-        $nights    = (int) get_post_meta($stay_post->ID, '_chama_stay_nights', true);
-        $edit_link = get_edit_post_link($stay_post->ID);
+        $status            = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
+        $check_in          = (string) get_post_meta($stay_post->ID, '_chama_stay_check_in', true);
+        $check_out         = (string) get_post_meta($stay_post->ID, '_chama_stay_check_out', true);
+        $revenue           = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
+        $nights            = (int) get_post_meta($stay_post->ID, '_chama_stay_nights', true);
+        $revenue_per_night = chama_ops_calculate_revenue_per_night($revenue, $nights);
+        $edit_link         = get_edit_post_link($stay_post->ID);
 
         echo '<li style="margin-bottom:12px;">';
         echo '<strong>' . esc_html($stay_post->post_title) . '</strong><br>';
@@ -360,6 +393,10 @@ function chama_ops_render_guest_related_stays_meta_box(WP_Post $post): void
 
         if ($revenue !== '') {
             echo esc_html__('Revenue:', 'chama-ops') . ' ' . esc_html('$' . $revenue) . '<br>';
+        }
+
+        if ($revenue_per_night !== null) {
+            echo esc_html__('Revenue / Night:', 'chama-ops') . ' ' . esc_html('$' . number_format($revenue_per_night, 2)) . '<br>';
         }
 
         if ($edit_link) {
@@ -381,12 +418,13 @@ function chama_ops_render_stay_details_meta_box(WP_Post $post): void
 {
     wp_nonce_field('chama_ops_save_stay_details', 'chama_ops_stay_nonce');
 
-    $linked_guest_id = get_post_meta($post->ID, '_chama_stay_guest_id', true);
-    $check_in        = (string) get_post_meta($post->ID, '_chama_stay_check_in', true);
-    $check_out       = (string) get_post_meta($post->ID, '_chama_stay_check_out', true);
-    $status          = get_post_meta($post->ID, '_chama_stay_status', true);
-    $revenue         = get_post_meta($post->ID, '_chama_stay_revenue', true);
-    $nights          = chama_ops_calculate_stay_nights($check_in, $check_out);
+    $linked_guest_id   = get_post_meta($post->ID, '_chama_stay_guest_id', true);
+    $check_in          = (string) get_post_meta($post->ID, '_chama_stay_check_in', true);
+    $check_out         = (string) get_post_meta($post->ID, '_chama_stay_check_out', true);
+    $status            = get_post_meta($post->ID, '_chama_stay_status', true);
+    $revenue           = (string) get_post_meta($post->ID, '_chama_stay_revenue', true);
+    $nights            = chama_ops_calculate_stay_nights($check_in, $check_out);
+    $revenue_per_night = $nights !== null ? chama_ops_calculate_revenue_per_night($revenue, $nights) : null;
 
     $guest_posts = get_posts([
         'post_type'      => 'guest',
@@ -449,6 +487,17 @@ function chama_ops_render_stay_details_meta_box(WP_Post $post): void
                     echo $nights !== null
                         ? esc_html((string) $nights)
                         : esc_html__('Set both dates with check-out after check-in to calculate nights.', 'chama-ops');
+                    ?>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row"><?php esc_html_e('Estimated Revenue / Night', 'chama-ops'); ?></th>
+                <td>
+                    <?php
+                    echo $revenue_per_night !== null
+                        ? esc_html('$' . number_format($revenue_per_night, 2))
+                        : esc_html__('Enter revenue and valid dates to calculate revenue per night.', 'chama-ops');
                     ?>
                 </td>
             </tr>
@@ -1058,11 +1107,12 @@ function chama_ops_render_overview_page(): void
         'order'          => 'DESC',
     ]);
 
-    $stay_status_summary  = chama_ops_get_stay_status_summary();
-    $guest_source_summary = chama_ops_get_guest_source_summary();
-    $action_links         = chama_ops_get_overview_action_links();
-    $rollup_metrics       = chama_ops_get_stay_rollup_metrics();
-    $average_revenue      = $rollup_metrics['average_revenue'];
+    $stay_status_summary    = chama_ops_get_stay_status_summary();
+    $guest_source_summary   = chama_ops_get_guest_source_summary();
+    $action_links           = chama_ops_get_overview_action_links();
+    $rollup_metrics         = chama_ops_get_stay_rollup_metrics();
+    $average_revenue        = $rollup_metrics['average_revenue'];
+    $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
     ?>
     <div class="wrap">
         <h1><?php esc_html_e('Chama Ops Overview', 'chama-ops'); ?></h1>
@@ -1124,6 +1174,18 @@ function chama_ops_render_overview_page(): void
                     ?>
                 </p>
                 <p style="margin-bottom:0;"><?php esc_html_e('Across stays with revenue entered', 'chama-ops'); ?></p>
+            </div>
+
+            <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
+                <h2 style="margin-top:0;"><?php esc_html_e('Average Revenue / Night', 'chama-ops'); ?></h2>
+                <p style="font-size:28px;margin:0;">
+                    <?php
+                    echo $average_revenue_night !== null
+                        ? esc_html('$' . number_format((float) $average_revenue_night, 2))
+                        : '—';
+                    ?>
+                </p>
+                <p style="margin-bottom:0;"><?php esc_html_e('Across stays with both revenue and nights', 'chama-ops'); ?></p>
             </div>
         </div>
 
