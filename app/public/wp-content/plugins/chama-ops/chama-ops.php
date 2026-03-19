@@ -171,6 +171,7 @@ function chama_ops_render_guest_details_meta_box(WP_Post $post): void
                         value="<?php echo esc_attr($phone); ?>"
                         class="regular-text"
                     >
+                    <p class="description"><?php esc_html_e('10-digit US numbers auto-format on save.', 'chama-ops'); ?></p>
                 </td>
             </tr>
 
@@ -263,6 +264,41 @@ function chama_ops_calculate_stay_nights(string $check_in, string $check_out): ?
     $interval = $check_in_date->diff($check_out_date);
 
     return isset($interval->days) ? (int) $interval->days : null;
+}
+
+/**
+ * Format guest phone numbers for consistent admin display/storage.
+ *
+ * @param string $phone Raw phone input from admin form.
+ */
+function chama_ops_format_guest_phone(string $phone): string
+{
+    $trimmed = trim($phone);
+
+    if ($trimmed === '') {
+        return '';
+    }
+
+    $digits = preg_replace('/\D+/', '', $trimmed);
+
+    if ($digits === null || $digits === '') {
+        return $trimmed;
+    }
+
+    if (strlen($digits) === 11 && substr($digits, 0, 1) === '1') {
+        $digits = substr($digits, 1);
+    }
+
+    if (strlen($digits) === 10) {
+        return sprintf(
+            '(%s) %s-%s',
+            substr($digits, 0, 3),
+            substr($digits, 3, 3),
+            substr($digits, 6, 4)
+        );
+    }
+
+    return $trimmed;
 }
 
 /**
@@ -898,7 +934,8 @@ function chama_ops_save_guest_meta(int $post_id): void
     }
 
     $email          = isset($_POST['chama_guest_email']) ? sanitize_email(wp_unslash($_POST['chama_guest_email'])) : '';
-    $phone          = isset($_POST['chama_guest_phone']) ? sanitize_text_field(wp_unslash($_POST['chama_guest_phone'])) : '';
+    $phone_raw      = isset($_POST['chama_guest_phone']) ? sanitize_text_field(wp_unslash($_POST['chama_guest_phone'])) : '';
+    $phone          = chama_ops_format_guest_phone($phone_raw);
     $marketing_src  = isset($_POST['chama_guest_marketing_source']) ? sanitize_text_field(wp_unslash($_POST['chama_guest_marketing_source'])) : '';
     $preferred_room = isset($_POST['chama_guest_preferred_room']) ? sanitize_text_field(wp_unslash($_POST['chama_guest_preferred_room'])) : '';
     $vip            = isset($_POST['chama_guest_vip']) ? '1' : '';

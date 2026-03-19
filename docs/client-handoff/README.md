@@ -1,0 +1,33 @@
+# Client Handoff Packet: Chama Station Inn Operations PWA Prototype
+
+This packet is written for Chama Station Inn stakeholders reviewing why the current prototype should become the inn's operations PWA.
+
+## Context captured from current public site
+- Current public page: https://chamastationinn.com/
+- Public metadata/title currently emphasizes a luxury positioning.
+- Live page content is still in a "Coming Soon" state.
+
+This gap is exactly the opportunity: pair the spa-like guest-facing brand refresh with an equally polished back-of-house operations system.
+
+## How to use this packet
+1. Review the business case in `01-product-intent-and-ops-value.md`.
+2. Review architecture and delivery confidence in `02-architecture-and-data-model.md`.
+3. Run the demo script in `03-demo-walkthrough-and-acceptance.md`.
+4. Confirm next-phase scope in `04-delivery-plan-and-next-phases.md`.
+5. Customize labels and wording with `00-term-mapping-workbook.md`.
+
+## Files
+- `00-term-mapping-workbook.md` - replaces prototype language with inn-specific wording.
+- `01-product-intent-and-ops-value.md` - why this should be Chama Station Inn's operations PWA.
+- `02-architecture-and-data-model.md` - practical architecture, data model, and security posture.
+- `03-demo-walkthrough-and-acceptance.md` - stakeholder demo flow and acceptance checklist.
+- `04-delivery-plan-and-next-phases.md` - staged implementation from prototype to production.
+- `05-brand-and-experience-alignment.md` - ties spa-like brand direction to operations UX decisions.
+
+## Audience
+- Owner / GM
+- Front-desk and operations leads
+- Delivery decision-makers
+
+## Status
+Ready for client review and noun/verb customization.
