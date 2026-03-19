@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.15.0
+ * Version: 1.16.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -516,6 +516,7 @@ function chama_ops_get_today_operations_metrics(): array
         'in_house_today'       => 0,
         'pending_check_ins'    => 0,
         'pending_check_outs'   => 0,
+        'overdue_arrivals'     => 0,
     ];
 
     $stay_ids = get_posts([
@@ -550,6 +551,16 @@ function chama_ops_get_today_operations_metrics(): array
             if (in_array($status, ['booked', 'checked_in'], true)) {
                 $metrics['in_house_today']++;
             }
+        }
+
+        if (
+            $status === 'booked'
+            && $check_in !== ''
+            && $check_out !== ''
+            && $check_in < $today
+            && $check_out > $today
+        ) {
+            $metrics['overdue_arrivals']++;
         }
     }
 
@@ -1417,6 +1428,10 @@ function chama_ops_get_overview_action_links(): array
             'chama_stay_today'         => 'departures',
             'chama_stay_status_filter' => 'checked_in',
         ], $stay_list_url),
+        'today_overdue_arrivals' => add_query_arg([
+            'chama_stay_today'         => 'overdue_arrivals',
+            'chama_stay_status_filter' => 'booked',
+        ], $stay_list_url),
         'google_guests'    => add_query_arg('chama_guest_source', 'google', $guest_list_url),
         'repeat_guests'    => add_query_arg('chama_guest_source', 'repeat', $guest_list_url),
         'quality_guest_missing_email'     => add_query_arg('chama_guest_quality', 'missing_email', $guest_list_url),
@@ -1810,6 +1825,11 @@ function chama_ops_render_overview_page(): void
                     <strong><?php esc_html_e('Pending Check-Outs', 'chama-ops'); ?></strong><br>
                     <?php echo esc_html((string) $today_ops_metrics['pending_check_outs']); ?><br>
                     <a href="<?php echo esc_url($action_links['today_pending_check_outs']); ?>"><?php esc_html_e('Open pending check-outs', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Overdue Arrivals', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $today_ops_metrics['overdue_arrivals']); ?><br>
+                    <a href="<?php echo esc_url($action_links['today_overdue_arrivals']); ?>"><?php esc_html_e('Open overdue arrivals', 'chama-ops'); ?></a>
                 </div>
             </div>
         </div>
@@ -2220,6 +2240,14 @@ function chama_ops_seed_sample_data(): void
                 'check_out'    => $today->modify('+2 days')->format('Y-m-d'),
                 'status'       => 'checked_in',
                 'revenue'      => '1760',
+            ],
+            [
+                'title'        => 'Stay - Omar Patel (Overdue Arrival)',
+                'guest_handle' => 'omar',
+                'check_in'     => $today->modify('-1 day')->format('Y-m-d'),
+                'check_out'    => $today->modify('+1 day')->format('Y-m-d'),
+                'status'       => 'booked',
+                'revenue'      => '940',
             ],
             [
                 'title'        => 'Stay - Elena Cruz (Lead Inquiry)',
@@ -2799,6 +2827,7 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
             <option value="arrivals" <?php selected($selected_today, 'arrivals'); ?>><?php esc_html_e('Arrivals Today', 'chama-ops'); ?></option>
             <option value="departures" <?php selected($selected_today, 'departures'); ?>><?php esc_html_e('Departures Today', 'chama-ops'); ?></option>
             <option value="in_house" <?php selected($selected_today, 'in_house'); ?>><?php esc_html_e('In-House Tonight', 'chama-ops'); ?></option>
+            <option value="overdue_arrivals" <?php selected($selected_today, 'overdue_arrivals'); ?>><?php esc_html_e('Overdue Arrivals', 'chama-ops'); ?></option>
         </select>
         <?php
     }
@@ -3026,6 +3055,24 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
                         'key'     => '_chama_stay_check_in',
                         'value'   => $today,
                         'compare' => '<=',
+                        'type'    => 'DATE',
+                    ],
+                    [
+                        'key'     => '_chama_stay_check_out',
+                        'value'   => $today,
+                        'compare' => '>',
+                        'type'    => 'DATE',
+                    ],
+                ];
+            }
+
+            if ($selected_today === 'overdue_arrivals') {
+                $meta_query[] = [
+                    'relation' => 'AND',
+                    [
+                        'key'     => '_chama_stay_check_in',
+                        'value'   => $today,
+                        'compare' => '<',
                         'type'    => 'DATE',
                     ],
                     [
