@@ -4112,6 +4112,102 @@ function chama_ops_render_stay_filter_context_notice(): void
 add_action('admin_notices', 'chama_ops_render_stay_filter_context_notice');
 
 /**
+ * Render contextual admin notices for guest quality filters.
+ */
+function chama_ops_render_guest_filter_context_notice(): void
+{
+    if (!is_admin() || !function_exists('get_current_screen')) {
+        return;
+    }
+
+    $screen = get_current_screen();
+
+    if (!$screen || $screen->base !== 'edit' || $screen->post_type !== 'guest') {
+        return;
+    }
+
+    $selected_quality = isset($_GET['chama_guest_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_quality'])) : '';
+
+    if ($selected_quality === '') {
+        return;
+    }
+
+    $metrics               = chama_ops_get_data_quality_metrics();
+    $missing_contact_count = count(chama_ops_get_guest_missing_contact_ids());
+    $guest_list_url        = admin_url('edit.php?post_type=guest');
+    $missing_contact_url   = add_query_arg('chama_guest_quality', 'missing_contact', $guest_list_url);
+    $missing_email_url     = add_query_arg('chama_guest_quality', 'missing_email', $guest_list_url);
+    $missing_phone_url     = add_query_arg('chama_guest_quality', 'missing_phone', $guest_list_url);
+    $export_url            = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_export_missing_contact_guests_csv'),
+        'chama_ops_export_missing_contact_guests_csv_action',
+        'chama_ops_export_missing_contact_guests_csv_nonce'
+    );
+
+    if ($selected_quality === 'missing_contact') {
+        echo '<div class="notice notice-warning is-dismissible"><p>';
+        printf(
+            wp_kses_post(
+                /* translators: 1: missing-contact guest count, 2: opening anchor tag to missing-email queue, 3: closing anchor tag, 4: opening anchor tag to missing-phone queue, 5: closing anchor tag, 6: opening anchor tag to export URL, 7: closing anchor tag. */
+                __('%1$d guest profiles are missing at least one contact field. %2$sMissing email queue%3$s | %4$sMissing phone queue%5$s | %6$sExport outreach file%7$s.', 'chama-ops')
+            ),
+            (int) $missing_contact_count,
+            '<a href="' . esc_url($missing_email_url) . '">',
+            '</a>',
+            '<a href="' . esc_url($missing_phone_url) . '">',
+            '</a>',
+            '<a href="' . esc_url($export_url) . '">',
+            '</a>'
+        );
+        echo '</p></div>';
+        return;
+    }
+
+    if ($selected_quality === 'missing_email') {
+        echo '<div class="notice notice-info is-dismissible"><p>';
+        printf(
+            wp_kses_post(
+                /* translators: 1: missing-email guest count, 2: opening anchor tag to missing-contact queue, 3: closing anchor tag. */
+                __('%1$d guest profiles are missing email. %2$sView full missing-contact queue%3$s.', 'chama-ops')
+            ),
+            (int) $metrics['guest_missing_email'],
+            '<a href="' . esc_url($missing_contact_url) . '">',
+            '</a>'
+        );
+        echo '</p></div>';
+        return;
+    }
+
+    if ($selected_quality === 'missing_phone') {
+        echo '<div class="notice notice-info is-dismissible"><p>';
+        printf(
+            wp_kses_post(
+                /* translators: 1: missing-phone guest count, 2: opening anchor tag to missing-contact queue, 3: closing anchor tag. */
+                __('%1$d guest profiles are missing phone. %2$sView full missing-contact queue%3$s.', 'chama-ops')
+            ),
+            (int) $metrics['guest_missing_phone'],
+            '<a href="' . esc_url($missing_contact_url) . '">',
+            '</a>'
+        );
+        echo '</p></div>';
+        return;
+    }
+
+    if ($selected_quality === 'missing_consent') {
+        echo '<div class="notice notice-info is-dismissible"><p>';
+        printf(
+            wp_kses_post(
+                /* translators: %d is the number of guest profiles missing marketing consent. */
+                __('%d guest profiles are missing marketing consent.', 'chama-ops')
+            ),
+            (int) $metrics['guest_missing_consent']
+        );
+        echo '</p></div>';
+    }
+}
+add_action('admin_notices', 'chama_ops_render_guest_filter_context_notice');
+
+/**
  * Auto-format guest phone input on admin edit screens.
  */
 function chama_ops_render_guest_phone_format_script(): void
