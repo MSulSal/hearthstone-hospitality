@@ -1635,6 +1635,10 @@ function chama_ops_get_overview_action_links(): array
             'chama_stay_today'         => 'arrivals_next_48h',
             'chama_stay_status_filter' => 'booked',
         ], $stay_list_url),
+        'today_arrival_contact_ready_48h' => add_query_arg([
+            'chama_stay_today'         => 'arrivals_contact_ready',
+            'chama_stay_status_filter' => 'booked',
+        ], $stay_list_url),
         'today_arrival_contact_gaps_48h' => add_query_arg([
             'chama_stay_today'         => 'arrivals_contact_gap',
             'chama_stay_status_filter' => 'booked',
@@ -2151,7 +2155,7 @@ function chama_ops_render_overview_page(): void
                         (int) $today_ops_metrics['arrivals_next_48h']
                     );
                     ?><br>
-                    <a href="<?php echo esc_url($action_links['today_arrivals_next_48h']); ?>"><?php esc_html_e('Open 48h arrivals', 'chama-ops'); ?></a>
+                    <a href="<?php echo esc_url($action_links['today_arrival_contact_ready_48h']); ?>"><?php esc_html_e('Open contact-ready queue', 'chama-ops'); ?></a>
                 </div>
             </div>
         </div>
@@ -3180,6 +3184,7 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
             <option value=""><?php esc_html_e('All Today States', 'chama-ops'); ?></option>
             <option value="arrivals" <?php selected($selected_today, 'arrivals'); ?>><?php esc_html_e('Arrivals Today', 'chama-ops'); ?></option>
             <option value="arrivals_next_48h" <?php selected($selected_today, 'arrivals_next_48h'); ?>><?php esc_html_e('Booked Arrivals (48h)', 'chama-ops'); ?></option>
+            <option value="arrivals_contact_ready" <?php selected($selected_today, 'arrivals_contact_ready'); ?>><?php esc_html_e('Arrival Contact Ready (48h)', 'chama-ops'); ?></option>
             <option value="departures" <?php selected($selected_today, 'departures'); ?>><?php esc_html_e('Departures Today', 'chama-ops'); ?></option>
             <option value="in_house" <?php selected($selected_today, 'in_house'); ?>><?php esc_html_e('In-House Tonight', 'chama-ops'); ?></option>
             <option value="overdue_arrivals" <?php selected($selected_today, 'overdue_arrivals'); ?>><?php esc_html_e('Overdue Arrivals', 'chama-ops'); ?></option>
@@ -3493,6 +3498,14 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
             if ($selected_today === 'arrivals_contact_gap') {
                 $gap_ids = chama_ops_get_arrival_contact_gap_stay_ids(1);
                 $query->set('post__in', !empty($gap_ids) ? $gap_ids : [0]);
+            }
+
+            if ($selected_today === 'arrivals_contact_ready') {
+                $arrival_ids = chama_ops_get_booked_arrival_stay_ids(1);
+                $gap_ids     = chama_ops_get_arrival_contact_gap_stay_ids(1);
+                $ready_ids   = array_values(array_diff($arrival_ids, $gap_ids));
+
+                $query->set('post__in', !empty($ready_ids) ? array_map('intval', $ready_ids) : [0]);
             }
 
             $query->set('meta_query', $meta_query);
