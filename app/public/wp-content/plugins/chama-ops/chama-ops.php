@@ -1992,6 +1992,11 @@ function chama_ops_render_overview_page(): void
         'chama_ops_export_stays_csv_action',
         'chama_ops_export_stays_csv_nonce'
     );
+    $export_arrival_contact_gaps_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_export_arrival_contact_gaps_csv'),
+        'chama_ops_export_arrival_contact_gaps_csv_action',
+        'chama_ops_export_arrival_contact_gaps_csv_nonce'
+    );
     ?>
     <div class="wrap">
         <?php if (isset($seed_notice_messages[$notice_key])) : ?>
@@ -2106,6 +2111,9 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button" href="<?php echo esc_url($export_stays_url); ?>">
                 <?php esc_html_e('Export Stays CSV', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($export_arrival_contact_gaps_url); ?>">
+                <?php esc_html_e('Export 48h Contact Gaps CSV', 'chama-ops'); ?>
             </a>
         </div>
 
@@ -3173,6 +3181,82 @@ function chama_ops_export_stays_csv(): void
     exit;
 }
 add_action('admin_post_chama_ops_export_stays_csv', 'chama_ops_export_stays_csv');
+
+/**
+ * Export next-48h arrival contact gaps to CSV.
+ */
+function chama_ops_export_arrival_contact_gaps_csv(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You do not have permission to export arrival contact gaps.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer(
+        'chama_ops_export_arrival_contact_gaps_csv_action',
+        'chama_ops_export_arrival_contact_gaps_csv_nonce'
+    );
+
+    $gap_stay_ids = chama_ops_get_arrival_contact_gap_stay_ids(1);
+
+    $filename = 'chama-ops-arrival-contact-gaps-48h-' . wp_date('Ymd-His') . '.csv';
+    chama_ops_send_csv_headers($filename);
+
+    $output = fopen('php://output', 'w');
+
+    if ($output === false) {
+        wp_die(esc_html__('Unable to open CSV output stream.', 'chama-ops'), '', ['response' => 500]);
+    }
+
+    fputcsv($output, [
+        'Stay ID',
+        'Stay Title',
+        'Check-In',
+        'Check-Out',
+        'Guest ID',
+        'Guest Name',
+        'Guest Email',
+        'Guest Phone',
+        'Missing Email',
+        'Missing Phone',
+        'Status',
+    ]);
+
+    foreach ($gap_stay_ids as $stay_id) {
+        $stay_id      = (int) $stay_id;
+        $stay_post    = get_post($stay_id);
+        $guest_id     = (int) get_post_meta($stay_id, '_chama_stay_guest_id', true);
+        $check_in     = (string) get_post_meta($stay_id, '_chama_stay_check_in', true);
+        $check_out    = (string) get_post_meta($stay_id, '_chama_stay_check_out', true);
+        $status       = (string) get_post_meta($stay_id, '_chama_stay_status', true);
+        $guest_name   = $guest_id > 0 ? get_the_title($guest_id) : 'N/A';
+        $guest_email  = $guest_id > 0 ? trim((string) get_post_meta($guest_id, '_chama_guest_email', true)) : '';
+        $guest_phone  = $guest_id > 0 ? trim((string) get_post_meta($guest_id, '_chama_guest_phone', true)) : '';
+        $missing_mail = $guest_email === '';
+        $missing_tel  = $guest_phone === '';
+
+        if (!$stay_post instanceof WP_Post) {
+            continue;
+        }
+
+        fputcsv($output, [
+            $stay_id,
+            $stay_post->post_title,
+            $check_in,
+            $check_out,
+            $guest_id > 0 ? $guest_id : '',
+            $guest_name,
+            $guest_email,
+            $guest_phone,
+            $missing_mail ? 'Yes' : 'No',
+            $missing_tel ? 'Yes' : 'No',
+            $status !== '' ? chama_ops_format_stay_status_label($status) : 'N/A',
+        ]);
+    }
+
+    fclose($output);
+    exit;
+}
+add_action('admin_post_chama_ops_export_arrival_contact_gaps_csv', 'chama_ops_export_arrival_contact_gaps_csv');
 
 /**
  * Render custom filters on Guest and Stay list screens.
