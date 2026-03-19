@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.18.0
+ * Version: 1.19.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1684,6 +1684,40 @@ function chama_ops_delete_sample_data_posts(): array
 }
 
 /**
+ * Convert sample data records into persistent records.
+ *
+ * @return array<string, int>
+ */
+function chama_ops_promote_sample_data_posts(): array
+{
+    $promoted_counts = [
+        'guest' => 0,
+        'stay'  => 0,
+        'total' => 0,
+    ];
+
+    foreach (chama_ops_get_sample_data_post_ids() as $sample_post_id) {
+        $sample_post_id = (int) $sample_post_id;
+        $post_type      = get_post_type($sample_post_id);
+        $deleted_meta   = delete_post_meta($sample_post_id, '_chama_ops_sample_data');
+
+        if (!$deleted_meta) {
+            continue;
+        }
+
+        if ($post_type === 'guest') {
+            $promoted_counts['guest']++;
+        } elseif ($post_type === 'stay') {
+            $promoted_counts['stay']++;
+        }
+    }
+
+    $promoted_counts['total'] = $promoted_counts['guest'] + $promoted_counts['stay'];
+
+    return $promoted_counts;
+}
+
+/**
  * Render the Chama Ops overview dashboard page.
  */
 function chama_ops_render_overview_page(): void
@@ -1714,6 +1748,12 @@ function chama_ops_render_overview_page(): void
     $notice_nights_scanned = isset($_GET['chama_ops_nights_scanned'])
         ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_nights_scanned'])))
         : 0;
+    $notice_promoted_guest_count = isset($_GET['chama_ops_promoted_guest_count'])
+        ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_promoted_guest_count'])))
+        : 0;
+    $notice_promoted_stay_count = isset($_GET['chama_ops_promoted_stay_count'])
+        ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_promoted_stay_count'])))
+        : 0;
     $scenario_labels = chama_ops_get_demo_scenario_labels();
     $seed_notice_messages = [
         'sample_data_seeded' => [
@@ -1734,6 +1774,14 @@ function chama_ops_render_overview_page(): void
         ],
         'sample_data_none' => [
             'message' => __('No sample data records were found to clear.', 'chama-ops'),
+            'type'    => 'notice-info',
+        ],
+        'sample_data_promoted' => [
+            'message' => __('Sample records are now persistent and will no longer be deleted by regenerate.', 'chama-ops'),
+            'type'    => 'notice-success',
+        ],
+        'sample_data_promote_none' => [
+            'message' => __('No sample records were available to convert.', 'chama-ops'),
             'type'    => 'notice-info',
         ],
         'stay_nights_rebuilt' => [
@@ -1790,6 +1838,11 @@ function chama_ops_render_overview_page(): void
         'chama_ops_clear_sample_data_action',
         'chama_ops_clear_sample_data_nonce'
     );
+    $promote_seed_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_promote_sample_data'),
+        'chama_ops_promote_sample_data_action',
+        'chama_ops_promote_sample_data_nonce'
+    );
     $rebuild_nights_url = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_rebuild_stay_nights'),
         'chama_ops_rebuild_stay_nights_action',
@@ -1836,6 +1889,14 @@ function chama_ops_render_overview_page(): void
                             /* translators: %d is the number of stay records scanned. */
                             __('Scanned stays: %d.', 'chama-ops'),
                             $notice_nights_scanned
+                        );
+                    }
+                    if ($notice_key === 'sample_data_promoted') {
+                        $notice_message .= ' ' . sprintf(
+                            /* translators: 1: guest count, 2: stay count. */
+                            __('Converted: %1$d guests, %2$d stays.', 'chama-ops'),
+                            $notice_promoted_guest_count,
+                            $notice_promoted_stay_count
                         );
                     }
 
@@ -1892,6 +1953,9 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button button-secondary" href="<?php echo esc_url($seed_data_cleanup_url); ?>">
                 <?php esc_html_e('Load Data Cleanup Drill', 'chama-ops'); ?>
+            </a>
+            <a class="button button-secondary" href="<?php echo esc_url($promote_seed_url); ?>">
+                <?php esc_html_e('Keep Current Sample Records', 'chama-ops'); ?>
             </a>
             <a class="button button-secondary" href="<?php echo esc_url($rebuild_nights_url); ?>">
                 <?php esc_html_e('Recalculate Stay Nights', 'chama-ops'); ?>
@@ -2675,6 +2739,30 @@ function chama_ops_clear_sample_data(): void
     exit;
 }
 add_action('admin_post_chama_ops_clear_sample_data', 'chama_ops_clear_sample_data');
+
+/**
+ * Convert current sample records into persistent records.
+ */
+function chama_ops_promote_sample_data(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('You do not have permission to convert sample data.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer('chama_ops_promote_sample_data_action', 'chama_ops_promote_sample_data_nonce');
+
+    $promoted_counts = chama_ops_promote_sample_data_posts();
+    $notice_key      = $promoted_counts['total'] > 0 ? 'sample_data_promoted' : 'sample_data_promote_none';
+
+    $redirect = add_query_arg([
+        'chama_ops_notice'               => $notice_key,
+        'chama_ops_promoted_guest_count' => $promoted_counts['guest'],
+        'chama_ops_promoted_stay_count'  => $promoted_counts['stay'],
+    ], wp_get_referer() ?: admin_url('admin.php?page=chama-ops-overview'));
+    wp_safe_redirect($redirect);
+    exit;
+}
+add_action('admin_post_chama_ops_promote_sample_data', 'chama_ops_promote_sample_data');
 
 /**
  * Recalculate persisted stay-night values from check-in/check-out dates.
