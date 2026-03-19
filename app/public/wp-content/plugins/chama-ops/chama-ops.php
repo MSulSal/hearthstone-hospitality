@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.17.0
+ * Version: 1.18.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -141,6 +141,7 @@ function chama_ops_render_guest_details_meta_box(WP_Post $post): void
     $preferred_room = get_post_meta($post->ID, '_chama_guest_preferred_room', true);
     $vip            = get_post_meta($post->ID, '_chama_guest_vip', true);
     $consent        = get_post_meta($post->ID, '_chama_guest_marketing_consent', true);
+    $room_theme_suggestions = chama_ops_get_room_theme_suggestions();
     ?>
     <table class="form-table" role="presentation">
         <tbody>
@@ -193,7 +194,7 @@ function chama_ops_render_guest_details_meta_box(WP_Post $post): void
 
             <tr>
                 <th scope="row">
-                    <label for="chama_guest_preferred_room"><?php esc_html_e('Preferred Room / Preference', 'chama-ops'); ?></label>
+                    <label for="chama_guest_preferred_room"><?php esc_html_e('Preferred Room / Theme', 'chama-ops'); ?></label>
                 </th>
                 <td>
                     <input
@@ -201,8 +202,15 @@ function chama_ops_render_guest_details_meta_box(WP_Post $post): void
                         id="chama_guest_preferred_room"
                         name="chama_guest_preferred_room"
                         value="<?php echo esc_attr($preferred_room); ?>"
+                        list="chama_room_theme_suggestions"
                         class="regular-text"
                     >
+                    <datalist id="chama_room_theme_suggestions">
+                        <?php foreach ($room_theme_suggestions as $room_theme_label) : ?>
+                            <option value="<?php echo esc_attr($room_theme_label); ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                    <p class="description"><?php esc_html_e('Select or type the guest room-theme preference.', 'chama-ops'); ?></p>
                 </td>
             </tr>
 
@@ -299,6 +307,26 @@ function chama_ops_format_guest_phone(string $phone): string
     }
 
     return $trimmed;
+}
+
+/**
+ * Suggested room theme labels for inn-specific preference capture.
+ *
+ * @return array<int, string>
+ */
+function chama_ops_get_room_theme_suggestions(): array
+{
+    return [
+        'Chama Canyon Calm',
+        'Taos Adobe',
+        'Santa Fe Serenity',
+        'Bandelier Mesa',
+        'White Sands Glow',
+        'Jemez Forest Retreat',
+        'Rio Grande Sunrise',
+        'Abiquiu Sky',
+        'High Desert Moon',
+    ];
 }
 
 /**
@@ -2273,7 +2301,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => 'elena@chamastationinn.com',
                 'phone'            => '(505) 222-0100',
                 'marketing_source' => 'direct',
-                'preferred_room'   => 'Riverside Cottage',
+                'preferred_room'   => 'Chama Canyon Calm',
                 'vip'              => '1',
                 'consent'          => '1',
             ],
@@ -2283,7 +2311,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => 'nate+ops@chamastationinn.com',
                 'phone'            => '',
                 'marketing_source' => 'google',
-                'preferred_room'   => 'Hilltop Suite',
+                'preferred_room'   => 'Taos Adobe',
                 'vip'              => '',
                 'consent'          => '1',
             ],
@@ -2293,7 +2321,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => 'sara@chamastationinn.com',
                 'phone'            => '(505) 222-0198',
                 'marketing_source' => 'referral',
-                'preferred_room'   => 'Garden Suite',
+                'preferred_room'   => 'Santa Fe Serenity',
                 'vip'              => '',
                 'consent'          => '1',
             ],
@@ -2303,7 +2331,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => 'omar@chamastationinn.com',
                 'phone'            => '(505) 222-0182',
                 'marketing_source' => 'repeat',
-                'preferred_room'   => 'Main Lodge Loft',
+                'preferred_room'   => 'High Desert Moon',
                 'vip'              => '1',
                 'consent'          => '1',
             ],
@@ -2383,7 +2411,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => 'elena@chamastationinn.com',
                 'phone'            => '',
                 'marketing_source' => 'direct',
-                'preferred_room'   => 'Riverside Cottage',
+                'preferred_room'   => 'Chama Canyon Calm',
                 'vip'              => '1',
                 'consent'          => '',
             ],
@@ -2393,7 +2421,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => '',
                 'phone'            => '(505) 222-0144',
                 'marketing_source' => 'google',
-                'preferred_room'   => 'Hilltop Suite',
+                'preferred_room'   => 'Taos Adobe',
                 'vip'              => '',
                 'consent'          => '',
             ],
@@ -2403,7 +2431,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => '',
                 'phone'            => '',
                 'marketing_source' => 'referral',
-                'preferred_room'   => 'Garden Suite',
+                'preferred_room'   => 'Santa Fe Serenity',
                 'vip'              => '',
                 'consent'          => '1',
             ],
@@ -2467,7 +2495,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => 'elena@chamastationinn.com',
                 'phone'            => '(505) 222-0100',
                 'marketing_source' => 'direct',
-                'preferred_room'   => 'Riverside Cottage',
+                'preferred_room'   => 'Chama Canyon Calm',
                 'vip'              => '1',
                 'consent'          => '1',
             ],
@@ -2477,7 +2505,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => 'nate+ops@chamastationinn.com',
                 'phone'            => '',
                 'marketing_source' => 'google',
-                'preferred_room'   => 'Hilltop Suite',
+                'preferred_room'   => 'Taos Adobe',
                 'vip'              => '',
                 'consent'          => '',
             ],
@@ -2487,7 +2515,7 @@ function chama_ops_seed_sample_data(): void
                 'email'            => '',
                 'phone'            => '(505) 222-0198',
                 'marketing_source' => 'referral',
-                'preferred_room'   => 'Garden Suite',
+                'preferred_room'   => 'Santa Fe Serenity',
                 'vip'              => '',
                 'consent'          => '1',
             ],
@@ -3196,3 +3224,4 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
     }
 }
 add_action('pre_get_posts', 'chama_ops_apply_admin_filters');
+
