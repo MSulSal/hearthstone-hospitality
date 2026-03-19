@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.11.0
+ * Version: 1.12.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -499,6 +499,61 @@ function chama_ops_get_upcoming_arrivals(int $days_ahead = 14, int $limit = 8): 
     }
 
     return $arrivals;
+}
+
+/**
+ * Build same-day operations metrics for arrivals, departures, and in-house stays.
+ *
+ * @return array<string, int>
+ */
+function chama_ops_get_today_operations_metrics(): array
+{
+    $today = wp_date('Y-m-d');
+
+    $metrics = [
+        'arrivals_today'       => 0,
+        'departures_today'     => 0,
+        'in_house_today'       => 0,
+        'pending_check_ins'    => 0,
+        'pending_check_outs'   => 0,
+    ];
+
+    $stay_ids = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+    ]);
+
+    foreach ($stay_ids as $stay_id) {
+        $status    = (string) get_post_meta($stay_id, '_chama_stay_status', true);
+        $check_in  = (string) get_post_meta($stay_id, '_chama_stay_check_in', true);
+        $check_out = (string) get_post_meta($stay_id, '_chama_stay_check_out', true);
+
+        if ($check_in === $today) {
+            $metrics['arrivals_today']++;
+
+            if ($status === 'booked') {
+                $metrics['pending_check_ins']++;
+            }
+        }
+
+        if ($check_out === $today) {
+            $metrics['departures_today']++;
+
+            if ($status === 'checked_in') {
+                $metrics['pending_check_outs']++;
+            }
+        }
+
+        if ($check_in !== '' && $check_out !== '' && $check_in <= $today && $check_out > $today) {
+            if (in_array($status, ['booked', 'checked_in'], true)) {
+                $metrics['in_house_today']++;
+            }
+        }
+    }
+
+    return $metrics;
 }
 
 /**
@@ -1351,6 +1406,17 @@ function chama_ops_get_overview_action_links(): array
         'checked_in_stays' => add_query_arg('chama_stay_status_filter', 'checked_in', $stay_list_url),
         'checked_out_stays' => add_query_arg('chama_stay_status_filter', 'checked_out', $stay_list_url),
         'cancelled_stays'  => add_query_arg('chama_stay_status_filter', 'cancelled', $stay_list_url),
+        'today_arrivals'   => add_query_arg('chama_stay_today', 'arrivals', $stay_list_url),
+        'today_departures' => add_query_arg('chama_stay_today', 'departures', $stay_list_url),
+        'today_in_house'   => add_query_arg('chama_stay_today', 'in_house', $stay_list_url),
+        'today_pending_check_ins' => add_query_arg([
+            'chama_stay_today'         => 'arrivals',
+            'chama_stay_status_filter' => 'booked',
+        ], $stay_list_url),
+        'today_pending_check_outs' => add_query_arg([
+            'chama_stay_today'         => 'departures',
+            'chama_stay_status_filter' => 'checked_in',
+        ], $stay_list_url),
         'google_guests'    => add_query_arg('chama_guest_source', 'google', $guest_list_url),
         'repeat_guests'    => add_query_arg('chama_guest_source', 'repeat', $guest_list_url),
         'quality_guest_missing_email'     => add_query_arg('chama_guest_quality', 'missing_email', $guest_list_url),
@@ -1513,6 +1579,7 @@ function chama_ops_render_overview_page(): void
     $average_revenue        = $rollup_metrics['average_revenue'];
     $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
     $sample_data_counts     = chama_ops_get_sample_data_counts();
+    $today_ops_metrics      = chama_ops_get_today_operations_metrics();
     $upcoming_arrivals      = chama_ops_get_upcoming_arrivals(14, 8);
     $seed_url               = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_seed_sample_data'),
@@ -1593,6 +1660,38 @@ function chama_ops_render_overview_page(): void
             );
             ?>
         </p>
+
+        <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
+            <h2 style="margin-top:0;"><?php esc_html_e('Today Operations Board', 'chama-ops'); ?></h2>
+            <p style="margin-top:0;"><?php esc_html_e('Live same-day counts for arrivals, departures, and in-house operations.', 'chama-ops'); ?></p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Arrivals Today', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $today_ops_metrics['arrivals_today']); ?><br>
+                    <a href="<?php echo esc_url($action_links['today_arrivals']); ?>"><?php esc_html_e('Open arrivals queue', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Departures Today', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $today_ops_metrics['departures_today']); ?><br>
+                    <a href="<?php echo esc_url($action_links['today_departures']); ?>"><?php esc_html_e('Open departures queue', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('In-House Tonight', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $today_ops_metrics['in_house_today']); ?><br>
+                    <a href="<?php echo esc_url($action_links['today_in_house']); ?>"><?php esc_html_e('Open in-house queue', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Pending Check-Ins', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $today_ops_metrics['pending_check_ins']); ?><br>
+                    <a href="<?php echo esc_url($action_links['today_pending_check_ins']); ?>"><?php esc_html_e('Open pending check-ins', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Pending Check-Outs', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $today_ops_metrics['pending_check_outs']); ?><br>
+                    <a href="<?php echo esc_url($action_links['today_pending_check_outs']); ?>"><?php esc_html_e('Open pending check-outs', 'chama-ops'); ?></a>
+                </div>
+            </div>
+        </div>
 
         <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
             <h2 style="margin-top:0;"><?php esc_html_e('Upcoming Arrivals (Next 14 Days)', 'chama-ops'); ?></h2>
@@ -2089,6 +2188,7 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
     if ($post_type === 'stay') {
         $selected_status = isset($_GET['chama_stay_status_filter']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_status_filter'])) : '';
         $selected_quality = isset($_GET['chama_stay_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_quality'])) : '';
+        $selected_today = isset($_GET['chama_stay_today']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_today'])) : '';
         ?>
         <label class="screen-reader-text" for="chama_stay_status_filter"><?php esc_html_e('Filter stays by status', 'chama-ops'); ?></label>
         <select name="chama_stay_status_filter" id="chama_stay_status_filter">
@@ -2106,6 +2206,13 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
             <option value="missing_dates" <?php selected($selected_quality, 'missing_dates'); ?>><?php esc_html_e('Missing Dates', 'chama-ops'); ?></option>
             <option value="invalid_date_range" <?php selected($selected_quality, 'invalid_date_range'); ?>><?php esc_html_e('Invalid Date Range', 'chama-ops'); ?></option>
             <option value="missing_revenue" <?php selected($selected_quality, 'missing_revenue'); ?>><?php esc_html_e('Missing Revenue', 'chama-ops'); ?></option>
+        </select>
+        <label class="screen-reader-text" for="chama_stay_today"><?php esc_html_e('Filter stays by today operations', 'chama-ops'); ?></label>
+        <select name="chama_stay_today" id="chama_stay_today">
+            <option value=""><?php esc_html_e('All Today States', 'chama-ops'); ?></option>
+            <option value="arrivals" <?php selected($selected_today, 'arrivals'); ?>><?php esc_html_e('Arrivals Today', 'chama-ops'); ?></option>
+            <option value="departures" <?php selected($selected_today, 'departures'); ?>><?php esc_html_e('Departures Today', 'chama-ops'); ?></option>
+            <option value="in_house" <?php selected($selected_today, 'in_house'); ?>><?php esc_html_e('In-House Tonight', 'chama-ops'); ?></option>
         </select>
         <?php
     }
@@ -2194,6 +2301,7 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
     if ($post_type === 'stay') {
         $selected_status = isset($_GET['chama_stay_status_filter']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_status_filter'])) : '';
         $selected_quality = isset($_GET['chama_stay_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_quality'])) : '';
+        $selected_today = isset($_GET['chama_stay_today']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_today'])) : '';
 
         if ($selected_status !== '') {
             $meta_query   = (array) $query->get('meta_query');
@@ -2296,6 +2404,49 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
                         'key'     => '_chama_stay_revenue',
                         'value'   => '',
                         'compare' => '=',
+                    ],
+                ];
+            }
+
+            $query->set('meta_query', $meta_query);
+        }
+
+        if ($selected_today !== '') {
+            $meta_query = (array) $query->get('meta_query');
+            $today = wp_date('Y-m-d');
+
+            if ($selected_today === 'arrivals') {
+                $meta_query[] = [
+                    'key'     => '_chama_stay_check_in',
+                    'value'   => $today,
+                    'compare' => '=',
+                    'type'    => 'DATE',
+                ];
+            }
+
+            if ($selected_today === 'departures') {
+                $meta_query[] = [
+                    'key'     => '_chama_stay_check_out',
+                    'value'   => $today,
+                    'compare' => '=',
+                    'type'    => 'DATE',
+                ];
+            }
+
+            if ($selected_today === 'in_house') {
+                $meta_query[] = [
+                    'relation' => 'AND',
+                    [
+                        'key'     => '_chama_stay_check_in',
+                        'value'   => $today,
+                        'compare' => '<=',
+                        'type'    => 'DATE',
+                    ],
+                    [
+                        'key'     => '_chama_stay_check_out',
+                        'value'   => $today,
+                        'compare' => '>',
+                        'type'    => 'DATE',
                     ],
                 ];
             }
