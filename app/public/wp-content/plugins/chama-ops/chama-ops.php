@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.10.0
+ * Version: 1.11.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -413,6 +413,92 @@ function chama_ops_get_data_quality_metrics(): array
     }
 
     return $metrics;
+}
+
+/**
+ * Build an upcoming-arrivals list with readiness flags.
+ *
+ * @param int $days_ahead Number of days ahead to include.
+ * @param int $limit Maximum number of stays to return.
+ * @return array<int, array<string, mixed>>
+ */
+function chama_ops_get_upcoming_arrivals(int $days_ahead = 14, int $limit = 8): array
+{
+    $today = wp_date('Y-m-d');
+    $window_end = wp_date('Y-m-d', strtotime('+' . max($days_ahead, 1) . ' days'));
+
+    $upcoming_stays = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => $limit,
+        'post_status'    => ['publish', 'draft'],
+        'meta_key'       => '_chama_stay_check_in',
+        'orderby'        => 'meta_value',
+        'order'          => 'ASC',
+        'meta_query'     => [
+            [
+                'key'     => '_chama_stay_status',
+                'value'   => 'booked',
+                'compare' => '=',
+            ],
+            [
+                'key'     => '_chama_stay_check_in',
+                'value'   => [$today, $window_end],
+                'compare' => 'BETWEEN',
+                'type'    => 'DATE',
+            ],
+        ],
+    ]);
+
+    $arrivals = [];
+
+    foreach ($upcoming_stays as $stay_post) {
+        $stay_id          = (int) $stay_post->ID;
+        $guest_id         = (int) get_post_meta($stay_id, '_chama_stay_guest_id', true);
+        $check_in         = (string) get_post_meta($stay_id, '_chama_stay_check_in', true);
+        $check_out        = (string) get_post_meta($stay_id, '_chama_stay_check_out', true);
+        $status           = (string) get_post_meta($stay_id, '_chama_stay_status', true);
+        $revenue          = (string) get_post_meta($stay_id, '_chama_stay_revenue', true);
+        $nights           = (int) get_post_meta($stay_id, '_chama_stay_nights', true);
+        $guest_name       = $guest_id > 0 ? get_the_title($guest_id) : '';
+        $is_guest_missing = $guest_id <= 0 || get_post_type($guest_id) !== 'guest';
+        $is_dates_missing = $check_in === '' || $check_out === '';
+        $is_nights_invalid = $nights <= 0;
+        $is_revenue_missing = $revenue === '';
+
+        $issues = [];
+
+        if ($is_guest_missing) {
+            $issues[] = __('Missing guest link', 'chama-ops');
+        }
+
+        if ($is_dates_missing) {
+            $issues[] = __('Missing stay dates', 'chama-ops');
+        }
+
+        if ($is_nights_invalid) {
+            $issues[] = __('Nights not calculated', 'chama-ops');
+        }
+
+        if ($is_revenue_missing) {
+            $issues[] = __('Missing estimated revenue', 'chama-ops');
+        }
+
+        $arrivals[] = [
+            'stay_id'     => $stay_id,
+            'stay_title'  => $stay_post->post_title,
+            'stay_link'   => get_edit_post_link($stay_id) ?: '',
+            'guest_name'  => $guest_name !== '' ? $guest_name : __('N/A', 'chama-ops'),
+            'guest_link'  => $guest_id > 0 ? (get_edit_post_link($guest_id) ?: '') : '',
+            'check_in'    => $check_in,
+            'check_out'   => $check_out,
+            'status'      => $status,
+            'nights'      => $nights,
+            'issues'      => $issues,
+            'is_ready'    => empty($issues),
+        ];
+    }
+
+    return $arrivals;
 }
 
 /**
@@ -1427,6 +1513,7 @@ function chama_ops_render_overview_page(): void
     $average_revenue        = $rollup_metrics['average_revenue'];
     $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
     $sample_data_counts     = chama_ops_get_sample_data_counts();
+    $upcoming_arrivals      = chama_ops_get_upcoming_arrivals(14, 8);
     $seed_url               = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_seed_sample_data'),
         'chama_ops_seed_sample_data_action',
@@ -1506,6 +1593,78 @@ function chama_ops_render_overview_page(): void
             );
             ?>
         </p>
+
+        <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
+            <h2 style="margin-top:0;"><?php esc_html_e('Upcoming Arrivals (Next 14 Days)', 'chama-ops'); ?></h2>
+            <p style="margin-top:0;"><?php esc_html_e('Booked stays arriving soon, with readiness checks for guest link, dates, nights, and revenue.', 'chama-ops'); ?></p>
+            <?php if (!empty($upcoming_arrivals)) : ?>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;">
+                    <?php foreach ($upcoming_arrivals as $arrival) : ?>
+                        <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                            <p style="margin:0 0 8px;">
+                                <strong><?php esc_html_e('Stay:', 'chama-ops'); ?></strong>
+                                <?php if ($arrival['stay_link'] !== '') : ?>
+                                    <a href="<?php echo esc_url((string) $arrival['stay_link']); ?>"><?php echo esc_html((string) $arrival['stay_title']); ?></a>
+                                <?php else : ?>
+                                    <?php echo esc_html((string) $arrival['stay_title']); ?>
+                                <?php endif; ?>
+                            </p>
+                            <p style="margin:0 0 8px;">
+                                <strong><?php esc_html_e('Guest:', 'chama-ops'); ?></strong>
+                                <?php if ($arrival['guest_link'] !== '') : ?>
+                                    <a href="<?php echo esc_url((string) $arrival['guest_link']); ?>"><?php echo esc_html((string) $arrival['guest_name']); ?></a>
+                                <?php else : ?>
+                                    <?php echo esc_html((string) $arrival['guest_name']); ?>
+                                <?php endif; ?>
+                            </p>
+                            <p style="margin:0 0 8px;">
+                                <strong><?php esc_html_e('Dates:', 'chama-ops'); ?></strong>
+                                <?php
+                                $arrival_check_in  = (string) $arrival['check_in'];
+                                $arrival_check_out = (string) $arrival['check_out'];
+                                echo ($arrival_check_in !== '' || $arrival_check_out !== '')
+                                    ? esc_html(trim($arrival_check_in . ' -> ' . $arrival_check_out))
+                                    : esc_html__('N/A', 'chama-ops');
+                                ?>
+                            </p>
+                            <p style="margin:0 0 8px;">
+                                <strong><?php esc_html_e('Nights:', 'chama-ops'); ?></strong>
+                                <?php
+                                echo (int) $arrival['nights'] > 0
+                                    ? esc_html((string) $arrival['nights'])
+                                    : esc_html__('N/A', 'chama-ops');
+                                ?>
+                            </p>
+                            <p style="margin:0 0 8px;">
+                                <strong><?php esc_html_e('Status:', 'chama-ops'); ?></strong>
+                                <?php echo esc_html(chama_ops_format_stay_status_label((string) $arrival['status'])); ?>
+                            </p>
+                            <p style="margin:0 0 8px;">
+                                <strong><?php esc_html_e('Readiness:', 'chama-ops'); ?></strong>
+                                <?php echo !empty($arrival['is_ready']) ? esc_html__('Ready', 'chama-ops') : esc_html__('Needs Attention', 'chama-ops'); ?>
+                            </p>
+                            <?php if (!empty($arrival['issues'])) : ?>
+                                <ul style="margin:0 0 8px 18px;">
+                                    <?php foreach ($arrival['issues'] as $issue) : ?>
+                                        <li><?php echo esc_html((string) $issue); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else : ?>
+                <p><?php esc_html_e('No booked arrivals in the next 14 days.', 'chama-ops'); ?></p>
+            <?php endif; ?>
+            <p style="margin:12px 0 0;">
+                <a class="button" href="<?php echo esc_url($action_links['booked_stays']); ?>">
+                    <?php esc_html_e('Open booked queue', 'chama-ops'); ?>
+                </a>
+                <a class="button" href="<?php echo esc_url($action_links['quality_stay_missing_dates']); ?>">
+                    <?php esc_html_e('Open stay quality queue', 'chama-ops'); ?>
+                </a>
+            </p>
+        </div>
 
         <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
             <h2 style="margin-top:0;"><?php esc_html_e('Action Board', 'chama-ops'); ?></h2>
