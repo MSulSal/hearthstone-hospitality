@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="440" viewBox="0 0 980 440">
+    <rect x="0" y="0" width="980" height="440" fill="#0f1115" rx="14"/>
+    <text x="24" y="38" fill="#e6edf7" font-size="28" font-family="Arial" font-weight="700">Operational Value Index Over Delivery Phases</text>
+<polyline points="80.0,360.0 287.5,285.4 495.0,219.1 702.5,144.6 910.0,70.0" fill="none" stroke="#67b0ff" stroke-width="4"/>
+<circle cx="80.0" cy="360.0" r="5" fill="#67b0ff"/>
+<text x="88.0" y="352.0" fill="#9fb0c8" font-size="13" font-family="Arial">30</text>
+<circle cx="287.5" cy="285.4" r="5" fill="#67b0ff"/>
+<text x="295.5" y="277.4" fill="#9fb0c8" font-size="13" font-family="Arial">48</text>
+<circle cx="495.0" cy="219.1" r="5" fill="#67b0ff"/>
+<text x="503.0" y="211.1" fill="#9fb0c8" font-size="13" font-family="Arial">64</text>
+<circle cx="702.5" cy="144.6" r="5" fill="#67b0ff"/>
+<text x="710.5" y="136.6" fill="#9fb0c8" font-size="13" font-family="Arial">82</text>
+<circle cx="910.0" cy="70.0" r="5" fill="#67b0ff"/>
+<text x="918.0" y="62.0" fill="#9fb0c8" font-size="13" font-family="Arial">100</text>
+<text x="65.0" y="408" fill="#9fb0c8" font-size="12" font-family="Arial">Now</text>
+<text x="272.5" y="408" fill="#9fb0c8" font-size="12" font-family="Arial">P1</text>
+<text x="480.0" y="408" fill="#9fb0c8" font-size="12" font-family="Arial">P2</text>
+<text x="687.5" y="408" fill="#9fb0c8" font-size="12" font-family="Arial">P3</text>
+<text x="895.0" y="408" fill="#9fb0c8" font-size="12" font-family="Arial">P4</text>
+    </svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+    <rect x="0" y="0" width="980" height="420" fill="#0f1115" rx="14"/>
+    <text x="24" y="38" fill="#e6edf7" font-size="28" font-family="Arial" font-weight="700">Module Priority Score (Client Value)</text>
+<text x="24" y="92.3" fill="#9fb0c8" font-size="17" font-family="Arial">Arrivals/Departures Board</text>
+<rect x="220" y="70.0" width="700.0" height="31.0" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="930.0" y="92.3" fill="#e6edf7" font-size="16" font-family="Arial">95</text>
+<text x="24" y="142.3" fill="#9fb0c8" font-size="17" font-family="Arial">Guest Preference Memory</text>
+<rect x="220" y="120.0" width="648.4" height="31.0" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="878.4" y="142.3" fill="#e6edf7" font-size="16" font-family="Arial">88</text>
+<text x="24" y="192.3" fill="#9fb0c8" font-size="17" font-family="Arial">Data Quality Auto-Queues</text>
+<rect x="220" y="170.0" width="663.2" height="31.0" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="893.2" y="192.3" fill="#e6edf7" font-size="16" font-family="Arial">90</text>
+<text x="24" y="242.3" fill="#9fb0c8" font-size="17" font-family="Arial">Revenue/Stay Rollups</text>
+<rect x="220" y="220.0" width="545.3" height="31.0" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="775.3" y="242.3" fill="#e6edf7" font-size="16" font-family="Arial">74</text>
+<text x="24" y="292.3" fill="#9fb0c8" font-size="17" font-family="Arial">Realtime Ops Feed</text>
+<rect x="220" y="270.0" width="596.8" height="31.0" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="826.8" y="292.3" fill="#e6edf7" font-size="16" font-family="Arial">81</text>
+<text x="24" y="342.3" fill="#9fb0c8" font-size="17" font-family="Arial">Mobile Check-In Flow</text>
+<rect x="220" y="320.0" width="633.7" height="31.0" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="863.7" y="342.3" fill="#e6edf7" font-size="16" font-family="Arial">86</text>
+    </svg>

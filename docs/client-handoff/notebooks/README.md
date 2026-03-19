@@ -12,6 +12,14 @@ These notebooks are prepared for client-facing walkthroughs and for your persona
 - `04-layout-deep-dive.ipynb`
   - Explain every major layout surface (frontend and admin) with customization guidance.
 
+## GitHub Presentation View (Code Hidden)
+- `01-prototype-presentation.md`
+- `02-finished-app-vision-presentation.md`
+- `03-dashboard-deep-dive.md`
+- `04-layout-deep-dive.md`
+
+These Markdown files are exported from the notebooks with code inputs removed, so GitHub shows results-only presentation content.
+
 ## How to run
 1. Open this folder in Jupyter Lab / VS Code notebook view.
 2. Run all cells top-to-bottom.
@@ -36,3 +44,6 @@ For each new commit milestone, update:
 - section logic and screenshot targets in notebook 03
 - layout inventory and customization notes in notebook 04
 - any new architecture visuals in `assets/`
+- then run:
+  - `python scripts/validate_client_notebooks.py`
+  - `python scripts/export_notebook_presentations.py`

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+    <rect x="0" y="0" width="980" height="420" fill="#0f1115" rx="14"/>
+    <text x="24" y="38" fill="#e6edf7" font-size="28" font-family="Arial" font-weight="700">Estimated Delivery Effort (Weeks)</text>
+<text x="24" y="103.5" fill="#9fb0c8" font-size="17" font-family="Arial">Phase 1: Prototype Hardening</text>
+<rect x="220" y="70.0" width="262.5" height="46.5" rx="8" fill="#69d2b0" opacity="0.9"/>
+<text x="492.5" y="103.5" fill="#e6edf7" font-size="16" font-family="Arial">3</text>
+<text x="24" y="178.5" fill="#9fb0c8" font-size="17" font-family="Arial">Phase 2: Inn-Specific Expansion</text>
+<rect x="220" y="145.0" width="350.0" height="46.5" rx="8" fill="#69d2b0" opacity="0.9"/>
+<text x="580.0" y="178.5" fill="#e6edf7" font-size="16" font-family="Arial">4</text>
+<text x="24" y="253.5" fill="#9fb0c8" font-size="17" font-family="Arial">Phase 3: PWA Workflow Lift-Out</text>
+<rect x="220" y="220.0" width="525.0" height="46.5" rx="8" fill="#69d2b0" opacity="0.9"/>
+<text x="755.0" y="253.5" fill="#e6edf7" font-size="16" font-family="Arial">6</text>
+<text x="24" y="328.5" fill="#9fb0c8" font-size="17" font-family="Arial">Phase 4: Full Productization</text>
+<rect x="220" y="295.0" width="700.0" height="46.5" rx="8" fill="#69d2b0" opacity="0.9"/>
+<text x="930.0" y="328.5" fill="#e6edf7" font-size="16" font-family="Arial">8</text>
+    </svg>

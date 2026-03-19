@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="360" viewBox="0 0 520 360">
+    <rect x="0" y="0" width="520" height="360" fill="#0f1115" rx="14"/>
+    <text x="22" y="42" fill="#e6edf7" font-size="24" font-family="Arial" font-weight="700">Arrival Contact Ready (48h)</text>
+<circle cx="170" cy="190" r="95" fill="none" stroke="#2d3648" stroke-width="24"/>
+<path d="M 170 95 A 95 95 0 1 1 75.0 190.0" fill="none" stroke="#69d2b0" stroke-width="24" stroke-linecap="round"/>
+<text x="126" y="200" fill="#e6edf7" font-size="34" font-family="Arial" font-weight="700">75.0%</text>
+<text x="22" y="322" fill="#9fb0c8" font-size="16" font-family="Arial">3 ready of 4 booked arrivals in the next 48 hours</text>
+    </svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+    <rect x="0" y="0" width="980" height="420" fill="#0f1115" rx="14"/>
+    <text x="24" y="38" fill="#e6edf7" font-size="28" font-family="Arial" font-weight="700">Data Quality Radar Breakdown</text>
+<text x="24" y="96.8" fill="#9fb0c8" font-size="17" font-family="Arial">Missing guest link</text>
+<rect x="220" y="70.0" width="466.7" height="37.2" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="696.7" y="96.8" fill="#e6edf7" font-size="16" font-family="Arial">2</text>
+<text x="24" y="156.8" fill="#9fb0c8" font-size="17" font-family="Arial">Missing dates</text>
+<rect x="220" y="130.0" width="233.3" height="37.2" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="463.3" y="156.8" fill="#e6edf7" font-size="16" font-family="Arial">1</text>
+<text x="24" y="216.8" fill="#9fb0c8" font-size="17" font-family="Arial">Invalid date range</text>
+<rect x="220" y="190.0" width="233.3" height="37.2" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="463.3" y="216.8" fill="#e6edf7" font-size="16" font-family="Arial">1</text>
+<text x="24" y="276.8" fill="#9fb0c8" font-size="17" font-family="Arial">Missing revenue</text>
+<rect x="220" y="250.0" width="700.0" height="37.2" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="930.0" y="276.8" fill="#e6edf7" font-size="16" font-family="Arial">3</text>
+<text x="24" y="336.8" fill="#9fb0c8" font-size="17" font-family="Arial">Missing guest contact</text>
+<rect x="220" y="310.0" width="466.7" height="37.2" rx="8" fill="#f8c26a" opacity="0.9"/>
+<text x="696.7" y="336.8" fill="#e6edf7" font-size="16" font-family="Arial">2</text>
+    </svg>
