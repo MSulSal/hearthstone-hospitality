@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.5.0
+ * Version: 1.6.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -384,7 +384,7 @@ function chama_ops_render_guest_related_stays_meta_box(WP_Post $post): void
         echo esc_html__('Status:', 'chama-ops') . ' ' . esc_html(chama_ops_format_stay_status_label($status)) . '<br>';
 
         if ($check_in !== '' || $check_out !== '') {
-            echo esc_html__('Dates:', 'chama-ops') . ' ' . esc_html(trim($check_in . ' → ' . $check_out)) . '<br>';
+            echo esc_html__('Dates:', 'chama-ops') . ' ' . esc_html(trim($check_in . ' -> ' . $check_out)) . '<br>';
         }
 
         if ($nights > 0) {
@@ -568,17 +568,17 @@ function chama_ops_render_stay_guest_summary_meta_box(WP_Post $post): void
     ?>
     <p><strong><?php esc_html_e('Guest', 'chama-ops'); ?>:</strong><br><?php echo esc_html($guest_post->post_title); ?></p>
 
-    <p><strong><?php esc_html_e('Email', 'chama-ops'); ?>:</strong><br><?php echo $guest_email !== '' ? esc_html($guest_email) : '—'; ?></p>
+    <p><strong><?php esc_html_e('Email', 'chama-ops'); ?>:</strong><br><?php echo $guest_email !== '' ? esc_html($guest_email) : esc_html__('N/A', 'chama-ops'); ?></p>
 
-    <p><strong><?php esc_html_e('Phone', 'chama-ops'); ?>:</strong><br><?php echo $guest_phone !== '' ? esc_html($guest_phone) : '—'; ?></p>
+    <p><strong><?php esc_html_e('Phone', 'chama-ops'); ?>:</strong><br><?php echo $guest_phone !== '' ? esc_html($guest_phone) : esc_html__('N/A', 'chama-ops'); ?></p>
 
-    <p><strong><?php esc_html_e('Source', 'chama-ops'); ?>:</strong><br><?php echo $guest_source !== '' ? esc_html(chama_ops_format_guest_source_label($guest_source)) : '—'; ?></p>
+    <p><strong><?php esc_html_e('Source', 'chama-ops'); ?>:</strong><br><?php echo $guest_source !== '' ? esc_html(chama_ops_format_guest_source_label($guest_source)) : esc_html__('N/A', 'chama-ops'); ?></p>
 
-    <p><strong><?php esc_html_e('Preference', 'chama-ops'); ?>:</strong><br><?php echo $guest_preference !== '' ? esc_html($guest_preference) : '—'; ?></p>
+    <p><strong><?php esc_html_e('Preference', 'chama-ops'); ?>:</strong><br><?php echo $guest_preference !== '' ? esc_html($guest_preference) : esc_html__('N/A', 'chama-ops'); ?></p>
 
-    <p><strong><?php esc_html_e('VIP', 'chama-ops'); ?>:</strong><br><?php echo $guest_vip === '1' ? esc_html__('Yes', 'chama-ops') : '—'; ?></p>
+    <p><strong><?php esc_html_e('VIP', 'chama-ops'); ?>:</strong><br><?php echo $guest_vip === '1' ? esc_html__('Yes', 'chama-ops') : esc_html__('N/A', 'chama-ops'); ?></p>
 
-    <p><strong><?php esc_html_e('Marketing Consent', 'chama-ops'); ?>:</strong><br><?php echo $guest_consent === '1' ? esc_html__('Yes', 'chama-ops') : '—'; ?></p>
+    <p><strong><?php esc_html_e('Marketing Consent', 'chama-ops'); ?>:</strong><br><?php echo $guest_consent === '1' ? esc_html__('Yes', 'chama-ops') : esc_html__('N/A', 'chama-ops'); ?></p>
 
     <?php if ($guest_edit_link) : ?>
         <p style="margin-top:16px;">
@@ -725,7 +725,7 @@ function chama_ops_render_guest_columns(string $column, int $post_id): void
         case 'guest_vip':
             echo get_post_meta($post_id, '_chama_guest_vip', true) === '1'
                 ? esc_html__('Yes', 'chama-ops')
-                : '—';
+                : esc_html__('N/A', 'chama-ops');
             break;
     }
 }
@@ -779,7 +779,7 @@ function chama_ops_render_stay_columns(string $column, int $post_id): void
         case 'stay_guest':
             $guest_id = (int) get_post_meta($post_id, '_chama_stay_guest_id', true);
 
-            echo $guest_id ? esc_html(get_the_title($guest_id)) : '—';
+            echo $guest_id ? esc_html(get_the_title($guest_id)) : esc_html__('N/A', 'chama-ops');
             break;
 
         case 'stay_dates':
@@ -787,16 +787,16 @@ function chama_ops_render_stay_columns(string $column, int $post_id): void
             $check_out = (string) get_post_meta($post_id, '_chama_stay_check_out', true);
 
             if ($check_in || $check_out) {
-                echo esc_html(trim($check_in . ' → ' . $check_out));
+                echo esc_html(trim($check_in . ' -> ' . $check_out));
             } else {
-                echo '—';
+                echo esc_html__('N/A', 'chama-ops');
             }
             break;
 
         case 'stay_nights':
             $nights = (int) get_post_meta($post_id, '_chama_stay_nights', true);
 
-            echo $nights > 0 ? esc_html((string) $nights) : '—';
+            echo $nights > 0 ? esc_html((string) $nights) : esc_html__('N/A', 'chama-ops');
             break;
 
         case 'stay_status':
@@ -806,7 +806,7 @@ function chama_ops_render_stay_columns(string $column, int $post_id): void
         case 'stay_revenue':
             $revenue = (string) get_post_meta($post_id, '_chama_stay_revenue', true);
 
-            echo $revenue !== '' ? esc_html('$' . $revenue) : '—';
+            echo $revenue !== '' ? esc_html('$' . $revenue) : esc_html__('N/A', 'chama-ops');
             break;
     }
 }
@@ -1077,6 +1077,90 @@ function chama_ops_get_overview_action_links(): array
 }
 
 /**
+ * Return all sample data post IDs across guest and stay records.
+ *
+ * @return array<int, int>
+ */
+function chama_ops_get_sample_data_post_ids(): array
+{
+    $sample_post_ids = get_posts([
+        'post_type'      => ['guest', 'stay'],
+        'posts_per_page' => -1,
+        'post_status'    => 'any',
+        'fields'         => 'ids',
+        'meta_query'     => [
+            [
+                'key'   => '_chama_ops_sample_data',
+                'value' => '1',
+            ],
+        ],
+    ]);
+
+    return array_map('intval', $sample_post_ids);
+}
+
+/**
+ * Return sample data counts by post type.
+ *
+ * @return array<string, int>
+ */
+function chama_ops_get_sample_data_counts(): array
+{
+    $counts = [
+        'guest' => 0,
+        'stay'  => 0,
+        'total' => 0,
+    ];
+
+    foreach (chama_ops_get_sample_data_post_ids() as $sample_post_id) {
+        $post_type = get_post_type($sample_post_id);
+
+        if ($post_type === 'guest') {
+            $counts['guest']++;
+        } elseif ($post_type === 'stay') {
+            $counts['stay']++;
+        }
+    }
+
+    $counts['total'] = $counts['guest'] + $counts['stay'];
+
+    return $counts;
+}
+
+/**
+ * Delete all sample data records and return deletion counts.
+ *
+ * @return array<string, int>
+ */
+function chama_ops_delete_sample_data_posts(): array
+{
+    $deleted_counts = [
+        'guest' => 0,
+        'stay'  => 0,
+        'total' => 0,
+    ];
+
+    foreach (chama_ops_get_sample_data_post_ids() as $sample_post_id) {
+        $post_type = get_post_type($sample_post_id);
+        $deleted   = wp_delete_post($sample_post_id, true);
+
+        if ($deleted === false) {
+            continue;
+        }
+
+        if ($post_type === 'guest') {
+            $deleted_counts['guest']++;
+        } elseif ($post_type === 'stay') {
+            $deleted_counts['stay']++;
+        }
+    }
+
+    $deleted_counts['total'] = $deleted_counts['guest'] + $deleted_counts['stay'];
+
+    return $deleted_counts;
+}
+
+/**
  * Render the Chama Ops overview dashboard page.
  */
 function chama_ops_render_overview_page(): void
@@ -1097,9 +1181,21 @@ function chama_ops_render_overview_page(): void
             'message' => __('Sample guest and stay data has been generated for the demo.', 'chama-ops'),
             'type'    => 'notice-success',
         ],
+        'sample_data_regenerated' => [
+            'message' => __('Sample data has been regenerated and existing sample records were replaced.', 'chama-ops'),
+            'type'    => 'notice-success',
+        ],
         'sample_data_exists' => [
-            'message' => __('Sample data already exists; add more by re-running with the force option.', 'chama-ops'),
+            'message' => __('Sample data already exists. Use regenerate if you want a clean reset of demo records.', 'chama-ops'),
             'type'    => 'notice-warning',
+        ],
+        'sample_data_cleared' => [
+            'message' => __('Sample data was cleared from guests and stays.', 'chama-ops'),
+            'type'    => 'notice-success',
+        ],
+        'sample_data_none' => [
+            'message' => __('No sample data records were found to clear.', 'chama-ops'),
+            'type'    => 'notice-info',
         ],
     ];
 
@@ -1125,12 +1221,18 @@ function chama_ops_render_overview_page(): void
     $rollup_metrics         = chama_ops_get_stay_rollup_metrics();
     $average_revenue        = $rollup_metrics['average_revenue'];
     $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
+    $sample_data_counts     = chama_ops_get_sample_data_counts();
     $seed_url               = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_seed_sample_data'),
         'chama_ops_seed_sample_data_action',
         'chama_ops_seed_sample_data_nonce'
     );
     $seed_force_url = add_query_arg('chama_ops_force_sample_data', '1', $seed_url);
+    $clear_seed_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_clear_sample_data'),
+        'chama_ops_clear_sample_data_action',
+        'chama_ops_clear_sample_data_nonce'
+    );
     ?>
     <div class="wrap">
         <?php if (isset($seed_notice_messages[$notice_key])) : ?>
@@ -1170,9 +1272,26 @@ function chama_ops_render_overview_page(): void
                 <?php esc_html_e('Generate Sample Data', 'chama-ops'); ?>
             </a>
             <a class="button button-secondary" href="<?php echo esc_url($seed_force_url); ?>">
-                <?php esc_html_e('Generate Sample Data (force)', 'chama-ops'); ?>
+                <?php esc_html_e('Regenerate Sample Data', 'chama-ops'); ?>
+            </a>
+            <a
+                class="button button-secondary"
+                href="<?php echo esc_url($clear_seed_url); ?>"
+                onclick="return confirm('<?php echo esc_attr__('Clear all sample guest and stay records?', 'chama-ops'); ?>');"
+            >
+                <?php esc_html_e('Clear Sample Data', 'chama-ops'); ?>
             </a>
         </div>
+
+        <p style="margin:0 0 16px;">
+            <?php
+            printf(
+                esc_html__('Sample records currently loaded: %1$d guests, %2$d stays.', 'chama-ops'),
+                (int) $sample_data_counts['guest'],
+                (int) $sample_data_counts['stay']
+            );
+            ?>
+        </p>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:24px 0;">
             <div style="background:#fff;border:1px solid #dcdcde;padding:16px;">
@@ -1199,7 +1318,7 @@ function chama_ops_render_overview_page(): void
                     <?php
                     echo $average_revenue !== null
                         ? esc_html('$' . number_format((float) $average_revenue, 2))
-                        : '—';
+                        : esc_html__('N/A', 'chama-ops');
                     ?>
                 </p>
                 <p style="margin-bottom:0;"><?php esc_html_e('Across stays with revenue entered', 'chama-ops'); ?></p>
@@ -1211,7 +1330,7 @@ function chama_ops_render_overview_page(): void
                     <?php
                     echo $average_revenue_night !== null
                         ? esc_html('$' . number_format((float) $average_revenue_night, 2))
-                        : '—';
+                        : esc_html__('N/A', 'chama-ops');
                     ?>
                 </p>
                 <p style="margin-bottom:0;"><?php esc_html_e('Across stays with both revenue and nights', 'chama-ops'); ?></p>
@@ -1296,20 +1415,9 @@ function chama_ops_seed_sample_data(): void
 
     $force = isset($_GET['chama_ops_force_sample_data']) && sanitize_text_field(wp_unslash($_GET['chama_ops_force_sample_data'])) === '1';
 
-    $existing = get_posts([
-        'post_type'      => ['guest', 'stay'],
-        'posts_per_page' => 1,
-        'post_status'    => 'any',
-        'fields'         => 'ids',
-        'meta_query'     => [
-            [
-                'key'   => '_chama_ops_sample_data',
-                'value' => '1',
-            ],
-        ],
-    ]);
+    $existing_sample_post_ids = chama_ops_get_sample_data_post_ids();
 
-    if (!$force && !empty($existing)) {
+    if (!$force && !empty($existing_sample_post_ids)) {
         $redirect = add_query_arg(
             'chama_ops_notice',
             'sample_data_exists',
@@ -1319,10 +1427,14 @@ function chama_ops_seed_sample_data(): void
         exit;
     }
 
+    if ($force && !empty($existing_sample_post_ids)) {
+        chama_ops_delete_sample_data_posts();
+    }
+
     $guest_definitions = [
         [
             'handle'           => 'elena',
-            'title'            => 'Sample Guest – Elena Cruz',
+            'title'            => 'Sample Guest - Elena Cruz',
             'email'            => 'elena@chamastationinn.com',
             'phone'            => '(505) 222-0100',
             'marketing_source' => 'direct',
@@ -1332,7 +1444,7 @@ function chama_ops_seed_sample_data(): void
         ],
         [
             'handle'           => 'nate',
-            'title'            => 'Sample Guest – Nate Morales',
+            'title'            => 'Sample Guest - Nate Morales',
             'email'            => 'nate+ops@chamastationinn.com',
             'phone'            => '(505) 222-0144',
             'marketing_source' => 'google',
@@ -1369,7 +1481,7 @@ function chama_ops_seed_sample_data(): void
 
     $stay_definitions = [
         [
-            'title'        => 'Stay – Elena Cruz (May 1–4, 2026)',
+            'title'        => 'Stay - Elena Cruz (May 1-4, 2026)',
             'guest_handle' => 'elena',
             'check_in'     => '2026-05-01',
             'check_out'    => '2026-05-04',
@@ -1377,7 +1489,7 @@ function chama_ops_seed_sample_data(): void
             'revenue'      => '1380',
         ],
         [
-            'title'        => 'Stay – Nate Morales (June 12–16, 2026)',
+            'title'        => 'Stay - Nate Morales (June 12-16, 2026)',
             'guest_handle' => 'nate',
             'check_in'     => '2026-06-12',
             'check_out'    => '2026-06-16',
@@ -1419,13 +1531,37 @@ function chama_ops_seed_sample_data(): void
 
     $redirect = add_query_arg(
         'chama_ops_notice',
-        'sample_data_seeded',
+        $force ? 'sample_data_regenerated' : 'sample_data_seeded',
         wp_get_referer() ?: admin_url('admin.php?page=chama-ops-overview')
     );
     wp_safe_redirect($redirect);
     exit;
 }
 add_action('admin_post_chama_ops_seed_sample_data', 'chama_ops_seed_sample_data');
+
+/**
+ * Clear all seeded sample data records.
+ */
+function chama_ops_clear_sample_data(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('You do not have permission to clear sample data.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer('chama_ops_clear_sample_data_action', 'chama_ops_clear_sample_data_nonce');
+
+    $deleted_counts = chama_ops_delete_sample_data_posts();
+    $notice_key     = $deleted_counts['total'] > 0 ? 'sample_data_cleared' : 'sample_data_none';
+
+    $redirect = add_query_arg(
+        'chama_ops_notice',
+        $notice_key,
+        wp_get_referer() ?: admin_url('admin.php?page=chama-ops-overview')
+    );
+    wp_safe_redirect($redirect);
+    exit;
+}
+add_action('admin_post_chama_ops_clear_sample_data', 'chama_ops_clear_sample_data');
 
 /**
  * Render custom filters on Guest and Stay list screens.
