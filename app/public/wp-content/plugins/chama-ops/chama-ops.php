@@ -1484,12 +1484,14 @@ function chama_ops_get_pipeline_metrics(array $stay_status_summary): array
  *
  * @param array<string, float|int|null> $pipeline_metrics Pipeline KPI values.
  * @param array<string, int>            $data_quality_metrics Data-quality counts.
+ * @param array<string, int|float|null> $today_ops_metrics Same-day operational KPI values.
  * @param array<string, string>         $action_links Quick action URLs.
  * @return array<int, array<string, string>>
  */
 function chama_ops_get_operational_recommendations(
     array $pipeline_metrics,
     array $data_quality_metrics,
+    array $today_ops_metrics,
     array $action_links
 ): array {
     $recommendations = [];
@@ -1498,6 +1500,12 @@ function chama_ops_get_operational_recommendations(
     $cancellation_rate = isset($pipeline_metrics['cancellation_rate']) ? (float) $pipeline_metrics['cancellation_rate'] : 0.0;
     $booked_or_later_rate = isset($pipeline_metrics['booked_or_later_rate']) ? (float) $pipeline_metrics['booked_or_later_rate'] : 0.0;
     $total_stays_in_mix = isset($pipeline_metrics['total_stays_in_mix']) ? (int) $pipeline_metrics['total_stays_in_mix'] : 0;
+    $arrival_contact_gap_count = isset($today_ops_metrics['arrival_contact_gaps_48h']) ? (int) $today_ops_metrics['arrival_contact_gaps_48h'] : 0;
+    $arrivals_next_48h = isset($today_ops_metrics['arrivals_next_48h']) ? (int) $today_ops_metrics['arrivals_next_48h'] : 0;
+    $arrival_contact_ready_rate = isset($today_ops_metrics['arrival_contact_ready_rate_48h'])
+        && $today_ops_metrics['arrival_contact_ready_rate_48h'] !== null
+        ? (float) $today_ops_metrics['arrival_contact_ready_rate_48h']
+        : null;
 
     if ($quality_issue_total > 0) {
         $recommendations[] = [
@@ -1552,6 +1560,22 @@ function chama_ops_get_operational_recommendations(
             ),
             'link'     => $action_links['booked_stays'],
             'link_label' => __('Open booked queue', 'chama-ops'),
+        ];
+    }
+
+    if ($arrival_contact_gap_count > 0 && $arrivals_next_48h > 0) {
+        $recommendations[] = [
+            'priority' => __('High', 'chama-ops'),
+            'title'    => __('Fix near-term arrival contact readiness', 'chama-ops'),
+            'detail'   => sprintf(
+                /* translators: 1: number of arrivals with contact gaps, 2: total booked arrivals in 48h, 3: readiness rate percentage. */
+                __('%1$d of %2$d booked arrivals in the next 48 hours are missing contact readiness. Current readiness rate: %3$s.', 'chama-ops'),
+                $arrival_contact_gap_count,
+                $arrivals_next_48h,
+                $arrival_contact_ready_rate !== null ? number_format($arrival_contact_ready_rate, 1) . '%' : __('N/A', 'chama-ops')
+            ),
+            'link'     => $action_links['today_arrival_contact_gaps_48h'],
+            'link_label' => __('Open contact-gap queue', 'chama-ops'),
         ];
     }
 
@@ -1871,14 +1895,14 @@ function chama_ops_render_overview_page(): void
     $action_links           = chama_ops_get_overview_action_links();
     $rollup_metrics         = chama_ops_get_stay_rollup_metrics();
     $data_quality_metrics   = chama_ops_get_data_quality_metrics();
-    $recommendations        = chama_ops_get_operational_recommendations($pipeline_metrics, $data_quality_metrics, $action_links);
+    $today_ops_metrics      = chama_ops_get_today_operations_metrics();
+    $recommendations        = chama_ops_get_operational_recommendations($pipeline_metrics, $data_quality_metrics, $today_ops_metrics, $action_links);
     $quality_issue_total    = array_sum($data_quality_metrics);
     $average_revenue        = $rollup_metrics['average_revenue'];
     $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
     $sample_data_counts     = chama_ops_get_sample_data_counts();
     $persistent_guest_count = max(0, $guest_total - (int) $sample_data_counts['guest']);
     $persistent_stay_count  = max(0, $stay_total - (int) $sample_data_counts['stay']);
-    $today_ops_metrics      = chama_ops_get_today_operations_metrics();
     $upcoming_arrivals      = chama_ops_get_upcoming_arrivals(14, 8);
     $seed_url               = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_seed_sample_data'),
