@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.19.0
+ * Version: 1.20.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -327,6 +327,16 @@ function chama_ops_get_room_theme_suggestions(): array
         'Abiquiu Sky',
         'High Desert Moon',
     ];
+}
+
+/**
+ * Determine whether a record is currently tagged as demo/sample data.
+ *
+ * @param int $post_id Post ID.
+ */
+function chama_ops_is_sample_record(int $post_id): bool
+{
+    return (string) get_post_meta($post_id, '_chama_ops_sample_data', true) === '1';
 }
 
 /**
@@ -1037,6 +1047,7 @@ function chama_ops_guest_columns(array $columns): array
     return [
         'cb'                  => $columns['cb'],
         'title'               => __('Guest', 'chama-ops'),
+        'guest_origin'        => __('Origin', 'chama-ops'),
         'guest_email'         => __('Email', 'chama-ops'),
         'guest_phone'         => __('Phone', 'chama-ops'),
         'guest_marketing_src' => __('Source', 'chama-ops'),
@@ -1055,6 +1066,12 @@ add_filter('manage_guest_posts_columns', 'chama_ops_guest_columns');
 function chama_ops_render_guest_columns(string $column, int $post_id): void
 {
     switch ($column) {
+        case 'guest_origin':
+            echo chama_ops_is_sample_record($post_id)
+                ? esc_html__('Sample', 'chama-ops')
+                : esc_html__('Persistent', 'chama-ops');
+            break;
+
         case 'guest_email':
             echo esc_html((string) get_post_meta($post_id, '_chama_guest_email', true));
             break;
@@ -1087,6 +1104,7 @@ function chama_ops_stay_columns(array $columns): array
     return [
         'cb'           => $columns['cb'],
         'title'        => __('Stay', 'chama-ops'),
+        'stay_origin'  => __('Origin', 'chama-ops'),
         'stay_guest'   => __('Guest', 'chama-ops'),
         'stay_dates'   => __('Dates', 'chama-ops'),
         'stay_nights'  => __('Nights', 'chama-ops'),
@@ -1121,6 +1139,12 @@ add_filter('manage_edit-stay_sortable_columns', 'chama_ops_stay_sortable_columns
 function chama_ops_render_stay_columns(string $column, int $post_id): void
 {
     switch ($column) {
+        case 'stay_origin':
+            echo chama_ops_is_sample_record($post_id)
+                ? esc_html__('Sample', 'chama-ops')
+                : esc_html__('Persistent', 'chama-ops');
+            break;
+
         case 'stay_guest':
             $guest_id = (int) get_post_meta($post_id, '_chama_stay_guest_id', true);
 
@@ -2996,6 +3020,7 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
     if ($post_type === 'guest') {
         $selected_source = isset($_GET['chama_guest_source']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_source'])) : '';
         $selected_quality = isset($_GET['chama_guest_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_quality'])) : '';
+        $selected_origin = isset($_GET['chama_data_origin']) ? sanitize_text_field(wp_unslash($_GET['chama_data_origin'])) : '';
         ?>
         <label class="screen-reader-text" for="chama_guest_source"><?php esc_html_e('Filter guests by source', 'chama-ops'); ?></label>
         <select name="chama_guest_source" id="chama_guest_source">
@@ -3013,6 +3038,12 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
             <option value="missing_phone" <?php selected($selected_quality, 'missing_phone'); ?>><?php esc_html_e('Missing Phone', 'chama-ops'); ?></option>
             <option value="missing_consent" <?php selected($selected_quality, 'missing_consent'); ?>><?php esc_html_e('Missing Consent', 'chama-ops'); ?></option>
         </select>
+        <label class="screen-reader-text" for="chama_data_origin"><?php esc_html_e('Filter records by origin', 'chama-ops'); ?></label>
+        <select name="chama_data_origin" id="chama_data_origin">
+            <option value=""><?php esc_html_e('All Record Origins', 'chama-ops'); ?></option>
+            <option value="sample" <?php selected($selected_origin, 'sample'); ?>><?php esc_html_e('Sample Only', 'chama-ops'); ?></option>
+            <option value="persistent" <?php selected($selected_origin, 'persistent'); ?>><?php esc_html_e('Persistent Only', 'chama-ops'); ?></option>
+        </select>
         <?php
     }
 
@@ -3020,6 +3051,7 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
         $selected_status = isset($_GET['chama_stay_status_filter']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_status_filter'])) : '';
         $selected_quality = isset($_GET['chama_stay_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_quality'])) : '';
         $selected_today = isset($_GET['chama_stay_today']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_today'])) : '';
+        $selected_origin = isset($_GET['chama_data_origin']) ? sanitize_text_field(wp_unslash($_GET['chama_data_origin'])) : '';
         ?>
         <label class="screen-reader-text" for="chama_stay_status_filter"><?php esc_html_e('Filter stays by status', 'chama-ops'); ?></label>
         <select name="chama_stay_status_filter" id="chama_stay_status_filter">
@@ -3047,6 +3079,12 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
             <option value="overdue_arrivals" <?php selected($selected_today, 'overdue_arrivals'); ?>><?php esc_html_e('Overdue Arrivals', 'chama-ops'); ?></option>
             <option value="arrivals_contact_gap" <?php selected($selected_today, 'arrivals_contact_gap'); ?>><?php esc_html_e('Arrival Contact Gaps (48h)', 'chama-ops'); ?></option>
         </select>
+        <label class="screen-reader-text" for="chama_data_origin"><?php esc_html_e('Filter records by origin', 'chama-ops'); ?></label>
+        <select name="chama_data_origin" id="chama_data_origin">
+            <option value=""><?php esc_html_e('All Record Origins', 'chama-ops'); ?></option>
+            <option value="sample" <?php selected($selected_origin, 'sample'); ?>><?php esc_html_e('Sample Only', 'chama-ops'); ?></option>
+            <option value="persistent" <?php selected($selected_origin, 'persistent'); ?>><?php esc_html_e('Persistent Only', 'chama-ops'); ?></option>
+        </select>
         <?php
     }
 }
@@ -3068,6 +3106,7 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
     if ($post_type === 'guest') {
         $selected_source = isset($_GET['chama_guest_source']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_source'])) : '';
         $selected_quality = isset($_GET['chama_guest_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_quality'])) : '';
+        $selected_origin = isset($_GET['chama_data_origin']) ? sanitize_text_field(wp_unslash($_GET['chama_data_origin'])) : '';
 
         if ($selected_source !== '') {
             $meta_query   = (array) $query->get('meta_query');
@@ -3129,12 +3168,41 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
 
             $query->set('meta_query', $meta_query);
         }
+
+        if ($selected_origin !== '') {
+            $meta_query = (array) $query->get('meta_query');
+
+            if ($selected_origin === 'sample') {
+                $meta_query[] = [
+                    'key'   => '_chama_ops_sample_data',
+                    'value' => '1',
+                ];
+            }
+
+            if ($selected_origin === 'persistent') {
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'key'     => '_chama_ops_sample_data',
+                        'compare' => 'NOT EXISTS',
+                    ],
+                    [
+                        'key'     => '_chama_ops_sample_data',
+                        'value'   => '1',
+                        'compare' => '!=',
+                    ],
+                ];
+            }
+
+            $query->set('meta_query', $meta_query);
+        }
     }
 
     if ($post_type === 'stay') {
         $selected_status = isset($_GET['chama_stay_status_filter']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_status_filter'])) : '';
         $selected_quality = isset($_GET['chama_stay_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_quality'])) : '';
         $selected_today = isset($_GET['chama_stay_today']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_today'])) : '';
+        $selected_origin = isset($_GET['chama_data_origin']) ? sanitize_text_field(wp_unslash($_GET['chama_data_origin'])) : '';
 
         if ($selected_status !== '') {
             $meta_query   = (array) $query->get('meta_query');
@@ -3305,6 +3373,34 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
             if ($selected_today === 'arrivals_contact_gap') {
                 $gap_ids = chama_ops_get_arrival_contact_gap_stay_ids(1);
                 $query->set('post__in', !empty($gap_ids) ? $gap_ids : [0]);
+            }
+
+            $query->set('meta_query', $meta_query);
+        }
+
+        if ($selected_origin !== '') {
+            $meta_query = (array) $query->get('meta_query');
+
+            if ($selected_origin === 'sample') {
+                $meta_query[] = [
+                    'key'   => '_chama_ops_sample_data',
+                    'value' => '1',
+                ];
+            }
+
+            if ($selected_origin === 'persistent') {
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'key'     => '_chama_ops_sample_data',
+                        'compare' => 'NOT EXISTS',
+                    ],
+                    [
+                        'key'     => '_chama_ops_sample_data',
+                        'value'   => '1',
+                        'compare' => '!=',
+                    ],
+                ];
             }
 
             $query->set('meta_query', $meta_query);
