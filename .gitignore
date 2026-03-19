@@ -6,6 +6,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Internal workspace for private docs/automation
+.internal/
+
 # Logs
 *.log
 npm-debug.log*
