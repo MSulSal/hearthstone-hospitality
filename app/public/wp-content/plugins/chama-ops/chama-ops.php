@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -287,12 +287,10 @@ function chama_ops_get_stay_rollup_metrics(): array
 
     foreach ($stays as $stay_post) {
         $status    = (string) get_post_meta($stay_post->ID, '_chama_stay_status', true);
-        $check_in  = (string) get_post_meta($stay_post->ID, '_chama_stay_check_in', true);
-        $check_out = (string) get_post_meta($stay_post->ID, '_chama_stay_check_out', true);
+        $nights    = (int) get_post_meta($stay_post->ID, '_chama_stay_nights', true);
         $revenue   = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
-        $nights    = chama_ops_calculate_stay_nights($check_in, $check_out);
 
-        if (in_array($status, $active_statuses, true) && $nights !== null) {
+        if (in_array($status, $active_statuses, true) && $nights > 0) {
             $booked_active_nights += $nights;
         }
 
@@ -345,7 +343,7 @@ function chama_ops_render_guest_related_stays_meta_box(WP_Post $post): void
         $check_in  = (string) get_post_meta($stay_post->ID, '_chama_stay_check_in', true);
         $check_out = (string) get_post_meta($stay_post->ID, '_chama_stay_check_out', true);
         $revenue   = (string) get_post_meta($stay_post->ID, '_chama_stay_revenue', true);
-        $nights    = chama_ops_calculate_stay_nights($check_in, $check_out);
+        $nights    = (int) get_post_meta($stay_post->ID, '_chama_stay_nights', true);
         $edit_link = get_edit_post_link($stay_post->ID);
 
         echo '<li style="margin-bottom:12px;">';
@@ -356,7 +354,7 @@ function chama_ops_render_guest_related_stays_meta_box(WP_Post $post): void
             echo esc_html__('Dates:', 'chama-ops') . ' ' . esc_html(trim($check_in . ' → ' . $check_out)) . '<br>';
         }
 
-        if ($nights !== null) {
+        if ($nights > 0) {
             echo esc_html__('Nights:', 'chama-ops') . ' ' . esc_html((string) $nights) . '<br>';
         }
 
@@ -618,12 +616,19 @@ function chama_ops_save_stay_meta(int $post_id): void
     $check_out       = isset($_POST['chama_stay_check_out']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_check_out'])) : '';
     $status          = isset($_POST['chama_stay_status']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_status'])) : 'lead';
     $revenue         = isset($_POST['chama_stay_revenue']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_revenue'])) : '';
+    $nights          = chama_ops_calculate_stay_nights($check_in, $check_out);
 
     update_post_meta($post_id, '_chama_stay_guest_id', $linked_guest_id);
     update_post_meta($post_id, '_chama_stay_check_in', $check_in);
     update_post_meta($post_id, '_chama_stay_check_out', $check_out);
     update_post_meta($post_id, '_chama_stay_status', $status);
     update_post_meta($post_id, '_chama_stay_revenue', $revenue);
+
+    if ($nights !== null) {
+        update_post_meta($post_id, '_chama_stay_nights', $nights);
+    } else {
+        delete_post_meta($post_id, '_chama_stay_nights');
+    }
 }
 add_action('save_post', 'chama_ops_save_stay_meta');
 
@@ -740,11 +745,9 @@ function chama_ops_render_stay_columns(string $column, int $post_id): void
             break;
 
         case 'stay_nights':
-            $check_in  = (string) get_post_meta($post_id, '_chama_stay_check_in', true);
-            $check_out = (string) get_post_meta($post_id, '_chama_stay_check_out', true);
-            $nights    = chama_ops_calculate_stay_nights($check_in, $check_out);
+            $nights = (int) get_post_meta($post_id, '_chama_stay_nights', true);
 
-            echo $nights !== null ? esc_html((string) $nights) : '—';
+            echo $nights > 0 ? esc_html((string) $nights) : '—';
             break;
 
         case 'stay_status':
@@ -782,13 +785,9 @@ function chama_ops_apply_stay_sorting(WP_Query $query): void
         $query->set('orderby', 'meta_value_num');
     }
 
-    /**
-     * Nights are derived from dates, so we approximate sortable nights by sorting on check-out date,
-     * then check-in date. This keeps the list deterministic without storing a separate nights meta value.
-     */
     if ($orderby === 'stay_nights') {
-        $query->set('meta_key', '_chama_stay_check_out');
-        $query->set('orderby', 'meta_value');
+        $query->set('meta_key', '_chama_stay_nights');
+        $query->set('orderby', 'meta_value_num');
     }
 }
 add_action('pre_get_posts', 'chama_ops_apply_stay_sorting');
