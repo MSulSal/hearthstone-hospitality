@@ -4111,3 +4111,58 @@ function chama_ops_render_stay_filter_context_notice(): void
 }
 add_action('admin_notices', 'chama_ops_render_stay_filter_context_notice');
 
+/**
+ * Auto-format guest phone input on admin edit screens.
+ */
+function chama_ops_render_guest_phone_format_script(): void
+{
+    if (!is_admin() || !function_exists('get_current_screen')) {
+        return;
+    }
+
+    $screen = get_current_screen();
+
+    if (!$screen || $screen->base !== 'post' || $screen->post_type !== 'guest') {
+        return;
+    }
+    ?>
+    <script>
+    (function () {
+        var input = document.getElementById('chama_guest_phone');
+
+        if (!input) {
+            return;
+        }
+
+        var formatChamaGuestPhone = function (rawValue) {
+            var trimmed = (rawValue || '').trim();
+
+            if (trimmed === '') {
+                return '';
+            }
+
+            var digits = trimmed.replace(/\D+/g, '');
+
+            if (digits.length === 11 && digits.charAt(0) === '1') {
+                digits = digits.slice(1);
+            }
+
+            if (digits.length === 10) {
+                return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
+            }
+
+            return trimmed;
+        };
+
+        var applyPhoneFormat = function () {
+            input.value = formatChamaGuestPhone(input.value);
+        };
+
+        input.addEventListener('blur', applyPhoneFormat);
+        input.addEventListener('change', applyPhoneFormat);
+    }());
+    </script>
+    <?php
+}
+add_action('admin_print_footer_scripts', 'chama_ops_render_guest_phone_format_script');
+
