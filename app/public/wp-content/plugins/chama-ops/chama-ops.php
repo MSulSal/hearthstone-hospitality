@@ -431,6 +431,7 @@ function chama_ops_get_data_quality_metrics(): array
         'stay_missing_dates'       => 0,
         'stay_invalid_date_range'  => 0,
         'stay_missing_revenue'     => 0,
+        'stay_arrival_contact_gaps_48h' => 0,
     ];
 
     $guest_ids = get_posts([
@@ -485,6 +486,8 @@ function chama_ops_get_data_quality_metrics(): array
             $metrics['stay_missing_revenue']++;
         }
     }
+
+    $metrics['stay_arrival_contact_gaps_48h'] = count(chama_ops_get_arrival_contact_gap_stay_ids(1));
 
     return $metrics;
 }
@@ -2421,6 +2424,11 @@ function chama_ops_render_overview_page(): void
                     <strong><?php esc_html_e('Stays Missing Revenue', 'chama-ops'); ?></strong><br>
                     <?php echo esc_html((string) $data_quality_metrics['stay_missing_revenue']); ?><br>
                     <a href="<?php echo esc_url($action_links['quality_stay_missing_revenue']); ?>"><?php esc_html_e('Open filtered list', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Arrival Contact Gaps (48h)', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $data_quality_metrics['stay_arrival_contact_gaps_48h']); ?><br>
+                    <a href="<?php echo esc_url($action_links['today_arrival_contact_gaps_48h']); ?>"><?php esc_html_e('Open filtered list', 'chama-ops'); ?></a>
                 </div>
             </div>
             <p style="margin:12px 0 0;">
