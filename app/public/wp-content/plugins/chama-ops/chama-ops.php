@@ -3142,6 +3142,9 @@ function chama_ops_export_guests_csv(): void
         'Guest Name',
         'Email',
         'Phone',
+        'Contact Ready',
+        'Missing Email',
+        'Missing Phone',
         'Marketing Source',
         'Preferred Room',
         'VIP',
@@ -3153,6 +3156,9 @@ function chama_ops_export_guests_csv(): void
         $guest_id          = (int) $guest_post->ID;
         $email             = (string) get_post_meta($guest_id, '_chama_guest_email', true);
         $phone             = (string) get_post_meta($guest_id, '_chama_guest_phone', true);
+        $contact_ready     = chama_ops_is_guest_contact_ready($guest_id);
+        $missing_email     = trim($email) === '';
+        $missing_phone     = trim($phone) === '';
         $source_key        = (string) get_post_meta($guest_id, '_chama_guest_marketing_source', true);
         $preferred_room    = (string) get_post_meta($guest_id, '_chama_guest_preferred_room', true);
         $vip               = (string) get_post_meta($guest_id, '_chama_guest_vip', true);
@@ -3163,6 +3169,9 @@ function chama_ops_export_guests_csv(): void
             $guest_post->post_title,
             $email,
             $phone,
+            $contact_ready ? 'Yes' : 'No',
+            $missing_email ? 'Yes' : 'No',
+            $missing_phone ? 'Yes' : 'No',
             $source_key !== '' ? chama_ops_format_guest_source_label($source_key) : 'N/A',
             $preferred_room,
             $vip === '1' ? 'Yes' : 'No',
