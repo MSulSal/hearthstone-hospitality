@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.6.0
+ * Version: 1.7.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -340,6 +340,79 @@ function chama_ops_get_stay_rollup_metrics(): array
         'revenue_total'           => $revenue_total,
         'revenue_count'           => $revenue_count,
     ];
+}
+
+/**
+ * Build data-quality metrics for guest and stay records.
+ *
+ * @return array<string, int>
+ */
+function chama_ops_get_data_quality_metrics(): array
+{
+    $metrics = [
+        'guest_missing_email'      => 0,
+        'guest_missing_phone'      => 0,
+        'guest_missing_consent'    => 0,
+        'stay_missing_guest_link'  => 0,
+        'stay_missing_dates'       => 0,
+        'stay_invalid_date_range'  => 0,
+        'stay_missing_revenue'     => 0,
+    ];
+
+    $guest_ids = get_posts([
+        'post_type'      => 'guest',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+    ]);
+
+    foreach ($guest_ids as $guest_id) {
+        $email   = (string) get_post_meta($guest_id, '_chama_guest_email', true);
+        $phone   = (string) get_post_meta($guest_id, '_chama_guest_phone', true);
+        $consent = (string) get_post_meta($guest_id, '_chama_guest_marketing_consent', true);
+
+        if ($email === '') {
+            $metrics['guest_missing_email']++;
+        }
+
+        if ($phone === '') {
+            $metrics['guest_missing_phone']++;
+        }
+
+        if ($consent !== '1') {
+            $metrics['guest_missing_consent']++;
+        }
+    }
+
+    $stay_ids = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+    ]);
+
+    foreach ($stay_ids as $stay_id) {
+        $linked_guest_id = (int) get_post_meta($stay_id, '_chama_stay_guest_id', true);
+        $check_in        = (string) get_post_meta($stay_id, '_chama_stay_check_in', true);
+        $check_out       = (string) get_post_meta($stay_id, '_chama_stay_check_out', true);
+        $revenue         = (string) get_post_meta($stay_id, '_chama_stay_revenue', true);
+
+        if ($linked_guest_id <= 0 || get_post_type($linked_guest_id) !== 'guest') {
+            $metrics['stay_missing_guest_link']++;
+        }
+
+        if ($check_in === '' || $check_out === '') {
+            $metrics['stay_missing_dates']++;
+        } elseif (chama_ops_calculate_stay_nights($check_in, $check_out) === null) {
+            $metrics['stay_invalid_date_range']++;
+        }
+
+        if ($revenue === '') {
+            $metrics['stay_missing_revenue']++;
+        }
+    }
+
+    return $metrics;
 }
 
 /**
@@ -1219,6 +1292,8 @@ function chama_ops_render_overview_page(): void
     $guest_source_summary   = chama_ops_get_guest_source_summary();
     $action_links           = chama_ops_get_overview_action_links();
     $rollup_metrics         = chama_ops_get_stay_rollup_metrics();
+    $data_quality_metrics   = chama_ops_get_data_quality_metrics();
+    $quality_issue_total    = array_sum($data_quality_metrics);
     $average_revenue        = $rollup_metrics['average_revenue'];
     $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
     $sample_data_counts     = chama_ops_get_sample_data_counts();
@@ -1335,6 +1410,56 @@ function chama_ops_render_overview_page(): void
                 </p>
                 <p style="margin-bottom:0;"><?php esc_html_e('Across stays with both revenue and nights', 'chama-ops'); ?></p>
             </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
+            <h2 style="margin-top:0;"><?php esc_html_e('Data Quality Radar', 'chama-ops'); ?></h2>
+            <p style="margin-top:0;">
+                <?php
+                printf(
+                    esc_html__('%d records currently need attention across guest/stay operations.', 'chama-ops'),
+                    (int) $quality_issue_total
+                );
+                ?>
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Guests Missing Email', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $data_quality_metrics['guest_missing_email']); ?>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Guests Missing Phone', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $data_quality_metrics['guest_missing_phone']); ?>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Guests Missing Consent', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $data_quality_metrics['guest_missing_consent']); ?>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Stays Missing Guest Link', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $data_quality_metrics['stay_missing_guest_link']); ?>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Stays Missing Dates', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $data_quality_metrics['stay_missing_dates']); ?>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Stays Invalid Date Range', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $data_quality_metrics['stay_invalid_date_range']); ?>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Stays Missing Revenue', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $data_quality_metrics['stay_missing_revenue']); ?>
+                </div>
+            </div>
+            <p style="margin:12px 0 0;">
+                <a class="button" href="<?php echo esc_url($action_links['view_guests']); ?>">
+                    <?php esc_html_e('Review Guests', 'chama-ops'); ?>
+                </a>
+                <a class="button" href="<?php echo esc_url($action_links['view_stays']); ?>">
+                    <?php esc_html_e('Review Stays', 'chama-ops'); ?>
+                </a>
+            </p>
         </div>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-bottom:16px;">
