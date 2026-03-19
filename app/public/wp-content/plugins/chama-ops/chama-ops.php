@@ -638,6 +638,50 @@ function chama_ops_get_arrival_contact_gap_stay_ids(int $days_ahead = 1): array
 }
 
 /**
+ * Get guest IDs with missing contact fields (email or phone).
+ *
+ * @return array<int, int>
+ */
+function chama_ops_get_guest_missing_contact_ids(): array
+{
+    $guest_ids = get_posts([
+        'post_type'      => 'guest',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+        'meta_query'     => [
+            'relation' => 'OR',
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_chama_guest_email',
+                    'compare' => 'NOT EXISTS',
+                ],
+                [
+                    'key'     => '_chama_guest_email',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+            ],
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_chama_guest_phone',
+                    'compare' => 'NOT EXISTS',
+                ],
+                [
+                    'key'     => '_chama_guest_phone',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+            ],
+        ],
+    ]);
+
+    return array_map('intval', $guest_ids);
+}
+
+/**
  * Determine whether a guest has complete contact fields for arrival readiness.
  *
  * @param int $guest_id Guest post ID.
@@ -1547,6 +1591,7 @@ function chama_ops_get_operational_recommendations(
     $total_stays_in_mix = isset($pipeline_metrics['total_stays_in_mix']) ? (int) $pipeline_metrics['total_stays_in_mix'] : 0;
     $arrival_contact_gap_count = isset($today_ops_metrics['arrival_contact_gaps_48h']) ? (int) $today_ops_metrics['arrival_contact_gaps_48h'] : 0;
     $arrivals_next_48h = isset($today_ops_metrics['arrivals_next_48h']) ? (int) $today_ops_metrics['arrivals_next_48h'] : 0;
+    $guest_missing_contact_count = count(chama_ops_get_guest_missing_contact_ids());
     $arrival_contact_ready_rate = isset($today_ops_metrics['arrival_contact_ready_rate_48h'])
         && $today_ops_metrics['arrival_contact_ready_rate_48h'] !== null
         ? (float) $today_ops_metrics['arrival_contact_ready_rate_48h']
@@ -1561,8 +1606,22 @@ function chama_ops_get_operational_recommendations(
                 __('%d records are missing required guest/stay fields. Clean these first to improve reporting accuracy.', 'chama-ops'),
                 $quality_issue_total
             ),
-            'link'     => $action_links['quality_stay_missing_dates'],
+            'link'     => $action_links['quality_guest_missing_contact'],
             'link_label' => __('Open quality queues', 'chama-ops'),
+        ];
+    }
+
+    if ($guest_missing_contact_count > 0) {
+        $recommendations[] = [
+            'priority' => __('High', 'chama-ops'),
+            'title'    => __('Close guest contact gaps', 'chama-ops'),
+            'detail'   => sprintf(
+                /* translators: %d is number of guest profiles missing email or phone. */
+                __('%d guest profiles are missing email or phone. Fix these to protect conversion and arrival comms.', 'chama-ops'),
+                $guest_missing_contact_count
+            ),
+            'link'     => $action_links['quality_guest_missing_contact'],
+            'link_label' => __('Open missing-contact guests', 'chama-ops'),
         ];
     }
 
@@ -3215,40 +3274,19 @@ function chama_ops_export_missing_contact_guests_csv(): void
         'chama_ops_export_missing_contact_guests_csv_nonce'
     );
 
-    $guests = get_posts([
-        'post_type'      => 'guest',
-        'posts_per_page' => -1,
-        'post_status'    => ['publish', 'draft'],
-        'orderby'        => 'date',
-        'order'          => 'DESC',
-        'meta_query'     => [
-            'relation' => 'OR',
-            [
-                'relation' => 'OR',
-                [
-                    'key'     => '_chama_guest_email',
-                    'compare' => 'NOT EXISTS',
-                ],
-                [
-                    'key'     => '_chama_guest_email',
-                    'value'   => '',
-                    'compare' => '=',
-                ],
-            ],
-            [
-                'relation' => 'OR',
-                [
-                    'key'     => '_chama_guest_phone',
-                    'compare' => 'NOT EXISTS',
-                ],
-                [
-                    'key'     => '_chama_guest_phone',
-                    'value'   => '',
-                    'compare' => '=',
-                ],
-            ],
-        ],
-    ]);
+    $guest_ids = chama_ops_get_guest_missing_contact_ids();
+    $guests    = [];
+
+    if (!empty($guest_ids)) {
+        $guests = get_posts([
+            'post_type'      => 'guest',
+            'posts_per_page' => -1,
+            'post_status'    => ['publish', 'draft'],
+            'post__in'       => $guest_ids,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ]);
+    }
 
     $filename = 'chama-ops-guests-missing-contact-' . wp_date('Ymd-His') . '.csv';
     chama_ops_send_csv_headers($filename);
