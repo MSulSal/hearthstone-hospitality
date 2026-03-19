@@ -1690,6 +1690,8 @@ function chama_ops_get_overview_action_links(): array
         ], $stay_list_url),
         'google_guests'    => add_query_arg('chama_guest_source', 'google', $guest_list_url),
         'repeat_guests'    => add_query_arg('chama_guest_source', 'repeat', $guest_list_url),
+        'missing_contact_guests' => add_query_arg('chama_guest_quality', 'missing_contact', $guest_list_url),
+        'quality_guest_missing_contact'   => add_query_arg('chama_guest_quality', 'missing_contact', $guest_list_url),
         'quality_guest_missing_email'     => add_query_arg('chama_guest_quality', 'missing_email', $guest_list_url),
         'quality_guest_missing_phone'     => add_query_arg('chama_guest_quality', 'missing_phone', $guest_list_url),
         'quality_guest_missing_consent'   => add_query_arg('chama_guest_quality', 'missing_consent', $guest_list_url),
@@ -2108,6 +2110,9 @@ function chama_ops_render_overview_page(): void
             <a class="button" href="<?php echo esc_url($action_links['repeat_guests']); ?>">
                 <?php esc_html_e('Repeat Guests', 'chama-ops'); ?>
             </a>
+            <a class="button" href="<?php echo esc_url($action_links['missing_contact_guests']); ?>">
+                <?php esc_html_e('Guests Missing Contact', 'chama-ops'); ?>
+            </a>
             <a class="button button-secondary" href="<?php echo esc_url($seed_url); ?>">
                 <?php esc_html_e('Generate Sample Data', 'chama-ops'); ?>
             </a>
@@ -2470,6 +2475,9 @@ function chama_ops_render_overview_page(): void
                 </div>
             </div>
             <p style="margin:12px 0 0;">
+                <a class="button" href="<?php echo esc_url($action_links['quality_guest_missing_contact']); ?>">
+                    <?php esc_html_e('Guests Missing Contact', 'chama-ops'); ?>
+                </a>
                 <a class="button" href="<?php echo esc_url($action_links['view_guests']); ?>">
                     <?php esc_html_e('Review Guests', 'chama-ops'); ?>
                 </a>
@@ -3373,6 +3381,7 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
         <label class="screen-reader-text" for="chama_guest_quality"><?php esc_html_e('Filter guests by quality issue', 'chama-ops'); ?></label>
         <select name="chama_guest_quality" id="chama_guest_quality">
             <option value=""><?php esc_html_e('All Data Quality States', 'chama-ops'); ?></option>
+            <option value="missing_contact" <?php selected($selected_quality, 'missing_contact'); ?>><?php esc_html_e('Missing Contact (Email or Phone)', 'chama-ops'); ?></option>
             <option value="missing_email" <?php selected($selected_quality, 'missing_email'); ?>><?php esc_html_e('Missing Email', 'chama-ops'); ?></option>
             <option value="missing_phone" <?php selected($selected_quality, 'missing_phone'); ?>><?php esc_html_e('Missing Phone', 'chama-ops'); ?></option>
             <option value="missing_consent" <?php selected($selected_quality, 'missing_consent'); ?>><?php esc_html_e('Missing Consent', 'chama-ops'); ?></option>
@@ -3461,6 +3470,36 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
 
         if ($selected_quality !== '') {
             $meta_query = (array) $query->get('meta_query');
+
+            if ($selected_quality === 'missing_contact') {
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'relation' => 'OR',
+                        [
+                            'key'     => '_chama_guest_email',
+                            'compare' => 'NOT EXISTS',
+                        ],
+                        [
+                            'key'     => '_chama_guest_email',
+                            'value'   => '',
+                            'compare' => '=',
+                        ],
+                    ],
+                    [
+                        'relation' => 'OR',
+                        [
+                            'key'     => '_chama_guest_phone',
+                            'compare' => 'NOT EXISTS',
+                        ],
+                        [
+                            'key'     => '_chama_guest_phone',
+                            'value'   => '',
+                            'compare' => '=',
+                        ],
+                    ],
+                ];
+            }
 
             if ($selected_quality === 'missing_email') {
                 $meta_query[] = [
