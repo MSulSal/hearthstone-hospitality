@@ -16,6 +16,8 @@ These notebooks are prepared for client-facing walkthroughs and for your persona
 1. Open this folder in Jupyter Lab / VS Code notebook view.
 2. Run all cells top-to-bottom.
 3. Use talking-point cells as your presenter script.
+4. Optional preflight from repo root:
+   - `python scripts/validate_client_notebooks.py`
 
 ## Image assets
 - `../assets/pwa-architecture.svg`

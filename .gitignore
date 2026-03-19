@@ -8,6 +8,7 @@ Thumbs.db
 
 # Internal workspace for private docs/automation
 .internal/
+.internal-backup/
 
 # Logs
 *.log
@@ -90,3 +91,6 @@ coverage/
 # Misc generated files
 *.tmp
 *.cache
+
+# Notebook artifacts
+**/.ipynb_checkpoints/
