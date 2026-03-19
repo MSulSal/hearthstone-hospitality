@@ -2007,6 +2007,11 @@ function chama_ops_render_overview_page(): void
         'chama_ops_export_guests_csv_action',
         'chama_ops_export_guests_csv_nonce'
     );
+    $export_missing_contact_guests_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_export_missing_contact_guests_csv'),
+        'chama_ops_export_missing_contact_guests_csv_action',
+        'chama_ops_export_missing_contact_guests_csv_nonce'
+    );
     $export_stays_url = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_export_stays_csv'),
         'chama_ops_export_stays_csv_action',
@@ -2143,6 +2148,9 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button" href="<?php echo esc_url($export_guests_url); ?>">
                 <?php esc_html_e('Export Guests CSV', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($export_missing_contact_guests_url); ?>">
+                <?php esc_html_e('Export Missing-Contact Guests CSV', 'chama-ops'); ?>
             </a>
             <a class="button" href="<?php echo esc_url($export_stays_url); ?>">
                 <?php esc_html_e('Export Stays CSV', 'chama-ops'); ?>
@@ -3192,6 +3200,109 @@ function chama_ops_export_guests_csv(): void
     exit;
 }
 add_action('admin_post_chama_ops_export_guests_csv', 'chama_ops_export_guests_csv');
+
+/**
+ * Export guest records that are missing email or phone.
+ */
+function chama_ops_export_missing_contact_guests_csv(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You do not have permission to export guests.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer(
+        'chama_ops_export_missing_contact_guests_csv_action',
+        'chama_ops_export_missing_contact_guests_csv_nonce'
+    );
+
+    $guests = get_posts([
+        'post_type'      => 'guest',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'meta_query'     => [
+            'relation' => 'OR',
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_chama_guest_email',
+                    'compare' => 'NOT EXISTS',
+                ],
+                [
+                    'key'     => '_chama_guest_email',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+            ],
+            [
+                'relation' => 'OR',
+                [
+                    'key'     => '_chama_guest_phone',
+                    'compare' => 'NOT EXISTS',
+                ],
+                [
+                    'key'     => '_chama_guest_phone',
+                    'value'   => '',
+                    'compare' => '=',
+                ],
+            ],
+        ],
+    ]);
+
+    $filename = 'chama-ops-guests-missing-contact-' . wp_date('Ymd-His') . '.csv';
+    chama_ops_send_csv_headers($filename);
+
+    $output = fopen('php://output', 'w');
+
+    if ($output === false) {
+        wp_die(esc_html__('Unable to open CSV output stream.', 'chama-ops'), '', ['response' => 500]);
+    }
+
+    fputcsv($output, [
+        'Guest ID',
+        'Guest Name',
+        'Email',
+        'Phone',
+        'Missing Email',
+        'Missing Phone',
+        'Marketing Source',
+        'Preferred Room',
+        'VIP',
+        'Marketing Consent',
+        'Created Date',
+    ]);
+
+    foreach ($guests as $guest_post) {
+        $guest_id          = (int) $guest_post->ID;
+        $email             = (string) get_post_meta($guest_id, '_chama_guest_email', true);
+        $phone             = (string) get_post_meta($guest_id, '_chama_guest_phone', true);
+        $missing_email     = trim($email) === '';
+        $missing_phone     = trim($phone) === '';
+        $source_key        = (string) get_post_meta($guest_id, '_chama_guest_marketing_source', true);
+        $preferred_room    = (string) get_post_meta($guest_id, '_chama_guest_preferred_room', true);
+        $vip               = (string) get_post_meta($guest_id, '_chama_guest_vip', true);
+        $marketing_consent = (string) get_post_meta($guest_id, '_chama_guest_marketing_consent', true);
+
+        fputcsv($output, [
+            $guest_id,
+            $guest_post->post_title,
+            $email,
+            $phone,
+            $missing_email ? 'Yes' : 'No',
+            $missing_phone ? 'Yes' : 'No',
+            $source_key !== '' ? chama_ops_format_guest_source_label($source_key) : 'N/A',
+            $preferred_room,
+            $vip === '1' ? 'Yes' : 'No',
+            $marketing_consent === '1' ? 'Yes' : 'No',
+            get_the_date('Y-m-d', $guest_id),
+        ]);
+    }
+
+    fclose($output);
+    exit;
+}
+add_action('admin_post_chama_ops_export_missing_contact_guests_csv', 'chama_ops_export_missing_contact_guests_csv');
 
 /**
  * Export all stay records to CSV.
