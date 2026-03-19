@@ -2081,6 +2081,11 @@ function chama_ops_render_overview_page(): void
         'chama_ops_export_today_ops_snapshot_csv_action',
         'chama_ops_export_today_ops_snapshot_csv_nonce'
     );
+    $export_action_board_snapshot_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_export_action_board_snapshot_csv'),
+        'chama_ops_export_action_board_snapshot_csv_action',
+        'chama_ops_export_action_board_snapshot_csv_nonce'
+    );
     $export_stays_url = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_export_stays_csv'),
         'chama_ops_export_stays_csv_action',
@@ -2226,6 +2231,9 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button" href="<?php echo esc_url($export_today_ops_snapshot_url); ?>">
                 <?php esc_html_e('Export Today Ops Snapshot CSV', 'chama-ops'); ?>
+            </a>
+            <a class="button" href="<?php echo esc_url($export_action_board_snapshot_url); ?>">
+                <?php esc_html_e('Export Action Board CSV', 'chama-ops'); ?>
             </a>
             <a class="button" href="<?php echo esc_url($export_stays_url); ?>">
                 <?php esc_html_e('Export Stays CSV', 'chama-ops'); ?>
@@ -3463,6 +3471,58 @@ function chama_ops_export_today_ops_snapshot_csv(): void
     exit;
 }
 add_action('admin_post_chama_ops_export_today_ops_snapshot_csv', 'chama_ops_export_today_ops_snapshot_csv');
+
+/**
+ * Export prioritized Action Board recommendations.
+ */
+function chama_ops_export_action_board_snapshot_csv(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You do not have permission to export Action Board snapshots.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer(
+        'chama_ops_export_action_board_snapshot_csv_action',
+        'chama_ops_export_action_board_snapshot_csv_nonce'
+    );
+
+    $stay_status_summary  = chama_ops_get_stay_status_summary();
+    $pipeline_metrics     = chama_ops_get_pipeline_metrics($stay_status_summary);
+    $action_links         = chama_ops_get_overview_action_links();
+    $data_quality_metrics = chama_ops_get_data_quality_metrics();
+    $today_ops_metrics    = chama_ops_get_today_operations_metrics();
+    $recommendations      = chama_ops_get_operational_recommendations(
+        $pipeline_metrics,
+        $data_quality_metrics,
+        $today_ops_metrics,
+        $action_links
+    );
+
+    $filename = 'chama-ops-action-board-snapshot-' . wp_date('Ymd-His') . '.csv';
+    chama_ops_send_csv_headers($filename);
+
+    $output = fopen('php://output', 'w');
+
+    if ($output === false) {
+        wp_die(esc_html__('Unable to open CSV output stream.', 'chama-ops'), '', ['response' => 500]);
+    }
+
+    fputcsv($output, ['Priority', 'Recommendation', 'Detail', 'Link Label', 'Queue URL']);
+
+    foreach ($recommendations as $recommendation) {
+        fputcsv($output, [
+            isset($recommendation['priority']) ? (string) $recommendation['priority'] : '',
+            isset($recommendation['title']) ? (string) $recommendation['title'] : '',
+            isset($recommendation['detail']) ? (string) $recommendation['detail'] : '',
+            isset($recommendation['link_label']) ? (string) $recommendation['link_label'] : '',
+            isset($recommendation['link']) ? (string) $recommendation['link'] : '',
+        ]);
+    }
+
+    fclose($output);
+    exit;
+}
+add_action('admin_post_chama_ops_export_action_board_snapshot_csv', 'chama_ops_export_action_board_snapshot_csv');
 
 /**
  * Export all stay records to CSV.
