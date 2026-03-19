@@ -3130,6 +3130,9 @@ function chama_ops_export_stays_csv(): void
         'Status',
         'Estimated Revenue',
         'Revenue Per Night',
+        'In 48h Arrival Window',
+        'Contact Ready',
+        'Contact Gap (48h Booked Arrivals)',
         'Created Date',
     ]);
 
@@ -3143,6 +3146,10 @@ function chama_ops_export_stays_csv(): void
         $revenue           = (string) get_post_meta($stay_id, '_chama_stay_revenue', true);
         $revenue_per_night = $nights > 0 ? chama_ops_calculate_revenue_per_night($revenue, $nights) : null;
         $guest_name        = $guest_id > 0 ? get_the_title($guest_id) : 'N/A';
+        $is_booked         = $status === 'booked';
+        $in_window_48h     = $is_booked && chama_ops_is_check_in_within_next_48h($check_in);
+        $contact_ready     = $guest_id > 0 && chama_ops_is_guest_contact_ready($guest_id);
+        $contact_gap_48h   = $in_window_48h && !$contact_ready;
 
         fputcsv($output, [
             $stay_id,
@@ -3155,6 +3162,9 @@ function chama_ops_export_stays_csv(): void
             $status !== '' ? chama_ops_format_stay_status_label($status) : 'N/A',
             $revenue,
             $revenue_per_night !== null ? number_format($revenue_per_night, 2) : '',
+            $in_window_48h ? 'Yes' : 'No',
+            $contact_ready ? 'Yes' : 'No',
+            $contact_gap_48h ? 'Yes' : 'No',
             get_the_date('Y-m-d', $stay_id),
         ]);
     }
