@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.7.0
+ * Version: 1.8.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1146,6 +1146,13 @@ function chama_ops_get_overview_action_links(): array
         'checked_in_stays' => add_query_arg('chama_stay_status_filter', 'checked_in', $stay_list_url),
         'google_guests'    => add_query_arg('chama_guest_source', 'google', $guest_list_url),
         'repeat_guests'    => add_query_arg('chama_guest_source', 'repeat', $guest_list_url),
+        'quality_guest_missing_email'     => add_query_arg('chama_guest_quality', 'missing_email', $guest_list_url),
+        'quality_guest_missing_phone'     => add_query_arg('chama_guest_quality', 'missing_phone', $guest_list_url),
+        'quality_guest_missing_consent'   => add_query_arg('chama_guest_quality', 'missing_consent', $guest_list_url),
+        'quality_stay_missing_guest_link' => add_query_arg('chama_stay_quality', 'missing_guest_link', $stay_list_url),
+        'quality_stay_missing_dates'      => add_query_arg('chama_stay_quality', 'missing_dates', $stay_list_url),
+        'quality_stay_invalid_dates'      => add_query_arg('chama_stay_quality', 'invalid_date_range', $stay_list_url),
+        'quality_stay_missing_revenue'    => add_query_arg('chama_stay_quality', 'missing_revenue', $stay_list_url),
     ];
 }
 
@@ -1425,31 +1432,38 @@ function chama_ops_render_overview_page(): void
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Guests Missing Email', 'chama-ops'); ?></strong><br>
-                    <?php echo esc_html((string) $data_quality_metrics['guest_missing_email']); ?>
+                    <?php echo esc_html((string) $data_quality_metrics['guest_missing_email']); ?><br>
+                    <a href="<?php echo esc_url($action_links['quality_guest_missing_email']); ?>"><?php esc_html_e('Open filtered list', 'chama-ops'); ?></a>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Guests Missing Phone', 'chama-ops'); ?></strong><br>
-                    <?php echo esc_html((string) $data_quality_metrics['guest_missing_phone']); ?>
+                    <?php echo esc_html((string) $data_quality_metrics['guest_missing_phone']); ?><br>
+                    <a href="<?php echo esc_url($action_links['quality_guest_missing_phone']); ?>"><?php esc_html_e('Open filtered list', 'chama-ops'); ?></a>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Guests Missing Consent', 'chama-ops'); ?></strong><br>
-                    <?php echo esc_html((string) $data_quality_metrics['guest_missing_consent']); ?>
+                    <?php echo esc_html((string) $data_quality_metrics['guest_missing_consent']); ?><br>
+                    <a href="<?php echo esc_url($action_links['quality_guest_missing_consent']); ?>"><?php esc_html_e('Open filtered list', 'chama-ops'); ?></a>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Stays Missing Guest Link', 'chama-ops'); ?></strong><br>
-                    <?php echo esc_html((string) $data_quality_metrics['stay_missing_guest_link']); ?>
+                    <?php echo esc_html((string) $data_quality_metrics['stay_missing_guest_link']); ?><br>
+                    <a href="<?php echo esc_url($action_links['quality_stay_missing_guest_link']); ?>"><?php esc_html_e('Open filtered list', 'chama-ops'); ?></a>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Stays Missing Dates', 'chama-ops'); ?></strong><br>
-                    <?php echo esc_html((string) $data_quality_metrics['stay_missing_dates']); ?>
+                    <?php echo esc_html((string) $data_quality_metrics['stay_missing_dates']); ?><br>
+                    <a href="<?php echo esc_url($action_links['quality_stay_missing_dates']); ?>"><?php esc_html_e('Open filtered list', 'chama-ops'); ?></a>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Stays Invalid Date Range', 'chama-ops'); ?></strong><br>
-                    <?php echo esc_html((string) $data_quality_metrics['stay_invalid_date_range']); ?>
+                    <?php echo esc_html((string) $data_quality_metrics['stay_invalid_date_range']); ?><br>
+                    <a href="<?php echo esc_url($action_links['quality_stay_invalid_dates']); ?>"><?php esc_html_e('Open filtered list', 'chama-ops'); ?></a>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Stays Missing Revenue', 'chama-ops'); ?></strong><br>
-                    <?php echo esc_html((string) $data_quality_metrics['stay_missing_revenue']); ?>
+                    <?php echo esc_html((string) $data_quality_metrics['stay_missing_revenue']); ?><br>
+                    <a href="<?php echo esc_url($action_links['quality_stay_missing_revenue']); ?>"><?php esc_html_e('Open filtered list', 'chama-ops'); ?></a>
                 </div>
             </div>
             <p style="margin:12px 0 0;">
@@ -1702,6 +1716,7 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
 
     if ($post_type === 'guest') {
         $selected_source = isset($_GET['chama_guest_source']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_source'])) : '';
+        $selected_quality = isset($_GET['chama_guest_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_quality'])) : '';
         ?>
         <label class="screen-reader-text" for="chama_guest_source"><?php esc_html_e('Filter guests by source', 'chama-ops'); ?></label>
         <select name="chama_guest_source" id="chama_guest_source">
@@ -1712,11 +1727,19 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
             <option value="social" <?php selected($selected_source, 'social'); ?>><?php esc_html_e('Social Media', 'chama-ops'); ?></option>
             <option value="repeat" <?php selected($selected_source, 'repeat'); ?>><?php esc_html_e('Repeat Guest', 'chama-ops'); ?></option>
         </select>
+        <label class="screen-reader-text" for="chama_guest_quality"><?php esc_html_e('Filter guests by quality issue', 'chama-ops'); ?></label>
+        <select name="chama_guest_quality" id="chama_guest_quality">
+            <option value=""><?php esc_html_e('All Data Quality States', 'chama-ops'); ?></option>
+            <option value="missing_email" <?php selected($selected_quality, 'missing_email'); ?>><?php esc_html_e('Missing Email', 'chama-ops'); ?></option>
+            <option value="missing_phone" <?php selected($selected_quality, 'missing_phone'); ?>><?php esc_html_e('Missing Phone', 'chama-ops'); ?></option>
+            <option value="missing_consent" <?php selected($selected_quality, 'missing_consent'); ?>><?php esc_html_e('Missing Consent', 'chama-ops'); ?></option>
+        </select>
         <?php
     }
 
     if ($post_type === 'stay') {
         $selected_status = isset($_GET['chama_stay_status_filter']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_status_filter'])) : '';
+        $selected_quality = isset($_GET['chama_stay_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_quality'])) : '';
         ?>
         <label class="screen-reader-text" for="chama_stay_status_filter"><?php esc_html_e('Filter stays by status', 'chama-ops'); ?></label>
         <select name="chama_stay_status_filter" id="chama_stay_status_filter">
@@ -1726,6 +1749,14 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
             <option value="checked_in" <?php selected($selected_status, 'checked_in'); ?>><?php esc_html_e('Checked In', 'chama-ops'); ?></option>
             <option value="checked_out" <?php selected($selected_status, 'checked_out'); ?>><?php esc_html_e('Checked Out', 'chama-ops'); ?></option>
             <option value="cancelled" <?php selected($selected_status, 'cancelled'); ?>><?php esc_html_e('Cancelled', 'chama-ops'); ?></option>
+        </select>
+        <label class="screen-reader-text" for="chama_stay_quality"><?php esc_html_e('Filter stays by quality issue', 'chama-ops'); ?></label>
+        <select name="chama_stay_quality" id="chama_stay_quality">
+            <option value=""><?php esc_html_e('All Data Quality States', 'chama-ops'); ?></option>
+            <option value="missing_guest_link" <?php selected($selected_quality, 'missing_guest_link'); ?>><?php esc_html_e('Missing Guest Link', 'chama-ops'); ?></option>
+            <option value="missing_dates" <?php selected($selected_quality, 'missing_dates'); ?>><?php esc_html_e('Missing Dates', 'chama-ops'); ?></option>
+            <option value="invalid_date_range" <?php selected($selected_quality, 'invalid_date_range'); ?>><?php esc_html_e('Invalid Date Range', 'chama-ops'); ?></option>
+            <option value="missing_revenue" <?php selected($selected_quality, 'missing_revenue'); ?>><?php esc_html_e('Missing Revenue', 'chama-ops'); ?></option>
         </select>
         <?php
     }
@@ -1747,6 +1778,7 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
 
     if ($post_type === 'guest') {
         $selected_source = isset($_GET['chama_guest_source']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_source'])) : '';
+        $selected_quality = isset($_GET['chama_guest_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_guest_quality'])) : '';
 
         if ($selected_source !== '') {
             $meta_query   = (array) $query->get('meta_query');
@@ -1757,10 +1789,62 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
 
             $query->set('meta_query', $meta_query);
         }
+
+        if ($selected_quality !== '') {
+            $meta_query = (array) $query->get('meta_query');
+
+            if ($selected_quality === 'missing_email') {
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'key'     => '_chama_guest_email',
+                        'compare' => 'NOT EXISTS',
+                    ],
+                    [
+                        'key'     => '_chama_guest_email',
+                        'value'   => '',
+                        'compare' => '=',
+                    ],
+                ];
+            }
+
+            if ($selected_quality === 'missing_phone') {
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'key'     => '_chama_guest_phone',
+                        'compare' => 'NOT EXISTS',
+                    ],
+                    [
+                        'key'     => '_chama_guest_phone',
+                        'value'   => '',
+                        'compare' => '=',
+                    ],
+                ];
+            }
+
+            if ($selected_quality === 'missing_consent') {
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'key'     => '_chama_guest_marketing_consent',
+                        'compare' => 'NOT EXISTS',
+                    ],
+                    [
+                        'key'     => '_chama_guest_marketing_consent',
+                        'value'   => '1',
+                        'compare' => '!=',
+                    ],
+                ];
+            }
+
+            $query->set('meta_query', $meta_query);
+        }
     }
 
     if ($post_type === 'stay') {
         $selected_status = isset($_GET['chama_stay_status_filter']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_status_filter'])) : '';
+        $selected_quality = isset($_GET['chama_stay_quality']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_quality'])) : '';
 
         if ($selected_status !== '') {
             $meta_query   = (array) $query->get('meta_query');
@@ -1768,6 +1852,104 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
                 'key'   => '_chama_stay_status',
                 'value' => $selected_status,
             ];
+
+            $query->set('meta_query', $meta_query);
+        }
+
+        if ($selected_quality !== '') {
+            $meta_query = (array) $query->get('meta_query');
+
+            if ($selected_quality === 'missing_guest_link') {
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'key'     => '_chama_stay_guest_id',
+                        'compare' => 'NOT EXISTS',
+                    ],
+                    [
+                        'key'     => '_chama_stay_guest_id',
+                        'value'   => '',
+                        'compare' => '=',
+                    ],
+                    [
+                        'key'     => '_chama_stay_guest_id',
+                        'value'   => '0',
+                        'compare' => '=',
+                    ],
+                ];
+            }
+
+            if ($selected_quality === 'missing_dates') {
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'key'     => '_chama_stay_check_in',
+                        'compare' => 'NOT EXISTS',
+                    ],
+                    [
+                        'key'     => '_chama_stay_check_in',
+                        'value'   => '',
+                        'compare' => '=',
+                    ],
+                    [
+                        'key'     => '_chama_stay_check_out',
+                        'compare' => 'NOT EXISTS',
+                    ],
+                    [
+                        'key'     => '_chama_stay_check_out',
+                        'value'   => '',
+                        'compare' => '=',
+                    ],
+                ];
+            }
+
+            if ($selected_quality === 'invalid_date_range') {
+                $meta_query[] = [
+                    [
+                        'key'     => '_chama_stay_check_in',
+                        'value'   => '',
+                        'compare' => '!=',
+                    ],
+                    [
+                        'key'     => '_chama_stay_check_out',
+                        'value'   => '',
+                        'compare' => '!=',
+                    ],
+                    [
+                        'relation' => 'OR',
+                        [
+                            'key'     => '_chama_stay_nights',
+                            'compare' => 'NOT EXISTS',
+                        ],
+                        [
+                            'key'     => '_chama_stay_nights',
+                            'value'   => '',
+                            'compare' => '=',
+                        ],
+                        [
+                            'key'     => '_chama_stay_nights',
+                            'value'   => 0,
+                            'compare' => '<=',
+                            'type'    => 'NUMERIC',
+                        ],
+                    ],
+                ];
+            }
+
+            if ($selected_quality === 'missing_revenue') {
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'key'     => '_chama_stay_revenue',
+                        'compare' => 'NOT EXISTS',
+                    ],
+                    [
+                        'key'     => '_chama_stay_revenue',
+                        'value'   => '',
+                        'compare' => '=',
+                    ],
+                ];
+            }
 
             $query->set('meta_query', $meta_query);
         }
