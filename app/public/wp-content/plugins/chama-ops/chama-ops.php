@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.14.0
+ * Version: 1.15.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1563,6 +1563,18 @@ function chama_ops_render_overview_page(): void
     $notice_scenario = isset($_GET['chama_ops_demo_scenario'])
         ? chama_ops_resolve_demo_scenario((string) wp_unslash($_GET['chama_ops_demo_scenario']))
         : 'balanced';
+    $notice_nights_updated = isset($_GET['chama_ops_nights_updated'])
+        ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_nights_updated'])))
+        : 0;
+    $notice_nights_cleared = isset($_GET['chama_ops_nights_cleared'])
+        ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_nights_cleared'])))
+        : 0;
+    $notice_nights_unchanged = isset($_GET['chama_ops_nights_unchanged'])
+        ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_nights_unchanged'])))
+        : 0;
+    $notice_nights_scanned = isset($_GET['chama_ops_nights_scanned'])
+        ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_nights_scanned'])))
+        : 0;
     $scenario_labels = chama_ops_get_demo_scenario_labels();
     $seed_notice_messages = [
         'sample_data_seeded' => [
@@ -1584,6 +1596,10 @@ function chama_ops_render_overview_page(): void
         'sample_data_none' => [
             'message' => __('No sample data records were found to clear.', 'chama-ops'),
             'type'    => 'notice-info',
+        ],
+        'stay_nights_rebuilt' => [
+            'message' => __('Stay nights were recalculated from current check-in/check-out dates.', 'chama-ops'),
+            'type'    => 'notice-success',
         ],
     ];
 
@@ -1635,6 +1651,11 @@ function chama_ops_render_overview_page(): void
         'chama_ops_clear_sample_data_action',
         'chama_ops_clear_sample_data_nonce'
     );
+    $rebuild_nights_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_rebuild_stay_nights'),
+        'chama_ops_rebuild_stay_nights_action',
+        'chama_ops_rebuild_stay_nights_nonce'
+    );
     $export_guests_url = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_export_guests_csv'),
         'chama_ops_export_guests_csv_action',
@@ -1661,6 +1682,21 @@ function chama_ops_render_overview_page(): void
                             /* translators: %s is a demo scenario label. */
                             __('Scenario: %s.', 'chama-ops'),
                             $scenario_labels[$notice_scenario]
+                        );
+                    }
+
+                    if ($notice_key === 'stay_nights_rebuilt') {
+                        $notice_message .= ' ' . sprintf(
+                            /* translators: 1: updated count, 2: cleared count, 3: unchanged count. */
+                            __('Updated: %1$d, cleared: %2$d, unchanged: %3$d.', 'chama-ops'),
+                            $notice_nights_updated,
+                            $notice_nights_cleared,
+                            $notice_nights_unchanged
+                        );
+                        $notice_message .= ' ' . sprintf(
+                            /* translators: %d is the number of stay records scanned. */
+                            __('Scanned stays: %d.', 'chama-ops'),
+                            $notice_nights_scanned
                         );
                     }
 
@@ -1717,6 +1753,9 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button button-secondary" href="<?php echo esc_url($seed_data_cleanup_url); ?>">
                 <?php esc_html_e('Load Data Cleanup Drill', 'chama-ops'); ?>
+            </a>
+            <a class="button button-secondary" href="<?php echo esc_url($rebuild_nights_url); ?>">
+                <?php esc_html_e('Recalculate Stay Nights', 'chama-ops'); ?>
             </a>
             <a
                 class="button button-secondary"
@@ -2479,6 +2518,70 @@ function chama_ops_clear_sample_data(): void
     exit;
 }
 add_action('admin_post_chama_ops_clear_sample_data', 'chama_ops_clear_sample_data');
+
+/**
+ * Recalculate persisted stay-night values from check-in/check-out dates.
+ */
+function chama_ops_rebuild_stay_nights(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('You do not have permission to recalculate stay nights.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer('chama_ops_rebuild_stay_nights_action', 'chama_ops_rebuild_stay_nights_nonce');
+
+    $stay_ids = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+    ]);
+
+    $updated   = 0;
+    $cleared   = 0;
+    $unchanged = 0;
+
+    foreach ($stay_ids as $stay_id) {
+        $stay_id    = (int) $stay_id;
+        $check_in   = (string) get_post_meta($stay_id, '_chama_stay_check_in', true);
+        $check_out  = (string) get_post_meta($stay_id, '_chama_stay_check_out', true);
+        $new_nights = chama_ops_calculate_stay_nights($check_in, $check_out);
+        $had_nights = metadata_exists('post', $stay_id, '_chama_stay_nights');
+
+        if ($new_nights === null) {
+            if ($had_nights) {
+                delete_post_meta($stay_id, '_chama_stay_nights');
+                $cleared++;
+            } else {
+                $unchanged++;
+            }
+
+            continue;
+        }
+
+        $existing_nights = (string) get_post_meta($stay_id, '_chama_stay_nights', true);
+
+        if ($had_nights && $existing_nights === (string) $new_nights) {
+            $unchanged++;
+            continue;
+        }
+
+        update_post_meta($stay_id, '_chama_stay_nights', $new_nights);
+        $updated++;
+    }
+
+    $redirect = add_query_arg([
+        'chama_ops_notice'          => 'stay_nights_rebuilt',
+        'chama_ops_nights_updated'  => $updated,
+        'chama_ops_nights_cleared'  => $cleared,
+        'chama_ops_nights_unchanged' => $unchanged,
+        'chama_ops_nights_scanned'  => count($stay_ids),
+    ], wp_get_referer() ?: admin_url('admin.php?page=chama-ops-overview'));
+
+    wp_safe_redirect($redirect);
+    exit;
+}
+add_action('admin_post_chama_ops_rebuild_stay_nights', 'chama_ops_rebuild_stay_nights');
 
 /**
  * Send shared CSV response headers.
