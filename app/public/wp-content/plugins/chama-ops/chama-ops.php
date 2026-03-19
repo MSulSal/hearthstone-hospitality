@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.20.0
+ * Version: 1.21.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1556,6 +1556,10 @@ function chama_ops_get_overview_action_links(): array
         'add_stay'         => admin_url('post-new.php?post_type=stay'),
         'view_guests'      => $guest_list_url,
         'view_stays'       => $stay_list_url,
+        'sample_guests'    => add_query_arg('chama_data_origin', 'sample', $guest_list_url),
+        'persistent_guests' => add_query_arg('chama_data_origin', 'persistent', $guest_list_url),
+        'sample_stays'     => add_query_arg('chama_data_origin', 'sample', $stay_list_url),
+        'persistent_stays' => add_query_arg('chama_data_origin', 'persistent', $stay_list_url),
         'lead_stays'       => add_query_arg('chama_stay_status_filter', 'lead', $stay_list_url),
         'booked_stays'     => add_query_arg('chama_stay_status_filter', 'booked', $stay_list_url),
         'checked_in_stays' => add_query_arg('chama_stay_status_filter', 'checked_in', $stay_list_url),
@@ -1841,6 +1845,8 @@ function chama_ops_render_overview_page(): void
     $average_revenue        = $rollup_metrics['average_revenue'];
     $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
     $sample_data_counts     = chama_ops_get_sample_data_counts();
+    $persistent_guest_count = max(0, $guest_total - (int) $sample_data_counts['guest']);
+    $persistent_stay_count  = max(0, $stay_total - (int) $sample_data_counts['stay']);
     $today_ops_metrics      = chama_ops_get_today_operations_metrics();
     $upcoming_arrivals      = chama_ops_get_upcoming_arrivals(14, 8);
     $seed_url               = wp_nonce_url(
@@ -2008,6 +2014,33 @@ function chama_ops_render_overview_page(): void
             );
             ?>
         </p>
+
+        <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
+            <h2 style="margin-top:0;"><?php esc_html_e('Record Origin Snapshot', 'chama-ops'); ?></h2>
+            <p style="margin-top:0;"><?php esc_html_e('See which records are still demo/sample data versus persistent records.', 'chama-ops'); ?></p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Sample Guests', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $sample_data_counts['guest']); ?><br>
+                    <a href="<?php echo esc_url($action_links['sample_guests']); ?>"><?php esc_html_e('Open sample guests', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Persistent Guests', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $persistent_guest_count); ?><br>
+                    <a href="<?php echo esc_url($action_links['persistent_guests']); ?>"><?php esc_html_e('Open persistent guests', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Sample Stays', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $sample_data_counts['stay']); ?><br>
+                    <a href="<?php echo esc_url($action_links['sample_stays']); ?>"><?php esc_html_e('Open sample stays', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Persistent Stays', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html((string) $persistent_stay_count); ?><br>
+                    <a href="<?php echo esc_url($action_links['persistent_stays']); ?>"><?php esc_html_e('Open persistent stays', 'chama-ops'); ?></a>
+                </div>
+            </div>
+        </div>
 
         <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
             <h2 style="margin-top:0;"><?php esc_html_e('Today Operations Board', 'chama-ops'); ?></h2>
