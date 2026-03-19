@@ -1,22 +1,8 @@
-# Client Presentation Notebooks
+# Client Presentation Guides (Markdown-Only)
 
-These notebooks are prepared for client-facing walkthroughs and for your personal study/rehearsal.
+These are GitHub-ready, print-friendly, code-hidden presentation guides.
 
-## Notebooks
-- `01-prototype-presentation.ipynb`
-  - Present current prototype value and operational readiness signals.
-- `02-finished-app-vision-presentation.ipynb`
-  - Present phased roadmap to the final operations PWA.
-- `03-dashboard-deep-dive.ipynb`
-  - Explain every dashboard section in detail with purpose, logic, actions, and screenshot targets.
-- `04-layout-deep-dive.ipynb`
-  - Explain every major layout surface (frontend and admin) with customization guidance.
-- `05-partner-progress-report.ipynb`
-  - Comprehensive step-by-step progress workbook for internal partner confidence.
-- `06-client-progress-brief-partner-edition.ipynb`
-  - Print-friendly client progress brief your partner can present directly.
-
-## GitHub Presentation View (Code Hidden)
+## Presentation files
 - `01-prototype-presentation.md`
 - `02-finished-app-vision-presentation.md`
 - `03-dashboard-deep-dive.md`
@@ -24,14 +10,7 @@ These notebooks are prepared for client-facing walkthroughs and for your persona
 - `05-partner-progress-report.md`
 - `06-client-progress-brief-partner-edition.md`
 
-These Markdown files are exported from the notebooks with code inputs removed, so GitHub shows results-only presentation content.
-
-## How to run
-1. Open this folder in Jupyter Lab / VS Code notebook view.
-2. Run all cells top-to-bottom.
-3. Use talking-point cells as your presenter script.
-4. Optional preflight from repo root:
-   - `python scripts/validate_client_notebooks.py`
+Use these as the source of truth for partner/client presentations.
 
 ## Image assets
 - `../assets/pwa-architecture.svg`
@@ -44,12 +23,4 @@ These Markdown files are exported from the notebooks with code inputs removed, s
   - Save dashboard/layout captures under `../assets/screenshots/`
 
 ## Update workflow (as we keep building)
-For each new commit milestone, update:
-- KPI values in notebook 01
-- phase estimates/priorities in notebook 02
-- section logic and screenshot targets in notebook 03
-- layout inventory and customization notes in notebook 04
-- any new architecture visuals in `assets/`
-- then run:
-  - `python scripts/validate_client_notebooks.py`
-  - `python scripts/export_notebook_presentations.py`
+For each milestone, update the corresponding markdown guide directly and keep asset links current.
