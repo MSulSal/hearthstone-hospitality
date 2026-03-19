@@ -3584,3 +3584,61 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
 }
 add_action('pre_get_posts', 'chama_ops_apply_admin_filters');
 
+/**
+ * Render contextual admin notices for today-operations stay filters.
+ */
+function chama_ops_render_stay_filter_context_notice(): void
+{
+    if (!is_admin() || !function_exists('get_current_screen')) {
+        return;
+    }
+
+    $screen = get_current_screen();
+
+    if (!$screen || $screen->base !== 'edit' || $screen->post_type !== 'stay') {
+        return;
+    }
+
+    $selected_today = isset($_GET['chama_stay_today']) ? sanitize_text_field(wp_unslash($_GET['chama_stay_today'])) : '';
+
+    if ($selected_today === '') {
+        return;
+    }
+
+    $arrivals_next_48h  = count(chama_ops_get_booked_arrival_stay_ids(1));
+    $contact_gap_count  = count(chama_ops_get_arrival_contact_gap_stay_ids(1));
+    $contact_ready_count = max(0, $arrivals_next_48h - $contact_gap_count);
+
+    if ($selected_today === 'arrivals_contact_gap') {
+        echo '<div class="notice notice-warning is-dismissible"><p>';
+        printf(
+            esc_html__('%1$d of %2$d booked arrivals in the next 48 hours are missing contact readiness.', 'chama-ops'),
+            (int) $contact_gap_count,
+            (int) $arrivals_next_48h
+        );
+        echo '</p></div>';
+        return;
+    }
+
+    if ($selected_today === 'arrivals_contact_ready') {
+        echo '<div class="notice notice-success is-dismissible"><p>';
+        printf(
+            esc_html__('%1$d of %2$d booked arrivals in the next 48 hours are contact-ready.', 'chama-ops'),
+            (int) $contact_ready_count,
+            (int) $arrivals_next_48h
+        );
+        echo '</p></div>';
+        return;
+    }
+
+    if ($selected_today === 'arrivals_next_48h') {
+        echo '<div class="notice notice-info is-dismissible"><p>';
+        printf(
+            esc_html__('%d booked arrivals are scheduled in the next 48 hours.', 'chama-ops'),
+            (int) $arrivals_next_48h
+        );
+        echo '</p></div>';
+    }
+}
+add_action('admin_notices', 'chama_ops_render_stay_filter_context_notice');
+
