@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.13.0
+ * Version: 1.14.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1430,6 +1430,37 @@ function chama_ops_get_overview_action_links(): array
 }
 
 /**
+ * Return supported sample demo scenario labels.
+ *
+ * @return array<string, string>
+ */
+function chama_ops_get_demo_scenario_labels(): array
+{
+    return [
+        'balanced'     => __('Balanced Demo', 'chama-ops'),
+        'booking_rush' => __('Booking Rush', 'chama-ops'),
+        'data_cleanup' => __('Data Cleanup Drill', 'chama-ops'),
+    ];
+}
+
+/**
+ * Resolve and validate a sample demo scenario key.
+ *
+ * @param string $raw_scenario Scenario key from user input.
+ */
+function chama_ops_resolve_demo_scenario(string $raw_scenario): string
+{
+    $scenario = sanitize_key($raw_scenario);
+    $labels   = chama_ops_get_demo_scenario_labels();
+
+    if (!isset($labels[$scenario])) {
+        return 'balanced';
+    }
+
+    return $scenario;
+}
+
+/**
  * Return all sample data post IDs across guest and stay records.
  *
  * @return array<int, int>
@@ -1528,7 +1559,11 @@ function chama_ops_render_overview_page(): void
     $guest_total = isset($guest_counts->publish) ? (int) $guest_counts->publish : 0;
     $stay_total  = isset($stay_counts->publish) ? (int) $stay_counts->publish : 0;
 
-    $notice_key = isset($_GET['chama_ops_notice']) ? sanitize_text_field(wp_unslash($_GET['chama_ops_notice'])) : '';
+    $notice_key     = isset($_GET['chama_ops_notice']) ? sanitize_text_field(wp_unslash($_GET['chama_ops_notice'])) : '';
+    $notice_scenario = isset($_GET['chama_ops_demo_scenario'])
+        ? chama_ops_resolve_demo_scenario((string) wp_unslash($_GET['chama_ops_demo_scenario']))
+        : 'balanced';
+    $scenario_labels = chama_ops_get_demo_scenario_labels();
     $seed_notice_messages = [
         'sample_data_seeded' => [
             'message' => __('Sample guest and stay data has been generated for the demo.', 'chama-ops'),
@@ -1587,6 +1622,14 @@ function chama_ops_render_overview_page(): void
         'chama_ops_seed_sample_data_nonce'
     );
     $seed_force_url = add_query_arg('chama_ops_force_sample_data', '1', $seed_url);
+    $seed_booking_rush_url = add_query_arg([
+        'chama_ops_force_sample_data' => '1',
+        'chama_ops_demo_scenario'     => 'booking_rush',
+    ], $seed_url);
+    $seed_data_cleanup_url = add_query_arg([
+        'chama_ops_force_sample_data' => '1',
+        'chama_ops_demo_scenario'     => 'data_cleanup',
+    ], $seed_url);
     $clear_seed_url = wp_nonce_url(
         admin_url('admin-post.php?action=chama_ops_clear_sample_data'),
         'chama_ops_clear_sample_data_action',
@@ -1606,7 +1649,24 @@ function chama_ops_render_overview_page(): void
     <div class="wrap">
         <?php if (isset($seed_notice_messages[$notice_key])) : ?>
             <div class="notice <?php echo esc_attr($seed_notice_messages[$notice_key]['type']); ?> inline">
-                <p><?php echo esc_html($seed_notice_messages[$notice_key]['message']); ?></p>
+                <p>
+                    <?php
+                    $notice_message = (string) $seed_notice_messages[$notice_key]['message'];
+
+                    if (
+                        ($notice_key === 'sample_data_seeded' || $notice_key === 'sample_data_regenerated')
+                        && isset($scenario_labels[$notice_scenario])
+                    ) {
+                        $notice_message .= ' ' . sprintf(
+                            /* translators: %s is a demo scenario label. */
+                            __('Scenario: %s.', 'chama-ops'),
+                            $scenario_labels[$notice_scenario]
+                        );
+                    }
+
+                    echo esc_html($notice_message);
+                    ?>
+                </p>
             </div>
         <?php endif; ?>
         <h1><?php esc_html_e('Chama Ops Overview', 'chama-ops'); ?></h1>
@@ -1651,6 +1711,12 @@ function chama_ops_render_overview_page(): void
             </a>
             <a class="button button-secondary" href="<?php echo esc_url($seed_force_url); ?>">
                 <?php esc_html_e('Regenerate Sample Data', 'chama-ops'); ?>
+            </a>
+            <a class="button button-secondary" href="<?php echo esc_url($seed_booking_rush_url); ?>">
+                <?php esc_html_e('Load Booking Rush Demo', 'chama-ops'); ?>
+            </a>
+            <a class="button button-secondary" href="<?php echo esc_url($seed_data_cleanup_url); ?>">
+                <?php esc_html_e('Load Data Cleanup Drill', 'chama-ops'); ?>
             </a>
             <a
                 class="button button-secondary"
@@ -2034,40 +2100,290 @@ function chama_ops_seed_sample_data(): void
         chama_ops_delete_sample_data_posts();
     }
 
+    $scenario = isset($_GET['chama_ops_demo_scenario'])
+        ? chama_ops_resolve_demo_scenario((string) wp_unslash($_GET['chama_ops_demo_scenario']))
+        : 'balanced';
     $today = new DateTimeImmutable(wp_date('Y-m-d'));
 
-    $guest_definitions = [
-        [
-            'handle'           => 'elena',
-            'title'            => 'Sample Guest - Elena Cruz',
-            'email'            => 'elena@chamastationinn.com',
-            'phone'            => '(505) 222-0100',
-            'marketing_source' => 'direct',
-            'preferred_room'   => 'Riverside Cottage',
-            'vip'              => '1',
-            'consent'          => '1',
-        ],
-        [
-            'handle'           => 'nate',
-            'title'            => 'Sample Guest - Nate Morales',
-            'email'            => 'nate+ops@chamastationinn.com',
-            'phone'            => '',
-            'marketing_source' => 'google',
-            'preferred_room'   => 'Hilltop Suite',
-            'vip'              => '',
-            'consent'          => '',
-        ],
-        [
-            'handle'           => 'sara',
-            'title'            => 'Sample Guest - Sara Lin',
-            'email'            => '',
-            'phone'            => '(505) 222-0198',
-            'marketing_source' => 'referral',
-            'preferred_room'   => 'Garden Suite',
-            'vip'              => '',
-            'consent'          => '1',
-        ],
-    ];
+    if ($scenario === 'booking_rush') {
+        $guest_definitions = [
+            [
+                'handle'           => 'elena',
+                'title'            => 'Sample Guest - Elena Cruz',
+                'email'            => 'elena@chamastationinn.com',
+                'phone'            => '(505) 222-0100',
+                'marketing_source' => 'direct',
+                'preferred_room'   => 'Riverside Cottage',
+                'vip'              => '1',
+                'consent'          => '1',
+            ],
+            [
+                'handle'           => 'nate',
+                'title'            => 'Sample Guest - Nate Morales',
+                'email'            => 'nate+ops@chamastationinn.com',
+                'phone'            => '(505) 222-0144',
+                'marketing_source' => 'google',
+                'preferred_room'   => 'Hilltop Suite',
+                'vip'              => '',
+                'consent'          => '1',
+            ],
+            [
+                'handle'           => 'sara',
+                'title'            => 'Sample Guest - Sara Lin',
+                'email'            => 'sara@chamastationinn.com',
+                'phone'            => '(505) 222-0198',
+                'marketing_source' => 'referral',
+                'preferred_room'   => 'Garden Suite',
+                'vip'              => '',
+                'consent'          => '1',
+            ],
+            [
+                'handle'           => 'omar',
+                'title'            => 'Sample Guest - Omar Patel',
+                'email'            => 'omar@chamastationinn.com',
+                'phone'            => '(505) 222-0182',
+                'marketing_source' => 'repeat',
+                'preferred_room'   => 'Main Lodge Loft',
+                'vip'              => '1',
+                'consent'          => '1',
+            ],
+        ];
+
+        $stay_definitions = [
+            [
+                'title'        => 'Stay - Elena Cruz (Arrives Today)',
+                'guest_handle' => 'elena',
+                'check_in'     => $today->format('Y-m-d'),
+                'check_out'    => $today->modify('+2 days')->format('Y-m-d'),
+                'status'       => 'booked',
+                'revenue'      => '920',
+            ],
+            [
+                'title'        => 'Stay - Nate Morales (Arrives Tomorrow)',
+                'guest_handle' => 'nate',
+                'check_in'     => $today->modify('+1 day')->format('Y-m-d'),
+                'check_out'    => $today->modify('+4 days')->format('Y-m-d'),
+                'status'       => 'booked',
+                'revenue'      => '1420',
+            ],
+            [
+                'title'        => 'Stay - Sara Lin (Weekend Booking)',
+                'guest_handle' => 'sara',
+                'check_in'     => $today->modify('+3 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+5 days')->format('Y-m-d'),
+                'status'       => 'booked',
+                'revenue'      => '1180',
+            ],
+            [
+                'title'        => 'Stay - Omar Patel (In House)',
+                'guest_handle' => 'omar',
+                'check_in'     => $today->modify('-1 day')->format('Y-m-d'),
+                'check_out'    => $today->modify('+2 days')->format('Y-m-d'),
+                'status'       => 'checked_in',
+                'revenue'      => '1760',
+            ],
+            [
+                'title'        => 'Stay - Elena Cruz (Lead Inquiry)',
+                'guest_handle' => 'elena',
+                'check_in'     => $today->modify('+7 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+9 days')->format('Y-m-d'),
+                'status'       => 'lead',
+                'revenue'      => '',
+            ],
+            [
+                'title'        => 'Stay - Nate Morales (Checked Out)',
+                'guest_handle' => 'nate',
+                'check_in'     => $today->modify('-7 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('-4 days')->format('Y-m-d'),
+                'status'       => 'checked_out',
+                'revenue'      => '1320',
+            ],
+            [
+                'title'        => 'Stay - Sara Lin (Cancelled)',
+                'guest_handle' => 'sara',
+                'check_in'     => $today->modify('+10 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+12 days')->format('Y-m-d'),
+                'status'       => 'cancelled',
+                'revenue'      => '880',
+            ],
+        ];
+    } elseif ($scenario === 'data_cleanup') {
+        $guest_definitions = [
+            [
+                'handle'           => 'elena',
+                'title'            => 'Sample Guest - Elena Cruz',
+                'email'            => 'elena@chamastationinn.com',
+                'phone'            => '',
+                'marketing_source' => 'direct',
+                'preferred_room'   => 'Riverside Cottage',
+                'vip'              => '1',
+                'consent'          => '',
+            ],
+            [
+                'handle'           => 'nate',
+                'title'            => 'Sample Guest - Nate Morales',
+                'email'            => '',
+                'phone'            => '(505) 222-0144',
+                'marketing_source' => 'google',
+                'preferred_room'   => 'Hilltop Suite',
+                'vip'              => '',
+                'consent'          => '',
+            ],
+            [
+                'handle'           => 'sara',
+                'title'            => 'Sample Guest - Sara Lin',
+                'email'            => '',
+                'phone'            => '',
+                'marketing_source' => 'referral',
+                'preferred_room'   => 'Garden Suite',
+                'vip'              => '',
+                'consent'          => '1',
+            ],
+        ];
+
+        $stay_definitions = [
+            [
+                'title'        => 'Stay - Elena Cruz (Arrives Today Missing Revenue)',
+                'guest_handle' => 'elena',
+                'check_in'     => $today->format('Y-m-d'),
+                'check_out'    => $today->modify('+1 day')->format('Y-m-d'),
+                'status'       => 'booked',
+                'revenue'      => '',
+            ],
+            [
+                'title'        => 'Stay - Nate Morales (Missing Dates)',
+                'guest_handle' => 'nate',
+                'check_in'     => '',
+                'check_out'    => '',
+                'status'       => 'booked',
+                'revenue'      => '760',
+            ],
+            [
+                'title'        => 'Stay - Sara Lin (Invalid Date Range)',
+                'guest_handle' => 'sara',
+                'check_in'     => $today->modify('+5 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+2 days')->format('Y-m-d'),
+                'status'       => 'booked',
+                'revenue'      => '',
+            ],
+            [
+                'title'        => 'Stay - Unlinked Lead (No Guest)',
+                'guest_handle' => '',
+                'check_in'     => $today->modify('+7 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+8 days')->format('Y-m-d'),
+                'status'       => 'lead',
+                'revenue'      => '',
+            ],
+            [
+                'title'        => 'Stay - Elena Cruz (Checked In)',
+                'guest_handle' => 'elena',
+                'check_in'     => $today->modify('-2 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+1 day')->format('Y-m-d'),
+                'status'       => 'checked_in',
+                'revenue'      => '1340',
+            ],
+            [
+                'title'        => 'Stay - Sara Lin (Cancelled)',
+                'guest_handle' => 'sara',
+                'check_in'     => $today->modify('+9 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+11 days')->format('Y-m-d'),
+                'status'       => 'cancelled',
+                'revenue'      => '620',
+            ],
+        ];
+    } else {
+        $guest_definitions = [
+            [
+                'handle'           => 'elena',
+                'title'            => 'Sample Guest - Elena Cruz',
+                'email'            => 'elena@chamastationinn.com',
+                'phone'            => '(505) 222-0100',
+                'marketing_source' => 'direct',
+                'preferred_room'   => 'Riverside Cottage',
+                'vip'              => '1',
+                'consent'          => '1',
+            ],
+            [
+                'handle'           => 'nate',
+                'title'            => 'Sample Guest - Nate Morales',
+                'email'            => 'nate+ops@chamastationinn.com',
+                'phone'            => '',
+                'marketing_source' => 'google',
+                'preferred_room'   => 'Hilltop Suite',
+                'vip'              => '',
+                'consent'          => '',
+            ],
+            [
+                'handle'           => 'sara',
+                'title'            => 'Sample Guest - Sara Lin',
+                'email'            => '',
+                'phone'            => '(505) 222-0198',
+                'marketing_source' => 'referral',
+                'preferred_room'   => 'Garden Suite',
+                'vip'              => '',
+                'consent'          => '1',
+            ],
+        ];
+
+        $stay_definitions = [
+            [
+                'title'        => 'Stay - Elena Cruz (Arrives Today)',
+                'guest_handle' => 'elena',
+                'check_in'     => $today->format('Y-m-d'),
+                'check_out'    => $today->modify('+1 day')->format('Y-m-d'),
+                'status'       => 'booked',
+                'revenue'      => '',
+            ],
+            [
+                'title'        => 'Stay - Elena Cruz (Upcoming Booked)',
+                'guest_handle' => 'elena',
+                'check_in'     => $today->modify('+2 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+5 days')->format('Y-m-d'),
+                'status'       => 'booked',
+                'revenue'      => '1380',
+            ],
+            [
+                'title'        => 'Stay - Nate Morales (In House)',
+                'guest_handle' => 'nate',
+                'check_in'     => $today->modify('-1 day')->format('Y-m-d'),
+                'check_out'    => $today->modify('+2 days')->format('Y-m-d'),
+                'status'       => 'checked_in',
+                'revenue'      => '2120',
+            ],
+            [
+                'title'        => 'Stay - Sara Lin (Checked Out)',
+                'guest_handle' => 'sara',
+                'check_in'     => $today->modify('-8 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('-5 days')->format('Y-m-d'),
+                'status'       => 'checked_out',
+                'revenue'      => '980',
+            ],
+            [
+                'title'        => 'Stay - Sara Lin (Lead Pending)',
+                'guest_handle' => 'sara',
+                'check_in'     => $today->modify('+9 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+11 days')->format('Y-m-d'),
+                'status'       => 'lead',
+                'revenue'      => '',
+            ],
+            [
+                'title'        => 'Stay - Elena Cruz (Cancelled)',
+                'guest_handle' => 'elena',
+                'check_in'     => $today->modify('+6 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+7 days')->format('Y-m-d'),
+                'status'       => 'cancelled',
+                'revenue'      => '650',
+            ],
+            [
+                'title'        => 'Stay - Unlinked Guest (Invalid Dates)',
+                'guest_handle' => '',
+                'check_in'     => $today->modify('+4 days')->format('Y-m-d'),
+                'check_out'    => $today->modify('+3 days')->format('Y-m-d'),
+                'status'       => 'booked',
+                'revenue'      => '',
+            ],
+        ];
+    }
 
     $guest_ids = [];
 
@@ -2093,65 +2409,6 @@ function chama_ops_seed_sample_data(): void
 
         $guest_ids[$guest_data['handle']] = $guest_id;
     }
-
-    $stay_definitions = [
-        [
-            'title'        => 'Stay - Elena Cruz (Arrives Today)',
-            'guest_handle' => 'elena',
-            'check_in'     => $today->format('Y-m-d'),
-            'check_out'    => $today->modify('+1 day')->format('Y-m-d'),
-            'status'       => 'booked',
-            'revenue'      => '',
-        ],
-        [
-            'title'        => 'Stay - Elena Cruz (Upcoming Booked)',
-            'guest_handle' => 'elena',
-            'check_in'     => $today->modify('+2 days')->format('Y-m-d'),
-            'check_out'    => $today->modify('+5 days')->format('Y-m-d'),
-            'status'       => 'booked',
-            'revenue'      => '1380',
-        ],
-        [
-            'title'        => 'Stay - Nate Morales (In House)',
-            'guest_handle' => 'nate',
-            'check_in'     => $today->modify('-1 day')->format('Y-m-d'),
-            'check_out'    => $today->modify('+2 days')->format('Y-m-d'),
-            'status'       => 'checked_in',
-            'revenue'      => '2120',
-        ],
-        [
-            'title'        => 'Stay - Sara Lin (Checked Out)',
-            'guest_handle' => 'sara',
-            'check_in'     => $today->modify('-8 days')->format('Y-m-d'),
-            'check_out'    => $today->modify('-5 days')->format('Y-m-d'),
-            'status'       => 'checked_out',
-            'revenue'      => '980',
-        ],
-        [
-            'title'        => 'Stay - Sara Lin (Lead Pending)',
-            'guest_handle' => 'sara',
-            'check_in'     => $today->modify('+9 days')->format('Y-m-d'),
-            'check_out'    => $today->modify('+11 days')->format('Y-m-d'),
-            'status'       => 'lead',
-            'revenue'      => '',
-        ],
-        [
-            'title'        => 'Stay - Elena Cruz (Cancelled)',
-            'guest_handle' => 'elena',
-            'check_in'     => $today->modify('+6 days')->format('Y-m-d'),
-            'check_out'    => $today->modify('+7 days')->format('Y-m-d'),
-            'status'       => 'cancelled',
-            'revenue'      => '650',
-        ],
-        [
-            'title'        => 'Stay - Unlinked Guest (Invalid Dates)',
-            'guest_handle' => '',
-            'check_in'     => $today->modify('+4 days')->format('Y-m-d'),
-            'check_out'    => $today->modify('+3 days')->format('Y-m-d'),
-            'status'       => 'booked',
-            'revenue'      => '',
-        ],
-    ];
 
     foreach ($stay_definitions as $stay_data) {
         $linked_guest_id = 0;
@@ -2190,11 +2447,10 @@ function chama_ops_seed_sample_data(): void
         update_post_meta($stay_id, '_chama_ops_sample_data', '1');
     }
 
-    $redirect = add_query_arg(
-        'chama_ops_notice',
-        $force ? 'sample_data_regenerated' : 'sample_data_seeded',
-        wp_get_referer() ?: admin_url('admin.php?page=chama-ops-overview')
-    );
+    $redirect = add_query_arg([
+        'chama_ops_notice'        => $force ? 'sample_data_regenerated' : 'sample_data_seeded',
+        'chama_ops_demo_scenario' => $scenario,
+    ], wp_get_referer() ?: admin_url('admin.php?page=chama-ops-overview'));
     wp_safe_redirect($redirect);
     exit;
 }
