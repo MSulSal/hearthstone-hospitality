@@ -626,20 +626,46 @@ function chama_ops_get_arrival_contact_gap_stay_ids(int $days_ahead = 1): array
         $stay_id  = (int) $stay_id;
         $guest_id = (int) get_post_meta($stay_id, '_chama_stay_guest_id', true);
 
-        if ($guest_id <= 0 || get_post_type($guest_id) !== 'guest') {
-            $gap_ids[] = $stay_id;
-            continue;
-        }
-
-        $guest_email = trim((string) get_post_meta($guest_id, '_chama_guest_email', true));
-        $guest_phone = trim((string) get_post_meta($guest_id, '_chama_guest_phone', true));
-
-        if ($guest_email === '' || $guest_phone === '') {
+        if (!chama_ops_is_guest_contact_ready($guest_id)) {
             $gap_ids[] = $stay_id;
         }
     }
 
     return $gap_ids;
+}
+
+/**
+ * Determine whether a guest has complete contact fields for arrival readiness.
+ *
+ * @param int $guest_id Guest post ID.
+ */
+function chama_ops_is_guest_contact_ready(int $guest_id): bool
+{
+    if ($guest_id <= 0 || get_post_type($guest_id) !== 'guest') {
+        return false;
+    }
+
+    $guest_email = trim((string) get_post_meta($guest_id, '_chama_guest_email', true));
+    $guest_phone = trim((string) get_post_meta($guest_id, '_chama_guest_phone', true));
+
+    return $guest_email !== '' && $guest_phone !== '';
+}
+
+/**
+ * Check whether a check-in date is in the current 48-hour (today/tomorrow) window.
+ *
+ * @param string $check_in Check-in date value.
+ */
+function chama_ops_is_check_in_within_next_48h(string $check_in): bool
+{
+    if ($check_in === '') {
+        return false;
+    }
+
+    $today    = wp_date('Y-m-d');
+    $tomorrow = wp_date('Y-m-d', strtotime('+1 day'));
+
+    return $check_in >= $today && $check_in <= $tomorrow;
 }
 
 /**
@@ -1134,6 +1160,7 @@ function chama_ops_stay_columns(array $columns): array
         'stay_origin'  => __('Origin', 'chama-ops'),
         'stay_guest'   => __('Guest', 'chama-ops'),
         'stay_dates'   => __('Dates', 'chama-ops'),
+        'stay_contact' => __('Contact Ready', 'chama-ops'),
         'stay_nights'  => __('Nights', 'chama-ops'),
         'stay_status'  => __('Status', 'chama-ops'),
         'stay_revenue' => __('Revenue', 'chama-ops'),
@@ -1187,6 +1214,21 @@ function chama_ops_render_stay_columns(string $column, int $post_id): void
             } else {
                 echo esc_html__('N/A', 'chama-ops');
             }
+            break;
+
+        case 'stay_contact':
+            $status   = (string) get_post_meta($post_id, '_chama_stay_status', true);
+            $check_in = (string) get_post_meta($post_id, '_chama_stay_check_in', true);
+            $guest_id = (int) get_post_meta($post_id, '_chama_stay_guest_id', true);
+
+            if ($status !== 'booked' || !chama_ops_is_check_in_within_next_48h($check_in)) {
+                echo esc_html__('N/A', 'chama-ops');
+                break;
+            }
+
+            echo chama_ops_is_guest_contact_ready($guest_id)
+                ? esc_html__('Ready', 'chama-ops')
+                : esc_html__('Gap', 'chama-ops');
             break;
 
         case 'stay_nights':
