@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.21.0
+ * Version: 1.22.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -576,6 +576,39 @@ function chama_ops_get_upcoming_arrivals(int $days_ahead = 14, int $limit = 8): 
 }
 
 /**
+ * Get booked arrivals between today and N days ahead.
+ *
+ * @param int $days_ahead Number of days ahead (inclusive) to inspect.
+ * @return array<int, int>
+ */
+function chama_ops_get_booked_arrival_stay_ids(int $days_ahead = 1): array
+{
+    $today      = wp_date('Y-m-d');
+    $window_end = wp_date('Y-m-d', strtotime('+' . max(0, $days_ahead) . ' days'));
+
+    $stay_ids = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+        'meta_query'     => [
+            [
+                'key'   => '_chama_stay_status',
+                'value' => 'booked',
+            ],
+            [
+                'key'     => '_chama_stay_check_in',
+                'value'   => [$today, $window_end],
+                'compare' => 'BETWEEN',
+                'type'    => 'DATE',
+            ],
+        ],
+    ]);
+
+    return array_map('intval', $stay_ids);
+}
+
+/**
  * Get booked arrivals in the next N days that are missing guest contact readiness.
  *
  * A stay is considered a contact gap when it is booked to arrive between today and
@@ -587,28 +620,10 @@ function chama_ops_get_upcoming_arrivals(int $days_ahead = 14, int $limit = 8): 
  */
 function chama_ops_get_arrival_contact_gap_stay_ids(int $days_ahead = 1): array
 {
-    $today_obj  = new DateTimeImmutable(wp_date('Y-m-d'));
-    $today      = $today_obj->format('Y-m-d');
-    $window_end = $today_obj->modify('+' . max(0, $days_ahead) . ' day')->format('Y-m-d');
-
-    $stay_ids = get_posts([
-        'post_type'      => 'stay',
-        'posts_per_page' => -1,
-        'post_status'    => ['publish', 'draft'],
-        'fields'         => 'ids',
-    ]);
-
     $gap_ids = [];
 
-    foreach ($stay_ids as $stay_id) {
+    foreach (chama_ops_get_booked_arrival_stay_ids($days_ahead) as $stay_id) {
         $stay_id  = (int) $stay_id;
-        $status   = (string) get_post_meta($stay_id, '_chama_stay_status', true);
-        $check_in = (string) get_post_meta($stay_id, '_chama_stay_check_in', true);
-
-        if ($status !== 'booked' || $check_in === '' || $check_in < $today || $check_in > $window_end) {
-            continue;
-        }
-
         $guest_id = (int) get_post_meta($stay_id, '_chama_stay_guest_id', true);
 
         if ($guest_id <= 0 || get_post_type($guest_id) !== 'guest') {
@@ -630,7 +645,7 @@ function chama_ops_get_arrival_contact_gap_stay_ids(int $days_ahead = 1): array
 /**
  * Build same-day operations metrics for arrivals, departures, and in-house stays.
  *
- * @return array<string, int>
+ * @return array<string, int|float|null>
  */
 function chama_ops_get_today_operations_metrics(): array
 {
@@ -644,6 +659,9 @@ function chama_ops_get_today_operations_metrics(): array
         'pending_check_outs'   => 0,
         'overdue_arrivals'     => 0,
         'arrival_contact_gaps_48h' => 0,
+        'arrivals_next_48h'    => 0,
+        'arrival_contact_ready_48h' => 0,
+        'arrival_contact_ready_rate_48h' => null,
     ];
 
     $stay_ids = get_posts([
@@ -691,7 +709,16 @@ function chama_ops_get_today_operations_metrics(): array
         }
     }
 
-    $metrics['arrival_contact_gaps_48h'] = count(chama_ops_get_arrival_contact_gap_stay_ids(1));
+    $arrivals_next_48h = count(chama_ops_get_booked_arrival_stay_ids(1));
+    $contact_gaps_48h  = count(chama_ops_get_arrival_contact_gap_stay_ids(1));
+    $contact_ready_48h = max(0, $arrivals_next_48h - $contact_gaps_48h);
+
+    $metrics['arrivals_next_48h'] = $arrivals_next_48h;
+    $metrics['arrival_contact_gaps_48h'] = $contact_gaps_48h;
+    $metrics['arrival_contact_ready_48h'] = $contact_ready_48h;
+    $metrics['arrival_contact_ready_rate_48h'] = $arrivals_next_48h > 0
+        ? round(($contact_ready_48h / $arrivals_next_48h) * 100, 1)
+        : null;
 
     return $metrics;
 }
@@ -1580,6 +1607,10 @@ function chama_ops_get_overview_action_links(): array
             'chama_stay_today'         => 'overdue_arrivals',
             'chama_stay_status_filter' => 'booked',
         ], $stay_list_url),
+        'today_arrivals_next_48h' => add_query_arg([
+            'chama_stay_today'         => 'arrivals_next_48h',
+            'chama_stay_status_filter' => 'booked',
+        ], $stay_list_url),
         'today_arrival_contact_gaps_48h' => add_query_arg([
             'chama_stay_today'         => 'arrivals_contact_gap',
             'chama_stay_status_filter' => 'booked',
@@ -2080,6 +2111,23 @@ function chama_ops_render_overview_page(): void
                     <strong><?php esc_html_e('Arrival Contact Gaps (48h)', 'chama-ops'); ?></strong><br>
                     <?php echo esc_html((string) $today_ops_metrics['arrival_contact_gaps_48h']); ?><br>
                     <a href="<?php echo esc_url($action_links['today_arrival_contact_gaps_48h']); ?>"><?php esc_html_e('Open contact-gap queue', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Arrival Contact Ready (48h)', 'chama-ops'); ?></strong><br>
+                    <?php
+                    $contact_ready_rate_48h = $today_ops_metrics['arrival_contact_ready_rate_48h'];
+                    echo $contact_ready_rate_48h !== null
+                        ? esc_html(number_format((float) $contact_ready_rate_48h, 1) . '%')
+                        : esc_html__('N/A', 'chama-ops');
+                    ?><br>
+                    <?php
+                    printf(
+                        esc_html__('%1$d ready of %2$d booked', 'chama-ops'),
+                        (int) $today_ops_metrics['arrival_contact_ready_48h'],
+                        (int) $today_ops_metrics['arrivals_next_48h']
+                    );
+                    ?><br>
+                    <a href="<?php echo esc_url($action_links['today_arrivals_next_48h']); ?>"><?php esc_html_e('Open 48h arrivals', 'chama-ops'); ?></a>
                 </div>
             </div>
         </div>
@@ -3107,6 +3155,7 @@ function chama_ops_render_admin_filters(string $post_type, string $which): void
         <select name="chama_stay_today" id="chama_stay_today">
             <option value=""><?php esc_html_e('All Today States', 'chama-ops'); ?></option>
             <option value="arrivals" <?php selected($selected_today, 'arrivals'); ?>><?php esc_html_e('Arrivals Today', 'chama-ops'); ?></option>
+            <option value="arrivals_next_48h" <?php selected($selected_today, 'arrivals_next_48h'); ?>><?php esc_html_e('Booked Arrivals (48h)', 'chama-ops'); ?></option>
             <option value="departures" <?php selected($selected_today, 'departures'); ?>><?php esc_html_e('Departures Today', 'chama-ops'); ?></option>
             <option value="in_house" <?php selected($selected_today, 'in_house'); ?>><?php esc_html_e('In-House Tonight', 'chama-ops'); ?></option>
             <option value="overdue_arrivals" <?php selected($selected_today, 'overdue_arrivals'); ?>><?php esc_html_e('Overdue Arrivals', 'chama-ops'); ?></option>
@@ -3348,12 +3397,26 @@ function chama_ops_apply_admin_filters(WP_Query $query): void
         if ($selected_today !== '') {
             $meta_query = (array) $query->get('meta_query');
             $today = wp_date('Y-m-d');
+            $tomorrow = wp_date('Y-m-d', strtotime('+1 day'));
 
             if ($selected_today === 'arrivals') {
                 $meta_query[] = [
                     'key'     => '_chama_stay_check_in',
                     'value'   => $today,
                     'compare' => '=',
+                    'type'    => 'DATE',
+                ];
+            }
+
+            if ($selected_today === 'arrivals_next_48h') {
+                $meta_query[] = [
+                    'key'   => '_chama_stay_status',
+                    'value' => 'booked',
+                ];
+                $meta_query[] = [
+                    'key'     => '_chama_stay_check_in',
+                    'value'   => [$today, $tomorrow],
+                    'compare' => 'BETWEEN',
                     'type'    => 'DATE',
                 ];
             }
