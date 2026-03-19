@@ -11,12 +11,18 @@ These notebooks are prepared for client-facing walkthroughs and for your persona
   - Explain every dashboard section in detail with purpose, logic, actions, and screenshot targets.
 - `04-layout-deep-dive.ipynb`
   - Explain every major layout surface (frontend and admin) with customization guidance.
+- `05-partner-progress-report.ipynb`
+  - Comprehensive step-by-step progress workbook for internal partner confidence.
+- `06-client-progress-brief-partner-edition.ipynb`
+  - Print-friendly client progress brief your partner can present directly.
 
 ## GitHub Presentation View (Code Hidden)
 - `01-prototype-presentation.md`
 - `02-finished-app-vision-presentation.md`
 - `03-dashboard-deep-dive.md`
 - `04-layout-deep-dive.md`
+- `05-partner-progress-report.md`
+- `06-client-progress-brief-partner-edition.md`
 
 These Markdown files are exported from the notebooks with code inputs removed, so GitHub shows results-only presentation content.
 
