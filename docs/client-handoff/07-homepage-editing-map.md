@@ -54,10 +54,15 @@ If Excerpt is hidden:
 
 For this inn profile (small, premium, spa-like), homepage should usually include:
 
-1. Calm luxury positioning statement
-2. Room-theme or experience highlights
-3. Operations reliability + guest communication trust signals
-4. Direct call to action (tour, booking, consultation)
+1. Hero with clear booking CTA
+2. Positioning intro (restored + modernized + railroad context)
+3. Stay/Rooms preview
+4. Courtyard/grounds atmosphere section
+5. Dining preview
+6. Weddings & events preview
+7. Explore Chama highlights
+8. Guest trust signal section
+9. Final booking/inquiry CTA
 
 ## Handoff Notes
 

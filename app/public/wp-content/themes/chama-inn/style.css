@@ -3,23 +3,27 @@ Theme Name: Chama Inn
 Theme URI: https://chamastationinn.com
 Author: Your Name
 Description: Custom theme for Chama Station Inn
-Version: 0.2.0
+Version: 0.3.0
 Requires at least: 6.0
 Requires PHP: 8.1
 Text Domain: chama-inn
 */
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  --chama-bg: #f6f5f1;
-  --chama-bg-soft: #ebe7df;
-  --chama-surface: #f6f5f1;
-  --chama-text: #151b1a;
-  --chama-text-inverse: #f8f6ef;
-  --chama-muted: #6e7d79;
-  --chama-accent: #c8a96b;
-  --chama-accent-strong: #b89551;
-  --chama-border: #d8d3c8;
+  --chama-bg: #f3eadf;
+  --chama-bg-soft: #e9decf;
+  --chama-bg-deep: #d8c7af;
+  --chama-surface: #fffdf8;
+  --chama-text: #2e2c2a;
+  --chama-text-soft: #5a544d;
+  --chama-text-inverse: #fbf7f1;
+  --chama-muted: #7b8575;
+  --chama-accent: #6b2e37;
+  --chama-accent-soft: #c99b86;
+  --chama-accent-strong: #5a252d;
+  --chama-highlight: #a88659;
+  --chama-border: #dbcdb8;
   --chama-space-xs: clamp(0.6rem, 0.45rem + 0.4vw, 0.9rem);
   --chama-space-sm: clamp(0.95rem, 0.7rem + 0.7vw, 1.35rem);
   --chama-space-md: clamp(1.2rem, 0.9rem + 1vw, 1.9rem);
@@ -48,10 +52,36 @@ html {
 body {
   background: var(--chama-bg);
   color: var(--chama-text);
-  font-family: "Roboto", Arial, sans-serif;
+  font-family: "Inter", "Segoe UI", Tahoma, Arial, sans-serif;
   line-height: 1.6;
   overflow-x: hidden;
   overflow-wrap: break-word;
+}
+
+a,
+a:visited {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.wp-block-heading {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+p,
+li,
+input,
+select,
+textarea,
+button {
+  font-family: "Inter", "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
 a {
@@ -78,19 +108,16 @@ iframe {
   align-items: center;
   justify-content: center;
   padding: var(--chama-space-xl) var(--chama-space-sm);
-  background-color: #101513;
+  background-color: var(--chama-bg-soft);
   background-size: cover;
   background-position: center;
+  border-bottom: 1px solid var(--chama-border);
 }
 
 .home-hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(7, 10, 9, 0.55) 0%,
-    rgba(7, 10, 9, 0.68) 100%
-  );
+  display: none;
 }
 
 .home-hero__content {
@@ -98,7 +125,7 @@ iframe {
   z-index: 1;
   width: min(58rem, 100%);
   text-align: center;
-  color: var(--chama-text-inverse);
+  color: var(--chama-text);
 }
 
 .home-hero__logo-wrap {
@@ -114,16 +141,17 @@ iframe {
 
 .home-hero__eyebrow {
   margin: 0 0 var(--chama-space-xs);
-  color: #e8decb;
+  color: var(--chama-accent);
   font-size: clamp(0.75rem, 0.63rem + 0.35vw, 0.93rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .home-hero__title {
   margin: 0;
   font-size: clamp(2rem, 5.5vw, 4.4rem);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.08;
 }
 
@@ -131,7 +159,29 @@ iframe {
   margin: var(--chama-space-sm) auto 0;
   max-width: 48rem;
   font-size: clamp(1rem, 2.4vw, 1.28rem);
-  color: #ede6d9;
+  color: var(--chama-text-soft);
+}
+
+.home-hero[style*="background-image"] .home-hero__overlay {
+  display: block;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 13, 11, 0.34) 0%,
+    rgba(18, 13, 11, 0.58) 100%
+  );
+}
+
+.home-hero[style*="background-image"] .home-hero__content,
+.home-hero[style*="background-image"] .home-hero__title {
+  color: var(--chama-text-inverse);
+}
+
+.home-hero[style*="background-image"] .home-hero__eyebrow {
+  color: #f8e8d8;
+}
+
+.home-hero[style*="background-image"] .home-hero__subtitle {
+  color: #f2e8dd;
 }
 
 .home-content {
@@ -142,7 +192,7 @@ iframe {
 .home-content__inner {
   width: min(70rem, 100%);
   margin: 0 auto;
-  padding: var(--chama-space-lg) var(--chama-space-sm) var(--chama-space-xl);
+  padding: var(--chama-space-md) var(--chama-space-sm) var(--chama-space-xl);
 }
 
 .home-content .wp-block-heading,
@@ -162,11 +212,31 @@ iframe {
 .home-content h3,
 .home-content h4 {
   color: var(--chama-text);
-  line-height: 1.2;
+  line-height: 1.22;
 }
 
 .home-content p {
-  color: #303b38;
+  color: var(--chama-text-soft);
+  font-size: clamp(1rem, 0.95rem + 0.2vw, 1.08rem);
+}
+
+.home-content ul,
+.home-content ol {
+  color: var(--chama-text-soft);
+}
+
+.home-content .alignfull {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.home-content .alignwide {
+  width: min(76rem, 100%);
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .home-content .wp-block-heading {
@@ -179,43 +249,81 @@ iframe {
 
 .home-content .wp-block-button__link {
   border-radius: 999px;
-  padding: 0.72rem 1.35rem;
+  padding: 0.74rem 1.4rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .home-content .wp-block-button.is-style-outline .wp-block-button__link {
   border-color: var(--chama-accent-strong);
   color: var(--chama-accent-strong);
+  background-color: transparent;
 }
 
 .home-content .wp-block-button__link:not(.has-background) {
   background: var(--chama-accent);
-  color: #14110c;
+  color: var(--chama-text-inverse);
 }
 
 .home-content .wp-block-button__link:hover,
 .home-content .wp-block-button__link:focus-visible {
   background: var(--chama-accent-strong);
-  color: #0f0d09;
+  color: var(--chama-text-inverse);
 }
 
 .home-content .wp-block-quote {
-  border-left: 4px solid var(--chama-accent);
-  margin: var(--chama-space-sm) 0;
-  padding-left: 1rem;
-  color: #2d3735;
+  border-left: 4px solid var(--chama-highlight);
+  margin: var(--chama-space-sm) 0 0;
+  padding: 0.45rem 0 0.45rem 1rem;
+  color: var(--chama-text);
+  font-style: italic;
 }
 
 .home-content .wp-block-separator {
   border-color: var(--chama-border);
 }
 
-.home-content .alignwide,
-.home-content .alignfull {
-  width: 100%;
-  max-width: none;
+.home-content .wp-block-group[class*="chama-home-"] {
+  border-top: 1px solid rgba(219, 205, 184, 0.72);
+}
+
+.home-content .chama-home-trust,
+.home-content .chama-home-trust p,
+.home-content .chama-home-trust li,
+.home-content .chama-home-trust .wp-block-heading {
+  color: var(--chama-text-inverse);
+}
+
+.home-content .chama-home-trust .wp-block-quote {
+  border-left-color: #f0cf9d;
+  color: #f8efe4;
+}
+
+.home-content .chama-card {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid var(--chama-border);
+  border-radius: 16px;
+  padding: clamp(1rem, 0.88rem + 0.4vw, 1.35rem);
+}
+
+.home-content .chama-card .wp-block-heading {
+  margin-bottom: 0.5rem;
+}
+
+.home-content .chama-mini-metric {
+  display: inline-block;
+  margin-right: 0.55rem;
+  margin-bottom: 0.45rem;
+  padding: 0.32rem 0.56rem;
+  border-radius: 999px;
+  border: 1px solid rgba(168, 134, 89, 0.52);
+  background: #f8f2e9;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--chama-accent-strong);
 }
 
 .home-content .wp-block-table {
@@ -234,7 +342,7 @@ iframe {
 .site-footer__text {
   margin: 0;
   font-size: 0.92rem;
-  color: #4a5754;
+  color: var(--chama-text-soft);
 }
 
 @media (max-width: 768px) {
@@ -245,6 +353,11 @@ iframe {
 
   .home-content__inner {
     padding-bottom: clamp(2rem, 6vw, 2.75rem);
+  }
+
+  .home-content .alignfull {
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
   }
 
   .home-content .wp-block-columns {
