@@ -2,42 +2,57 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+get_header();
 ?>
-<!DOCTYPE html>
-<html <?php language_attributes(); ?>>
-<head>
-    <meta charset="<?php bloginfo('charset'); ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php wp_head(); ?>
-</head>
-<body <?php body_class('home-page'); ?>>
-<?php wp_body_open(); ?>
 
-<main class="billboard">
-    <div class="billboard__media" aria-hidden="true">
-        <img
-            class="billboard__poster"
-            src="https://img1.wsimg.com/isteam/videos/gyyYoKP"
-            alt=""
-        />
-        <div class="billboard__overlay"></div>
-    </div>
+<main class="home-shell">
+    <?php if (have_posts()) : ?>
+        <?php while (have_posts()) : the_post(); ?>
+            <?php
+            $hero_image_url = get_the_post_thumbnail_url(get_the_ID(), 'full');
+            $hero_style     = $hero_image_url !== false
+                ? ' style="background-image:url(' . esc_url($hero_image_url) . ');"'
+                : '';
+            ?>
+            <article id="post-<?php the_ID(); ?>" <?php post_class('home-page'); ?>>
+                <section class="home-hero"<?php echo $hero_style; ?>>
+                    <div class="home-hero__overlay"></div>
+                    <div class="home-hero__content">
+                        <?php if (function_exists('the_custom_logo') && has_custom_logo()) : ?>
+                            <div class="home-hero__logo-wrap">
+                                <?php the_custom_logo(); ?>
+                            </div>
+                        <?php endif; ?>
 
-    <div class="billboard__content">
-        <img
-            class="billboard__logo"
-            src="https://img1.wsimg.com/isteam/ip/b34e47f3-f61f-4e2a-9edf-27b8883a5ac0/Copy%20of%20CSI_Logo%20%28Website%29%20%282%29.png/:/rs=h:200,cg:true,m/qt=q:95"
-            alt="Chama Station Inn"
-        />
+                        <p class="home-hero__eyebrow">
+                            <?php echo esc_html(get_bloginfo('description')); ?>
+                        </p>
+                        <h1 class="home-hero__title"><?php the_title(); ?></h1>
 
-        <h1 class="billboard__title">Coming Soon</h1>
-    </div>
+                        <?php if (has_excerpt()) : ?>
+                            <p class="home-hero__subtitle"><?php echo esc_html(get_the_excerpt()); ?></p>
+                        <?php endif; ?>
+                    </div>
+                </section>
+
+                <section class="home-content">
+                    <div class="home-content__inner">
+                        <?php the_content(); ?>
+                    </div>
+                </section>
+            </article>
+        <?php endwhile; ?>
+    <?php else : ?>
+        <section class="home-content">
+            <div class="home-content__inner">
+                <h1><?php esc_html_e('Welcome to Chama Station Inn', 'chama-inn'); ?></h1>
+                <p><?php esc_html_e('Create and publish a Home page to control this content in WordPress.', 'chama-inn'); ?></p>
+            </div>
+        </section>
+    <?php endif; ?>
 </main>
 
-<footer class="site-footer">
-    <p class="site-footer__text">Copyright © 2026 Chama Station Inn - All Rights Reserved.</p>
-</footer>
+<?php
+get_footer();
 
-<?php wp_footer(); ?>
-</body>
-</html>

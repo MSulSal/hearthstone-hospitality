@@ -16,6 +16,7 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 4. Confirm next-phase scope in `04-delivery-plan-and-next-phases.md`.
 5. Customize labels and wording with `00-term-mapping-workbook.md`.
 6. Review implementation checkpoint in `06-build-status-before-frontend.md`.
+7. Use `07-homepage-editing-map.md` for WP-native homepage editing handoff.
 
 ## Files
 - `00-term-mapping-workbook.md` - replaces prototype language with inn-specific wording.
@@ -25,6 +26,7 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 - `04-delivery-plan-and-next-phases.md` - staged implementation from prototype to production.
 - `05-brand-and-experience-alignment.md` - ties spa-like brand direction to operations UX decisions.
 - `06-build-status-before-frontend.md` - complete backend/admin accomplishment checkpoint before frontend focus.
+- `07-homepage-editing-map.md` - exact wp-admin locations for homepage edits after handoff.
 - `notebooks/` - markdown presentation guides with visuals for prototype and final-app roadmap storytelling.
 - `assets/` - supporting visuals used by docs and presentation guides.
 
