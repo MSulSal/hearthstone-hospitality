@@ -2,6 +2,9 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+$header_cta_url   = function_exists('chama_inn_get_header_cta_url') ? chama_inn_get_header_cta_url() : home_url('/contact');
+$header_cta_label = function_exists('chama_inn_get_header_cta_label') ? chama_inn_get_header_cta_label() : __('Book Your Stay', 'chama-inn');
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -40,8 +43,8 @@ if (!defined('ABSPATH')) {
             ?>
         </nav>
 
-        <a class="site-header__cta" href="<?php echo esc_url(home_url('/contact')); ?>">
-            <?php esc_html_e('Book Your Stay', 'chama-inn'); ?>
+        <a class="site-header__cta" href="<?php echo esc_url($header_cta_url); ?>">
+            <?php echo esc_html($header_cta_label); ?>
         </a>
     </div>
 </header>

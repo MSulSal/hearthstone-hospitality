@@ -78,6 +78,10 @@ This lets you compare client preferences without touching CSS.
 
 The header button currently routes to `/contact`. Keep that page published for the CTA to work.
 
+Optional control:
+- Go to `Appearance -> Customize -> Chama Inn Design`.
+- Set **Header CTA Page** and **Header CTA Label** to choose the exact route and button text.
+
 ## Recommended Content Blocks
 
 For this inn profile (small, premium, spa-like), homepage should usually include:
