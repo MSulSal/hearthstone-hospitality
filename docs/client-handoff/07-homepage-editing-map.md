@@ -58,6 +58,8 @@ If Excerpt is hidden:
   - Moonstone Calm (Cool)
   - Alpine Stillness (Cool)
   - Terracotta Dawn (Warm)
+  - Heritage Garnet (Accent)
+  - Desert Contrast (Neutral)
 - Publish to apply instantly site-wide.
 
 This lets you compare client preferences without touching CSS.
