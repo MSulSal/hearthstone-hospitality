@@ -35,6 +35,14 @@ return <<<'HTML'
 <p>The inn is a practical home base for train trips, local dining, hiking access, and nearby outdoor activities while keeping a quieter, more restorative stay experience.</p>
 <!-- /wp:paragraph -->
 
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Insider tips from repeat visitors</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list -->
+<ul><li>Request first-floor rooms for easier access.</li><li>Ask about fireplace rooms when booking early.</li><li>Room availability can tighten quickly during peak train dates.</li><li>The depot-facing location makes train-day logistics easy.</li></ul>
+<!-- /wp:list -->
+
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-outline","style":{"border":{"radius":"999px"}}} -->
 <div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" style="border-radius:999px">Read guest reviews</a></div>

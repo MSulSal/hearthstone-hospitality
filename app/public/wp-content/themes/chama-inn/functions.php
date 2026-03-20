@@ -491,7 +491,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 5;
+    $target_version = 6;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -558,7 +558,9 @@ function chama_inn_migrate_seeded_copy(): void
                 "restored railroad inn in chama, new mexico",
                 "Boutique railroad-town inn in Chama, New Mexico",
                 "Temporary demo images. Replace with current client-owned photos before production launch.",
+                "Client-provided image set applied for this draft. Swap individual photos in Theme Editor if needed.",
                 "Clean, comfortable, cozy, and right across from the station.",
+                "Quietly luxurious stays across from the Cumbres and Toltec depot",
             ];
             $should_refresh_home = false;
 
@@ -580,7 +582,8 @@ function chama_inn_migrate_seeded_copy(): void
 
         if ($slug === "stay-rooms") {
             $should_refresh_stay = strpos($updated_content, "Room Category One") !== false
-                || strpos($updated_content, "Replace with room summary, occupancy, and signature features.") !== false;
+                || strpos($updated_content, "Replace with room summary, occupancy, and signature features.") !== false
+                || strpos($updated_content, "Nine guest rooms with clean comfort, friendly service, and walkable access to the train depot and downtown Chama.") !== false;
 
             if ($should_refresh_stay) {
                 $fresh_stay_pattern = chama_inn_load_pattern_content("patterns/stay-rooms-page.php");
@@ -593,7 +596,8 @@ function chama_inn_migrate_seeded_copy(): void
 
         if ($slug === "about-our-story") {
             $should_refresh_about = strpos($updated_content, "Use this page to connect place, hospitality style, and the inn's long-term vision for guests and community.") !== false
-                || strpos($updated_content, "Story timeline") !== false;
+                || strpos($updated_content, "Story timeline") !== false
+                || strpos($updated_content, "What guests experience") !== false;
 
             if ($should_refresh_about) {
                 $fresh_about_pattern = chama_inn_load_pattern_content("patterns/about-story-page.php");

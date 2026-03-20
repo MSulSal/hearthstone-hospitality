@@ -51,8 +51,36 @@ return <<<'HTML'
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
+<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"16px"}}}} -->
+<div class="wp-block-columns"><!-- wp:column -->
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-20.jpg" alt="Courtyard seating area at Chama Station Inn"/></figure>
+<!-- /wp:image --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame is-stucco-tint"} -->
+<figure class="wp-block-image size-large chama-photo-frame is-stucco-tint"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-22.jpg" alt="Guest walkway and room doors"/></figure>
+<!-- /wp:image --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-21.jpg" alt="Fireplace room feature"/></figure>
+<!-- /wp:image --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
+
 <!-- wp:list -->
 <ul><li>Ask for first-floor rooms if stairs are a concern.</li><li>Fireplace rooms are limited and often book first.</li><li>Some guests prefer upstairs rooms for extra quiet.</li><li>Book early during peak train season.</li></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">More guest voices</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list -->
+<ul><li>"Our room was clean, quaint, and exactly what we were looking for." - Kate M, May 2023</li><li>"Comfortable room, friendly staff, and very short walk to everything." - Julie E, September 2022</li><li>"Quiet stay in the heart of town, directly across from the train." - Christine P, July 2022</li></ul>
 <!-- /wp:list -->
 
 <!-- wp:buttons -->

@@ -4,30 +4,6 @@ if (!defined("ABSPATH")) {
 }
 
 return <<<'HTML'
-<!-- wp:group {"align":"full","className":"chama-home-hero","style":{"spacing":{"padding":{"top":"92px","bottom":"84px","left":"20px","right":"20px"}},"color":{"background":"#f3eadf"}},"layout":{"type":"constrained","contentSize":"980px"}} -->
-<div class="wp-block-group alignfull chama-home-hero has-background" style="background-color:#f3eadf;padding-top:92px;padding-right:20px;padding-bottom:84px;padding-left:20px"><!-- wp:image {"align":"center","sizeSlug":"large","linkDestination":"none","className":"chama-brand-mark"} -->
-<figure class="wp-block-image aligncenter size-large chama-brand-mark"><img src="/wp-content/themes/chama-inn/assets/images/client-logo.webp" alt="Chama Station Inn"/></figure>
-<!-- /wp:image -->
-
-<!-- wp:heading {"textAlign":"center","level":1,"style":{"typography":{"fontSize":"56px","lineHeight":"1.1"},"color":{"text":"#4e4035"}}} -->
-<h1 class="wp-block-heading has-text-align-center has-text-color" style="color:#4e4035;font-size:56px;line-height:1.1">Quietly luxurious stays across from the Cumbres and Toltec depot</h1>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"21px"},"color":{"text":"#393633"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#393633;font-size:21px">A lightened Chama inn with clean comfort, welcoming service, and courtyard calm in the heart of town.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#6f8680","text":"#f7f4ee"},"border":{"radius":"999px"}}} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#f7f4ee;background-color:#6f8680">Book your stay</a></div>
-<!-- /wp:button -->
-
-<!-- wp:button {"className":"is-style-outline","style":{"border":{"radius":"999px"}}} -->
-<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" style="border-radius:999px">Explore the inn</a></div>
-<!-- /wp:button --></div>
-<!-- /wp:buttons --></div>
-<!-- /wp:group -->
-
 <!-- wp:group {"align":"full","className":"chama-home-intro","style":{"spacing":{"padding":{"top":"52px","bottom":"52px","left":"20px","right":"20px"}},"color":{"background":"#e8ddcc"}},"layout":{"type":"constrained","contentSize":"920px"}} -->
 <div class="wp-block-group alignfull chama-home-intro has-background" style="background-color:#e8ddcc;padding-top:52px;padding-right:20px;padding-bottom:52px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
 <h2 class="wp-block-heading has-text-align-center">Quiet place. Modern comfort.</h2>
@@ -236,7 +212,15 @@ return <<<'HTML'
 <!-- /wp:columns -->
 
 <!-- wp:list {"style":{"color":{"text":"#f2ede5"}}} -->
-<ul class="has-text-color" style="color:#f2ede5"><li>"Everything was within walking distance. Rooms were clean and staff were very welcoming." - Liana R, July 2023</li><li>"Rose was amazingly friendly and accommodating. We would definitely come back." - Kate M, May 2023</li><li>"This is now our first choice in Chama. Spotless room and very clean grounds." - Robert D, July 2022</li></ul>
+<ul class="has-text-color" style="color:#f2ede5"><li>"Everything was within walking distance. Rooms were clean and staff were very welcoming." - Liana R, July 2023</li><li>"Rose was amazingly friendly and accommodating. We would definitely come back." - Kate M, May 2023</li><li>"This is now our first choice in Chama. Spotless room and very clean grounds." - Robert D, July 2022</li><li>"Great location, courtyard seating, and smooth late-arrival support." - Diamond_D, October 2022</li><li>"Comfortable rooms, walkable shops and restaurants, and friendly management." - Julie E, September 2022</li><li>"Excellent service and we would recommend to family and friends." - Noemi W, June 2023</li></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading {"level":3,"textAlign":"center","style":{"color":{"text":"#f7f4ee"}}} -->
+<h3 class="wp-block-heading has-text-align-center has-text-color" style="color:#f7f4ee">Guest tips before you book</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list {"style":{"color":{"text":"#f2ede5"}}} -->
+<ul class="has-text-color" style="color:#f2ede5"><li>If stairs are a concern, request a first-floor room.</li><li>Fireplace rooms are limited and usually book first.</li><li>Some guests prefer upstairs rooms for additional quiet.</li><li>Book early during peak Cumbres and Toltec train season.</li></ul>
 <!-- /wp:list -->
 
 <!-- wp:paragraph {"align":"center","fontSize":"small","style":{"color":{"text":"#e3d3bf"}}} -->
