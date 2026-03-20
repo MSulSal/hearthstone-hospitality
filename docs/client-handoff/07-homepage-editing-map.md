@@ -35,6 +35,12 @@ If Excerpt is hidden:
   - Group
   - Separator
 
+## Quick Start Layout Pattern (Recommended)
+- In homepage editor, click `+` (block inserter).
+- Go to `Patterns -> Chama Inn`.
+- Insert **Inn Conversion Page (Light)**.
+- Replace placeholder copy with inn-specific messaging.
+
 ## 5) Logo
 - Go to `Appearance -> Customize -> Site Identity`.
 - Upload or replace the site logo.

@@ -26,7 +26,7 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 - `04-delivery-plan-and-next-phases.md` - staged implementation from prototype to production.
 - `05-brand-and-experience-alignment.md` - ties spa-like brand direction to operations UX decisions.
 - `06-build-status-before-frontend.md` - complete backend/admin accomplishment checkpoint before frontend focus.
-- `07-homepage-editing-map.md` - exact wp-admin locations for homepage edits after handoff.
+- `07-homepage-editing-map.md` - exact wp-admin locations for homepage edits after handoff, including the "Inn Conversion Page (Light)" pattern.
 - `notebooks/` - markdown presentation guides with visuals for prototype and final-app roadmap storytelling.
 - `assets/` - supporting visuals used by docs and presentation guides.
 
