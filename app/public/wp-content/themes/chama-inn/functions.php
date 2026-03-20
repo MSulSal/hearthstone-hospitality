@@ -178,23 +178,67 @@ function chama_inn_register_block_patterns(): void
         ]);
     }
 
-    $pattern_file = get_theme_file_path("patterns/inn-conversion-page.php");
+    $pattern_registry = [
+        "inn-conversion-page" => [
+            "file"        => "patterns/inn-conversion-page.php",
+            "title"       => __("Inn Conversion Page (Light)", "chama-inn"),
+            "description" => __("Editable homepage layout for a premium inn landing page and operations pitch.", "chama-inn"),
+        ],
+        "stay-rooms-page" => [
+            "file"        => "patterns/stay-rooms-page.php",
+            "title"       => __("Interior: Stay and Rooms", "chama-inn"),
+            "description" => __("Starter layout for room categories, amenities, and booking CTA.", "chama-inn"),
+        ],
+        "dining-page" => [
+            "file"        => "patterns/dining-page.php",
+            "title"       => __("Interior: Dining", "chama-inn"),
+            "description" => __("Starter layout for dining details, hours, and upcoming menu expansion.", "chama-inn"),
+        ],
+        "weddings-events-page" => [
+            "file"        => "patterns/weddings-events-page.php",
+            "title"       => __("Interior: Weddings and Events", "chama-inn"),
+            "description" => __("Starter layout for intimate wedding and private event inquiries.", "chama-inn"),
+        ],
+        "explore-chama-page" => [
+            "file"        => "patterns/explore-chama-page.php",
+            "title"       => __("Interior: Explore Chama", "chama-inn"),
+            "description" => __("Starter layout for railroad-first local exploration highlights.", "chama-inn"),
+        ],
+        "about-story-page" => [
+            "file"        => "patterns/about-story-page.php",
+            "title"       => __("Interior: About and Story", "chama-inn"),
+            "description" => __("Starter layout for restoration story, community role, and inn values.", "chama-inn"),
+        ],
+        "contact-inquiry-page" => [
+            "file"        => "patterns/contact-inquiry-page.php",
+            "title"       => __("Interior: Contact and Inquiry", "chama-inn"),
+            "description" => __("Starter layout for direct contact details, map info, and inquiry CTA.", "chama-inn"),
+        ],
+    ];
 
-    if (!file_exists($pattern_file)) {
-        return;
+    foreach ($pattern_registry as $slug => $pattern) {
+        if (!is_array($pattern) || !isset($pattern["file"], $pattern["title"], $pattern["description"])) {
+            continue;
+        }
+
+        $pattern_file = get_theme_file_path((string) $pattern["file"]);
+
+        if (!file_exists($pattern_file)) {
+            continue;
+        }
+
+        $pattern_content = include $pattern_file;
+
+        if (!is_string($pattern_content) || trim($pattern_content) === "") {
+            continue;
+        }
+
+        register_block_pattern("chama-inn/" . $slug, [
+            "title"       => $pattern["title"],
+            "description" => $pattern["description"],
+            "categories"  => ["chama-inn"],
+            "content"     => $pattern_content,
+        ]);
     }
-
-    $pattern_content = include $pattern_file;
-
-    if (!is_string($pattern_content) || trim($pattern_content) === "") {
-        return;
-    }
-
-    register_block_pattern("chama-inn/inn-conversion-page", [
-        "title"       => __("Inn Conversion Page (Light)", "chama-inn"),
-        "description" => __("Editable homepage layout for a premium inn landing page and operations pitch.", "chama-inn"),
-        "categories"  => ["chama-inn"],
-        "content"     => $pattern_content,
-    ]);
 }
 add_action("init", "chama_inn_register_block_patterns");

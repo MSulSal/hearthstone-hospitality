@@ -41,6 +41,15 @@ If Excerpt is hidden:
 - Insert **Inn Conversion Page (Light)**.
 - Replace placeholder copy with inn-specific messaging.
 
+## Interior Page Starter Patterns
+In any interior page editor, click `+ -> Patterns -> Chama Inn` and choose:
+- **Interior: Stay and Rooms**
+- **Interior: Dining**
+- **Interior: Weddings and Events**
+- **Interior: Explore Chama**
+- **Interior: About and Story**
+- **Interior: Contact and Inquiry**
+
 ## 5) Logo
 - Go to `Appearance -> Customize -> Site Identity`.
 - Upload or replace the site logo.

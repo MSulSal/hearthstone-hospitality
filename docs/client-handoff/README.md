@@ -28,7 +28,7 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 - `04-delivery-plan-and-next-phases.md` - staged implementation from prototype to production.
 - `05-brand-and-experience-alignment.md` - ties spa-like brand direction to operations UX decisions.
 - `06-build-status-before-frontend.md` - complete backend/admin accomplishment checkpoint before frontend focus.
-- `07-homepage-editing-map.md` - exact wp-admin locations for homepage edits after handoff, including the "Inn Conversion Page (Light)" pattern.
+- `07-homepage-editing-map.md` - exact wp-admin locations for homepage edits after handoff, plus interior page starter pattern usage.
 - `08-frontend-theme-lock-and-ux-system.md` - final brand/UX theme lock based on live reference sites, trust signals, and WP-native handoff constraints.
 - `09-review-signal-and-proof-points.md` - Tripadvisor-derived trust themes, safe copy lines, and launch-day claim verification rules.
 - `notebooks/` - markdown presentation guides with visuals for prototype and final-app roadmap storytelling.
