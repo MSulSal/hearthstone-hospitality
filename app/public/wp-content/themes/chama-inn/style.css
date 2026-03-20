@@ -3,7 +3,7 @@ Theme Name: Chama Inn
 Theme URI: https://chamastationinn.com
 Author: Your Name
 Description: Custom theme for Chama Station Inn
-Version: 0.3.0
+Version: 0.3.1
 Requires at least: 6.0
 Requires PHP: 8.1
 Text Domain: chama-inn
@@ -29,6 +29,54 @@ Text Domain: chama-inn
   --chama-space-md: clamp(1.2rem, 0.9rem + 1vw, 1.9rem);
   --chama-space-lg: clamp(1.8rem, 1.2rem + 1.8vw, 3rem);
   --chama-space-xl: clamp(2.6rem, 1.4rem + 3.2vw, 4.8rem);
+}
+
+body.chama-scheme-sage-retreat {
+  --chama-bg: #eef0e8;
+  --chama-bg-soft: #dfe6d8;
+  --chama-bg-deep: #cbd5c3;
+  --chama-surface: #f9faf6;
+  --chama-text: #273127;
+  --chama-text-soft: #4f5c50;
+  --chama-text-inverse: #f5f7f1;
+  --chama-muted: #687462;
+  --chama-accent: #4f5f4d;
+  --chama-accent-soft: #b9a58f;
+  --chama-accent-strong: #3d4a3b;
+  --chama-highlight: #8f7d66;
+  --chama-border: #c7d0c0;
+}
+
+body.chama-scheme-rail-burgundy {
+  --chama-bg: #f1e5dc;
+  --chama-bg-soft: #e4d4c9;
+  --chama-bg-deep: #d0b8a5;
+  --chama-surface: #fbf6f1;
+  --chama-text: #312724;
+  --chama-text-soft: #62514b;
+  --chama-text-inverse: #fbf5ee;
+  --chama-muted: #7e6c65;
+  --chama-accent: #5b202c;
+  --chama-accent-soft: #bc8f7f;
+  --chama-accent-strong: #471822;
+  --chama-highlight: #9d7353;
+  --chama-border: #d7c3b5;
+}
+
+body.chama-scheme-desert-contrast {
+  --chama-bg: #f8f4ee;
+  --chama-bg-soft: #ebe2d7;
+  --chama-bg-deep: #decfbe;
+  --chama-surface: #ffffff;
+  --chama-text: #1e1b19;
+  --chama-text-soft: #413a35;
+  --chama-text-inverse: #ffffff;
+  --chama-muted: #6a6d66;
+  --chama-accent: #57202f;
+  --chama-accent-soft: #c28f79;
+  --chama-accent-strong: #3c1620;
+  --chama-highlight: #9c7a4f;
+  --chama-border: #d9cfbf;
 }
 
 *,

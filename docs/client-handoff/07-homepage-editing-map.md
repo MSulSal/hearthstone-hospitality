@@ -50,6 +50,17 @@ If Excerpt is hidden:
 - Footer now auto-generates year and site title.
 - Site title can be edited in `Settings -> General`.
 
+## 7) Color Scheme Switcher (Fast Demo Mode)
+- Go to `Appearance -> Customize -> Chama Inn Design`.
+- Change **Color Scheme** to one of:
+  - Sunrise Plaster (Default)
+  - Sage Retreat
+  - Rail Burgundy
+  - Desert Contrast
+- Publish to apply instantly site-wide.
+
+This lets you compare client preferences without touching CSS.
+
 ## Recommended Content Blocks
 
 For this inn profile (small, premium, spa-like), homepage should usually include:
