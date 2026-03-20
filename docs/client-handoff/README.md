@@ -17,6 +17,8 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 5. Customize labels and wording with `00-term-mapping-workbook.md`.
 6. Review implementation checkpoint in `06-build-status-before-frontend.md`.
 7. Use `07-homepage-editing-map.md` for WP-native homepage editing handoff.
+8. Lock visual/UX direction with `08-frontend-theme-lock-and-ux-system.md`.
+9. Pull trust/copy proof points from `09-review-signal-and-proof-points.md`.
 
 ## Files
 - `00-term-mapping-workbook.md` - replaces prototype language with inn-specific wording.
@@ -27,6 +29,8 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 - `05-brand-and-experience-alignment.md` - ties spa-like brand direction to operations UX decisions.
 - `06-build-status-before-frontend.md` - complete backend/admin accomplishment checkpoint before frontend focus.
 - `07-homepage-editing-map.md` - exact wp-admin locations for homepage edits after handoff, including the "Inn Conversion Page (Light)" pattern.
+- `08-frontend-theme-lock-and-ux-system.md` - final brand/UX theme lock based on live reference sites, trust signals, and WP-native handoff constraints.
+- `09-review-signal-and-proof-points.md` - Tripadvisor-derived trust themes, safe copy lines, and launch-day claim verification rules.
 - `notebooks/` - markdown presentation guides with visuals for prototype and final-app roadmap storytelling.
 - `assets/` - supporting visuals used by docs and presentation guides.
 

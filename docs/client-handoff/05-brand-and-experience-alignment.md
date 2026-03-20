@@ -1,5 +1,8 @@
 # 05) Brand and Experience Alignment for Chama Station Inn
 
+For the locked frontend visual/UX implementation brief, see:
+`08-frontend-theme-lock-and-ux-system.md`.
+
 ## Brand direction reflected in public presence
 The current public title metadata emphasizes a luxury accommodation identity while the live page remains in coming-soon mode.
 
