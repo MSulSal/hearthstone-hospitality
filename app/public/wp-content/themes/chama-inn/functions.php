@@ -211,15 +211,21 @@ function chama_inn_get_core_page_blueprint(): array
             "pattern" => "patterns/stay-rooms-page.php",
         ],
         [
-            "title"   => __("Dining", "chama-inn"),
+            "title"   => __("Restaurant", "chama-inn"),
             "slug"    => "dining",
-            "excerpt" => __("Current dining details and upcoming additions.", "chama-inn"),
+            "excerpt" => __("Current restaurant details, hours, and guest dining options.", "chama-inn"),
             "pattern" => "patterns/dining-page.php",
+        ],
+        [
+            "title"   => __("Gift Shop", "chama-inn"),
+            "slug"    => "gift-shop",
+            "excerpt" => __("Curated goods, local finds, and rail-town keepsakes.", "chama-inn"),
+            "pattern" => "patterns/gift-shop-page.php",
         ],
         [
             "title"   => __("Weddings & Events", "chama-inn"),
             "slug"    => "weddings-events",
-            "excerpt" => __("Inquire about intimate weddings and private events.", "chama-inn"),
+            "excerpt" => __("Optional private gatherings and celebration inquiries.", "chama-inn"),
             "pattern" => "patterns/weddings-events-page.php",
         ],
         [
@@ -231,7 +237,7 @@ function chama_inn_get_core_page_blueprint(): array
         [
             "title"   => __("About / Our Story", "chama-inn"),
             "slug"    => "about-our-story",
-            "excerpt" => __("Restoration story, inn values, and place-based identity.", "chama-inn"),
+            "excerpt" => __("Inn story, values, and place-based identity.", "chama-inn"),
             "pattern" => "patterns/about-story-page.php",
         ],
         [
@@ -306,9 +312,10 @@ function chama_inn_set_default_nav_menu(array $pages_by_slug): void
         "home",
         "stay-rooms",
         "dining",
-        "weddings-events",
+        "gift-shop",
         "explore-chama",
         "about-our-story",
+        "weddings-events",
         "contact",
     ];
 
@@ -359,6 +366,26 @@ function chama_inn_ensure_core_pages(): void
 
         if ($existing instanceof WP_Post) {
             $pages_by_slug[$slug] = (int) $existing->ID;
+
+            $sync_payload = [
+                "ID" => (int) $existing->ID,
+            ];
+            $needs_sync = false;
+
+            if ((string) $existing->post_title !== (string) $page_definition["title"]) {
+                $sync_payload["post_title"] = (string) $page_definition["title"];
+                $needs_sync = true;
+            }
+
+            if ((string) $existing->post_excerpt !== (string) $page_definition["excerpt"]) {
+                $sync_payload["post_excerpt"] = (string) $page_definition["excerpt"];
+                $needs_sync = true;
+            }
+
+            if ($needs_sync) {
+                wp_update_post($sync_payload);
+            }
+
             continue;
         }
 
@@ -424,7 +451,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 3;
+    $target_version = 4;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -451,12 +478,18 @@ function chama_inn_migrate_seeded_copy(): void
         "<strong>Dining note:</strong> Keep promises specific and credible. Show what guests can enjoy now, then label upcoming additions as \"coming soon.\"</p>" => "<strong>Dining update:</strong> The inn continues to expand guest dining options while keeping clear, reliable recommendations available now.</p>",
         "Lead with the railroad experience, then curate a short set of nearby outdoor and local-town highlights." => "Start with the historic railroad, then explore nearby trails, local shops, and mountain-town views at your own pace.",
         "Keep this final section simple: one booking action, one inquiry action, and clear contact details." => "Planning a train weekend, event trip, or quiet getaway? Our team can help you choose the right room and dates.",
+        "Dining that supports the stay" => "Restaurant and dining",
+        "Weddings and events" => "Gift shop highlights",
+        "Position this for intimate weddings, rehearsal dinners, and private gatherings with a warm, romantic, New Mexico setting." => "Feature locally inspired goods, railroad memorabilia, and practical travel essentials guests can purchase on-site or online.",
+        "Start event inquiry" => "Browse gift ideas",
+        "Intimate celebrations in a calm Chama setting" => "Optional private gatherings in a calm Chama setting",
     ];
 
     $slugs_to_scan = [
         "home",
         "stay-rooms",
         "dining",
+        "gift-shop",
         "weddings-events",
         "explore-chama",
         "about-our-story",
@@ -570,8 +603,13 @@ function chama_inn_register_block_patterns(): void
         ],
         "dining-page" => [
             "file"        => "patterns/dining-page.php",
-            "title"       => __("Interior: Dining", "chama-inn"),
-            "description" => __("Starter layout for dining details, hours, and upcoming menu expansion.", "chama-inn"),
+            "title"       => __("Interior: Restaurant", "chama-inn"),
+            "description" => __("Starter layout for restaurant details, hours, and menu direction.", "chama-inn"),
+        ],
+        "gift-shop-page" => [
+            "file"        => "patterns/gift-shop-page.php",
+            "title"       => __("Interior: Gift Shop", "chama-inn"),
+            "description" => __("Starter layout for gift catalog, purchase flow, and fulfillment notes.", "chama-inn"),
         ],
         "weddings-events-page" => [
             "file"        => "patterns/weddings-events-page.php",

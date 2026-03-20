@@ -150,7 +150,7 @@ return <<<'HTML'
 <div class="wp-block-group alignfull chama-home-dining has-background" style="background-color:#f7f4ee;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:columns {"verticalAlignment":"center","style":{"spacing":{"blockGap":{"left":"30px"}}}} -->
 <div class="wp-block-columns are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"58%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:58%"><!-- wp:heading -->
-<h2 class="wp-block-heading">Dining that supports the stay</h2>
+<h2 class="wp-block-heading">Restaurant and dining</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -174,16 +174,16 @@ return <<<'HTML'
 
 <!-- wp:group {"align":"full","className":"chama-home-events","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#e8ddcc"}},"layout":{"type":"constrained","contentSize":"940px"}} -->
 <div class="wp-block-group alignfull chama-home-events has-background" style="background-color:#e8ddcc;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
-<h2 class="wp-block-heading has-text-align-center">Weddings and events</h2>
+<h2 class="wp-block-heading has-text-align-center">Gift shop highlights</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center">Position this for intimate weddings, rehearsal dinners, and private gatherings with a warm, romantic, New Mexico setting.</p>
+<p class="has-text-align-center">Feature locally inspired goods, railroad memorabilia, and practical travel essentials guests can purchase on-site or online.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 <div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#9a6a45","text":"#f7f4ee"},"border":{"radius":"999px"}}} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#f7f4ee;background-color:#9a6a45">Start event inquiry</a></div>
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#f7f4ee;background-color:#9a6a45">Browse gift ideas</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->

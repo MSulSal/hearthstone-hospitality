@@ -19,6 +19,7 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 7. Use `07-homepage-editing-map.md` for WP-native homepage editing handoff.
 8. Lock visual/UX direction with `08-frontend-theme-lock-and-ux-system.md`.
 9. Pull trust/copy proof points from `09-review-signal-and-proof-points.md`.
+10. Collect final brand/content assets with `10-content-intake-for-final-visual-pass.md`.
 
 ## Files
 - `00-term-mapping-workbook.md` - replaces prototype language with inn-specific wording.
@@ -31,6 +32,7 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 - `07-homepage-editing-map.md` - exact wp-admin locations for homepage edits after handoff, plus interior page starter pattern usage.
 - `08-frontend-theme-lock-and-ux-system.md` - final brand/UX theme lock based on live reference sites, trust signals, and WP-native handoff constraints.
 - `09-review-signal-and-proof-points.md` - Tripadvisor-derived trust themes, safe copy lines, and launch-day claim verification rules.
+- `10-content-intake-for-final-visual-pass.md` - exact client inputs needed to finalize visuals before full operations modules are connected.
 - `notebooks/` - markdown presentation guides with visuals for prototype and final-app roadmap storytelling.
 - `assets/` - supporting visuals used by docs and presentation guides.
 
