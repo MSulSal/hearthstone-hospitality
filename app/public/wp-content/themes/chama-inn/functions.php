@@ -491,7 +491,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 6;
+    $target_version = 7;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -561,6 +561,8 @@ function chama_inn_migrate_seeded_copy(): void
                 "Client-provided image set applied for this draft. Swap individual photos in Theme Editor if needed.",
                 "Clean, comfortable, cozy, and right across from the station.",
                 "Quietly luxurious stays across from the Cumbres and Toltec depot",
+                "chama-brand-mark",
+                "csi-32.jpg",
             ];
             $should_refresh_home = false;
 

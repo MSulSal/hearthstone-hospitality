@@ -16,7 +16,7 @@ get_header();
                 $hero_image_url = get_theme_file_uri('assets/images/csi-assets/csi-31.jpg');
             }
             $hero_style     = $hero_image_url !== false
-                ? ' style="background-image:url(' . esc_url($hero_image_url) . ');"'
+                ? ' style="background-image:linear-gradient(rgba(199,154,99,0.56), rgba(199,154,99,0.56)),url(' . esc_url($hero_image_url) . ');background-blend-mode:color;"'
                 : '';
             ?>
             <article id="post-<?php the_ID(); ?>" <?php post_class('home-page'); ?>>

@@ -105,8 +105,8 @@ return <<<'HTML'
 <!-- /wp:column -->
 
 <!-- wp:column -->
-<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
-<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-32.jpg" alt="Courtyard seating and garden space"/></figure>
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame is-inn-refresh-tint"} -->
+<figure class="wp-block-image size-large chama-photo-frame is-inn-refresh-tint"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-30.jpg" alt="Inn exterior color-tinted to the refreshed stucco palette"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 

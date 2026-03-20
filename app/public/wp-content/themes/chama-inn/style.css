@@ -691,6 +691,23 @@ iframe {
   filter: sepia(34%) saturate(78%) hue-rotate(-30deg) brightness(1.05);
 }
 
+.chama-photo-frame.is-inn-refresh-tint {
+  position: relative;
+}
+
+.chama-photo-frame.is-inn-refresh-tint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(199, 154, 99, 0.44);
+  mix-blend-mode: color;
+  pointer-events: none;
+}
+
+.chama-photo-frame.is-inn-refresh-tint img {
+  filter: saturate(68%) contrast(0.95) brightness(1.03);
+}
+
 .home-content .chama-mini-metric {
   display: inline-block;
   margin-right: 0.55rem;
