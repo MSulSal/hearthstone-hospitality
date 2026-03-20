@@ -34,7 +34,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center">Chama Station Inn is being reimagined for guests who want authentic railroad-town character with cleaner finishes, softer pacing, and reliable hospitality.</p>
+<p class="has-text-align-center">Chama Station Inn offers clean, comfortable rooms, warm service, and a calmer pace across from the depot and close to downtown.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -44,7 +44,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center">Feature up to three room experiences here so guests can choose quickly and confidently.</p>
+<p class="has-text-align-center">Choose from nine thoughtfully prepared rooms designed for comfort, quiet sleep, and easy access to the train and downtown.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"20px"}}}} -->
@@ -55,7 +55,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Use this card for a room category that highlights regional details and classic character.</p>
+<p>Character-forward rooms with thoughtful details, comfortable bedding, and practical layouts for train travelers and weekend guests.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
@@ -67,7 +67,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Use this card for bright rooms, premium bedding, and a slower restorative atmosphere.</p>
+<p>Bright, quiet rooms designed for restorative nights and easy mornings before exploring Chama.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
@@ -79,7 +79,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Use this card for families or longer stays looking for space and easy downtown/train access.</p>
+<p>Extra-space options for couples, families, and longer stays who want walkable convenience and mountain-town calm.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
@@ -100,11 +100,11 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Use this section to show flowers, outdoor seating, fresh air, and the quiet rhythm guests remember after their stay.</p>
+<p>Courtyard seating, mountain air, and a slower rhythm make the inn feel both grounded and quietly premium.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>Keep the tone intimate and restorative, not resort-scale.</p>
+<p>Ideal for couples, families, and rail travelers who want a welcoming home base in Chama.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column -->
 
@@ -116,6 +116,36 @@ return <<<'HTML'
 <!-- /wp:columns --></div>
 <!-- /wp:group -->
 
+<!-- wp:group {"align":"full","className":"chama-home-gallery","style":{"spacing":{"padding":{"top":"50px","bottom":"50px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"1080px"}} -->
+<div class="wp-block-group alignfull chama-home-gallery has-background" style="background-color:#f7f4ee;padding-top:50px;padding-right:20px;padding-bottom:50px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
+<h2 class="wp-block-heading has-text-align-center">See the inn</h2>
+<!-- /wp:heading -->
+
+<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"16px"}}}} -->
+<div class="wp-block-columns"><!-- wp:column -->
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
+<figure class="wp-block-image size-large chama-photo-frame"><img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/09/63/1f/64/chama-station-inn.jpg?w=900&amp;h=600&amp;s=1" alt="Chama Station Inn exterior and garden side elevation"/></figure>
+<!-- /wp:image --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
+<figure class="wp-block-image size-large chama-photo-frame"><img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0d/76/17/9d/chama-station-inn.jpg?w=900&amp;h=500&amp;s=1" alt="Chama Station Inn exterior view"/></figure>
+<!-- /wp:image --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
+<figure class="wp-block-image size-large chama-photo-frame"><img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/06/30/3e/1b/chama-station-inn.jpg?w=900&amp;h=650&amp;s=1" alt="Chama Station Inn balcony and facade"/></figure>
+<!-- /wp:image --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
+
+<!-- wp:paragraph {"align":"center","fontSize":"small"} -->
+<p class="has-text-align-center has-small-font-size">Temporary demo images. Replace with current client-owned photos before production launch.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
 <!-- wp:group {"align":"full","className":"chama-home-dining","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"1080px"}} -->
 <div class="wp-block-group alignfull chama-home-dining has-background" style="background-color:#f7f4ee;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:columns {"verticalAlignment":"center","style":{"spacing":{"blockGap":{"left":"30px"}}}} -->
 <div class="wp-block-columns are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"58%"} -->
@@ -124,18 +154,18 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Present current food-and-beverage reality clearly, then leave space for future additions such as expanded dinner service, market items, and a fuller bar program.</p>
+<p>Dining around the inn keeps your stay easy: quick coffee options, walkable local favorites, and growing on-site offerings over time.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:list -->
-<ul><li>On-site convenience for train travelers and weekend guests</li><li>Seasonal and local flavor where possible</li><li>Clear operating hours and easy access to menus</li></ul>
+<ul><li>Easy options before and after your train day</li><li>Walkable choices in the heart of town</li><li>Clear hours and simple dining guidance at check-in</li></ul>
 <!-- /wp:list --></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"center","width":"42%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:42%"><!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
 <div class="wp-block-group chama-card"><!-- wp:paragraph -->
-<p><strong>Dining note:</strong> Keep promises specific and credible. Show what guests can enjoy now, then label upcoming additions as "coming soon."</p>
+<p><strong>Dining update:</strong> The inn continues to expand guest dining options while keeping clear, reliable recommendations available now.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
@@ -164,7 +194,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center">Lead with the railroad experience, then curate a short set of nearby outdoor and local-town highlights.</p>
+<p class="has-text-align-center">Start with the historic railroad, then explore nearby trails, local shops, and mountain-town views at your own pace.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:list {"className":"is-style-checkmark-list"} -->
@@ -178,16 +208,32 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center","style":{"color":{"text":"#f2ede5"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#f2ede5">Use this trust area for verified, review-backed themes: clean rooms, friendly service, train convenience, and restful stays.</p>
+<p class="has-text-align-center has-text-color" style="color:#f2ede5">Review themes consistently mention clean rooms, friendly hospitality, and easy train-station convenience.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"align":"center","style":{"color":{"text":"#f2ede5"}}} -->
 <p class="has-text-align-center has-text-color" style="color:#f2ede5"><span class="chama-mini-metric">4.4 / 5 rating*</span><span class="chama-mini-metric">115 reviews*</span><span class="chama-mini-metric">#2 of 7 hotels*</span></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:quote {"textAlign":"center"} -->
-<blockquote class="wp-block-quote has-text-align-center"><p>"Clean, comfortable, welcoming, and perfectly placed for railroad travelers."</p></blockquote>
-<!-- /wp:quote -->
+<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"20px"}}}} -->
+<div class="wp-block-columns"><!-- wp:column -->
+<div class="wp-block-column"><!-- wp:quote -->
+<blockquote class="wp-block-quote"><p>"Clean, comfortable, cozy, and right across from the station."</p></blockquote>
+<!-- /wp:quote --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:quote -->
+<blockquote class="wp-block-quote"><p>"Friendly team, easy check-in, and walkable to everything we needed."</p></blockquote>
+<!-- /wp:quote --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:quote -->
+<blockquote class="wp-block-quote"><p>"Courtyard calm and quiet nights made this an easy repeat stay."</p></blockquote>
+<!-- /wp:quote --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
 
 <!-- wp:paragraph {"align":"center","fontSize":"small","style":{"color":{"text":"#e3d3bf"}}} -->
 <p class="has-text-align-center has-text-color has-small-font-size" style="color:#e3d3bf">*Update review metrics before publishing. See client handoff doc 09.</p>
@@ -200,7 +246,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center">Keep this final section simple: one booking action, one inquiry action, and clear contact details.</p>
+<p class="has-text-align-center">Planning a train weekend, event trip, or quiet getaway? Our team can help you choose the right room and dates.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->

@@ -174,6 +174,27 @@ function chama_inn_get_header_cta_label(): string
     return $label;
 }
 
+function chama_inn_get_packaged_logo_uri(): string
+{
+    $relative_paths = [
+        "assets/images/client-logo.webp",
+        "assets/images/client-logo.png",
+        "assets/images/client-logo.jpg",
+        "assets/images/client-logo.jpeg",
+        "assets/images/client-logo.svg",
+    ];
+
+    foreach ($relative_paths as $relative_path) {
+        $absolute_path = get_theme_file_path($relative_path);
+
+        if (file_exists($absolute_path)) {
+            return get_theme_file_uri($relative_path);
+        }
+    }
+
+    return "";
+}
+
 function chama_inn_get_core_page_blueprint(): array
 {
     return [
@@ -396,6 +417,133 @@ function chama_inn_created_pages_notice(): void
     echo "</p></div>";
 }
 add_action("admin_notices", "chama_inn_created_pages_notice");
+
+function chama_inn_migrate_seeded_copy(): void
+{
+    if (!is_admin() || !current_user_can("manage_options")) {
+        return;
+    }
+
+    $target_version = 3;
+    $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
+
+    if ($current_version >= $target_version) {
+        return;
+    }
+
+    $replacements = [
+        "Restored railroad inn in Chama, New Mexico" => "Boutique railroad-town inn in Chama, New Mexico",
+        "restored railroad inn in chama, new mexico" => "Boutique railroad-town inn in Chama, New Mexico",
+        "A lightened historic inn with clean comfort, welcoming service, and courtyard calm in the heart of Chama." => "A lightened Chama inn with clean comfort, welcoming service, and courtyard calm in the heart of town.",
+        "Historic place. Modern comfort." => "Quiet place. Modern comfort.",
+        "Use this card for a room category that highlights historic details and classic character." => "Character-forward rooms with thoughtful details, comfortable bedding, and practical layouts for train travelers and weekend guests.",
+        "Use this card for bright rooms, premium bedding, and a slower restorative atmosphere." => "Bright, quiet rooms designed for restorative nights and easy mornings before exploring Chama.",
+        "Use this card for families or longer stays looking for space and easy downtown/train access." => "Extra-space options for couples, families, and longer stays who want walkable convenience and mountain-town calm.",
+        "Use this section to show flowers, outdoor seating, fresh air, and the quiet rhythm guests remember after their stay." => "Courtyard seating, mountain air, and a slower rhythm make the inn feel both grounded and quietly premium.",
+        "Use this trust area for verified, review-backed themes: clean rooms, friendly service, train convenience, and restful stays." => "Review themes consistently mention clean rooms, friendly hospitality, and easy train-station convenience.",
+        "A historic inn, thoughtfully restored for modern Chama stays" => "A boutique Chama inn with regional character and modern comfort",
+        "Use this page to connect heritage, restoration, and the inn's long-term vision for guests and community." => "Use this page to connect place, hospitality style, and the inn's long-term vision for guests and community.",
+        "Intimate celebrations in a restored Chama setting" => "Intimate celebrations in a calm Chama setting",
+        "Feature up to three room experiences here so guests can choose quickly and confidently." => "Choose from nine thoughtfully prepared rooms designed for comfort, quiet sleep, and easy access to the train and downtown.",
+        "Keep the tone intimate and restorative, not resort-scale." => "Ideal for couples, families, and rail travelers who want a welcoming home base in Chama.",
+        "Present current food-and-beverage reality clearly, then leave space for future additions such as expanded dinner service, market items, and a fuller bar program." => "Dining around the inn keeps your stay easy: quick coffee options, walkable local favorites, and growing on-site offerings over time.",
+        "<li>On-site convenience for train travelers and weekend guests</li><li>Seasonal and local flavor where possible</li><li>Clear operating hours and easy access to menus</li>" => "<li>Easy options before and after your train day</li><li>Walkable choices in the heart of town</li><li>Clear hours and simple dining guidance at check-in</li>",
+        "<strong>Dining note:</strong> Keep promises specific and credible. Show what guests can enjoy now, then label upcoming additions as \"coming soon.\"</p>" => "<strong>Dining update:</strong> The inn continues to expand guest dining options while keeping clear, reliable recommendations available now.</p>",
+        "Lead with the railroad experience, then curate a short set of nearby outdoor and local-town highlights." => "Start with the historic railroad, then explore nearby trails, local shops, and mountain-town views at your own pace.",
+        "Keep this final section simple: one booking action, one inquiry action, and clear contact details." => "Planning a train weekend, event trip, or quiet getaway? Our team can help you choose the right room and dates.",
+    ];
+
+    $slugs_to_scan = [
+        "home",
+        "stay-rooms",
+        "dining",
+        "weddings-events",
+        "explore-chama",
+        "about-our-story",
+        "contact",
+    ];
+
+    $updated_pages = 0;
+
+    foreach ($slugs_to_scan as $slug) {
+        $page = get_page_by_path($slug, OBJECT, "page");
+
+        if (!($page instanceof WP_Post)) {
+            continue;
+        }
+
+        $original_content = (string) $page->post_content;
+        $updated_content  = strtr($original_content, $replacements);
+
+        if ($slug === "home") {
+            $legacy_markers = [
+                "A calm mountain stay, supported by modern inn operations",
+                "Spa style comfort in historic Chama, New Mexico",
+                "Use this section for your primary promise.",
+                "Restored railroad inn in Chama, New Mexico",
+                "restored railroad inn in chama, new mexico",
+            ];
+            $should_refresh_home = false;
+
+            foreach ($legacy_markers as $marker) {
+                if (strpos($updated_content, $marker) !== false) {
+                    $should_refresh_home = true;
+                    break;
+                }
+            }
+
+            if ($should_refresh_home) {
+                $fresh_home_pattern = chama_inn_load_pattern_content("patterns/inn-conversion-page.php");
+
+                if ($fresh_home_pattern !== "") {
+                    $updated_content = $fresh_home_pattern;
+                }
+            }
+        }
+
+        if ($updated_content === $original_content) {
+            continue;
+        }
+
+        wp_update_post([
+            "ID"           => (int) $page->ID,
+            "post_content" => $updated_content,
+        ]);
+
+        $updated_pages++;
+    }
+
+    update_option("chama_inn_copy_migration_version", $target_version, false);
+
+    if ($updated_pages > 0) {
+        update_option("chama_inn_copy_migration_count", $updated_pages, false);
+    }
+}
+add_action("admin_init", "chama_inn_migrate_seeded_copy");
+
+function chama_inn_copy_migration_notice(): void
+{
+    if (!current_user_can("manage_options")) {
+        return;
+    }
+
+    $updated_pages = (int) get_option("chama_inn_copy_migration_count", 0);
+
+    if ($updated_pages <= 0) {
+        return;
+    }
+
+    delete_option("chama_inn_copy_migration_count");
+
+    echo '<div class="notice notice-success is-dismissible"><p>';
+    echo esc_html(sprintf(
+        /* translators: %d: number of pages updated */
+        __("Chama Inn content update applied to %d page(s) with refined copy and testimonial blocks.", "chama-inn"),
+        $updated_pages
+    ));
+    echo "</p></div>";
+}
+add_action("admin_notices", "chama_inn_copy_migration_notice");
 
 function chama_inn_register_block_patterns(): void
 {

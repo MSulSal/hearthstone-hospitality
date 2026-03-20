@@ -5,6 +5,9 @@ if (!defined('ABSPATH')) {
 
 $header_cta_url   = function_exists('chama_inn_get_header_cta_url') ? chama_inn_get_header_cta_url() : home_url('/contact');
 $header_cta_label = function_exists('chama_inn_get_header_cta_label') ? chama_inn_get_header_cta_label() : __('Book Your Stay', 'chama-inn');
+$packaged_logo_uri = function_exists('chama_inn_get_packaged_logo_uri') ? chama_inn_get_packaged_logo_uri() : '';
+$site_name = get_bloginfo('name');
+$show_site_title = true;
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -22,15 +25,25 @@ $header_cta_label = function_exists('chama_inn_get_header_cta_label') ? chama_in
 <header class="site-header">
     <div class="site-header__inner">
         <div class="site-header__brand">
-            <?php if (function_exists('the_custom_logo') && has_custom_logo()) : ?>
+            <?php if ($packaged_logo_uri !== '') : ?>
+                <div class="site-header__logo">
+                    <a class="site-header__logo-link" href="<?php echo esc_url(home_url('/')); ?>">
+                        <img class="site-header__logo-image" src="<?php echo esc_url($packaged_logo_uri); ?>" alt="<?php echo esc_attr($site_name); ?>">
+                    </a>
+                </div>
+                <?php $show_site_title = false; ?>
+            <?php elseif (function_exists('the_custom_logo') && has_custom_logo()) : ?>
                 <div class="site-header__logo">
                     <?php the_custom_logo(); ?>
                 </div>
+                <?php $show_site_title = false; ?>
             <?php endif; ?>
 
-            <a class="site-header__title" href="<?php echo esc_url(home_url('/')); ?>">
-                <?php echo esc_html(get_bloginfo('name')); ?>
-            </a>
+            <?php if ($show_site_title) : ?>
+                <a class="site-header__title" href="<?php echo esc_url(home_url('/')); ?>">
+                    <?php echo esc_html($site_name); ?>
+                </a>
+            <?php endif; ?>
         </div>
 
         <button class="site-header__menu-toggle" type="button" aria-expanded="false" aria-controls="site-header-panel">

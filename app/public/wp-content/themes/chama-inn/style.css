@@ -268,6 +268,15 @@ iframe {
   max-height: 48px;
 }
 
+.site-header__logo-link {
+  display: inline-flex;
+}
+
+.site-header__logo-image {
+  width: auto;
+  max-height: 48px;
+}
+
 .site-header__title {
   font-family: "Fraunces", Georgia, "Times New Roman", serif;
   font-size: clamp(1.03rem, 0.98rem + 0.2vw, 1.14rem);
@@ -645,6 +654,21 @@ iframe {
 
 .home-content .chama-card .wp-block-heading {
   margin-bottom: 0.5rem;
+}
+
+.home-content .chama-photo-frame {
+  margin-bottom: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--chama-border);
+  background: var(--chama-bg-soft);
+}
+
+.home-content .chama-photo-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: sepia(16%) saturate(88%) hue-rotate(-12deg) brightness(1.02);
 }
 
 .home-content .chama-mini-metric {
