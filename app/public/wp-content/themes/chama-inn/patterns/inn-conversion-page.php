@@ -5,21 +5,21 @@ if (!defined("ABSPATH")) {
 
 return <<<'HTML'
 <!-- wp:group {"align":"full","className":"chama-home-hero","style":{"spacing":{"padding":{"top":"92px","bottom":"84px","left":"20px","right":"20px"}},"color":{"background":"#f3eadf"}},"layout":{"type":"constrained","contentSize":"980px"}} -->
-<div class="wp-block-group alignfull chama-home-hero has-background" style="background-color:#f3eadf;padding-top:92px;padding-right:20px;padding-bottom:84px;padding-left:20px"><!-- wp:paragraph {"align":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.12em","fontSize":"13px"},"color":{"text":"#6b2e37"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#6b2e37;font-size:13px;letter-spacing:0.12em;text-transform:uppercase">Restored railroad inn in Chama, New Mexico</p>
+<div class="wp-block-group alignfull chama-home-hero has-background" style="background-color:#f3eadf;padding-top:92px;padding-right:20px;padding-bottom:84px;padding-left:20px"><!-- wp:paragraph {"align":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.12em","fontSize":"13px"},"color":{"text":"#6f8680"}}} -->
+<p class="has-text-align-center has-text-color" style="color:#6f8680;font-size:13px;letter-spacing:0.12em;text-transform:uppercase">Restored railroad inn in Chama, New Mexico</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:heading {"textAlign":"center","level":1,"style":{"typography":{"fontSize":"56px","lineHeight":"1.1"},"color":{"text":"#2e2c2a"}}} -->
-<h1 class="wp-block-heading has-text-align-center has-text-color" style="color:#2e2c2a;font-size:56px;line-height:1.1">Quietly luxurious stays across from the Cumbres and Toltec depot</h1>
+<!-- wp:heading {"textAlign":"center","level":1,"style":{"typography":{"fontSize":"56px","lineHeight":"1.1"},"color":{"text":"#4e4035"}}} -->
+<h1 class="wp-block-heading has-text-align-center has-text-color" style="color:#4e4035;font-size:56px;line-height:1.1">Quietly luxurious stays across from the Cumbres and Toltec depot</h1>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"21px"},"color":{"text":"#5a544d"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#5a544d;font-size:21px">A lightened historic inn with clean comfort, welcoming service, and courtyard calm in the heart of Chama.</p>
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"21px"},"color":{"text":"#393633"}}} -->
+<p class="has-text-align-center has-text-color" style="color:#393633;font-size:21px">A lightened historic inn with clean comfort, welcoming service, and courtyard calm in the heart of Chama.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#6b2e37","text":"#fbf7f1"},"border":{"radius":"999px"}}} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#fbf7f1;background-color:#6b2e37">Book your stay</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#6f8680","text":"#f7f4ee"},"border":{"radius":"999px"}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#f7f4ee;background-color:#6f8680">Book your stay</a></div>
 <!-- /wp:button -->
 
 <!-- wp:button {"className":"is-style-outline","style":{"border":{"radius":"999px"}}} -->
@@ -28,8 +28,8 @@ return <<<'HTML'
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"align":"full","className":"chama-home-intro","style":{"spacing":{"padding":{"top":"52px","bottom":"52px","left":"20px","right":"20px"}},"color":{"background":"#e9decf"}},"layout":{"type":"constrained","contentSize":"920px"}} -->
-<div class="wp-block-group alignfull chama-home-intro has-background" style="background-color:#e9decf;padding-top:52px;padding-right:20px;padding-bottom:52px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
+<!-- wp:group {"align":"full","className":"chama-home-intro","style":{"spacing":{"padding":{"top":"52px","bottom":"52px","left":"20px","right":"20px"}},"color":{"background":"#e8ddcc"}},"layout":{"type":"constrained","contentSize":"920px"}} -->
+<div class="wp-block-group alignfull chama-home-intro has-background" style="background-color:#e8ddcc;padding-top:52px;padding-right:20px;padding-bottom:52px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
 <h2 class="wp-block-heading has-text-align-center">Historic place. Modern comfort.</h2>
 <!-- /wp:heading -->
 
@@ -38,8 +38,8 @@ return <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"align":"full","className":"chama-home-stay","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#fffdf8"}},"layout":{"type":"constrained","contentSize":"1080px"}} -->
-<div class="wp-block-group alignfull chama-home-stay has-background" style="background-color:#fffdf8;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
+<!-- wp:group {"align":"full","className":"chama-home-stay","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"1080px"}} -->
+<div class="wp-block-group alignfull chama-home-stay has-background" style="background-color:#f7f4ee;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
 <h2 class="wp-block-heading has-text-align-center">Stay / Rooms</h2>
 <!-- /wp:heading -->
 
@@ -116,8 +116,8 @@ return <<<'HTML'
 <!-- /wp:columns --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"align":"full","className":"chama-home-dining","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#fffdf8"}},"layout":{"type":"constrained","contentSize":"1080px"}} -->
-<div class="wp-block-group alignfull chama-home-dining has-background" style="background-color:#fffdf8;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:columns {"verticalAlignment":"center","style":{"spacing":{"blockGap":{"left":"30px"}}}} -->
+<!-- wp:group {"align":"full","className":"chama-home-dining","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"1080px"}} -->
+<div class="wp-block-group alignfull chama-home-dining has-background" style="background-color:#f7f4ee;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:columns {"verticalAlignment":"center","style":{"spacing":{"blockGap":{"left":"30px"}}}} -->
 <div class="wp-block-columns are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center","width":"58%"} -->
 <div class="wp-block-column is-vertically-aligned-center" style="flex-basis:58%"><!-- wp:heading -->
 <h2 class="wp-block-heading">Dining that supports the stay</h2>
@@ -142,8 +142,8 @@ return <<<'HTML'
 <!-- /wp:columns --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"align":"full","className":"chama-home-events","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#e9decf"}},"layout":{"type":"constrained","contentSize":"940px"}} -->
-<div class="wp-block-group alignfull chama-home-events has-background" style="background-color:#e9decf;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
+<!-- wp:group {"align":"full","className":"chama-home-events","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#e8ddcc"}},"layout":{"type":"constrained","contentSize":"940px"}} -->
+<div class="wp-block-group alignfull chama-home-events has-background" style="background-color:#e8ddcc;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
 <h2 class="wp-block-heading has-text-align-center">Weddings and events</h2>
 <!-- /wp:heading -->
 
@@ -152,14 +152,14 @@ return <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#6b2e37","text":"#fbf7f1"},"border":{"radius":"999px"}}} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#fbf7f1;background-color:#6b2e37">Start event inquiry</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#9a6a45","text":"#f7f4ee"},"border":{"radius":"999px"}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#f7f4ee;background-color:#9a6a45">Start event inquiry</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"align":"full","className":"chama-home-explore","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#fffdf8"}},"layout":{"type":"constrained","contentSize":"980px"}} -->
-<div class="wp-block-group alignfull chama-home-explore has-background" style="background-color:#fffdf8;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
+<!-- wp:group {"align":"full","className":"chama-home-explore","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"980px"}} -->
+<div class="wp-block-group alignfull chama-home-explore has-background" style="background-color:#f7f4ee;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
 <h2 class="wp-block-heading has-text-align-center">Explore Chama</h2>
 <!-- /wp:heading -->
 
@@ -172,25 +172,25 @@ return <<<'HTML'
 <!-- /wp:list --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"align":"full","className":"chama-home-trust","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#6b2e37"}},"layout":{"type":"constrained","contentSize":"940px"}} -->
-<div class="wp-block-group alignfull chama-home-trust has-background" style="background-color:#6b2e37;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center","style":{"color":{"text":"#fbf7f1"}}} -->
-<h2 class="wp-block-heading has-text-align-center has-text-color" style="color:#fbf7f1">Why guests come back</h2>
+<!-- wp:group {"align":"full","className":"chama-home-trust","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#74837a"}},"layout":{"type":"constrained","contentSize":"940px"}} -->
+<div class="wp-block-group alignfull chama-home-trust has-background" style="background-color:#74837a;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center","style":{"color":{"text":"#f7f4ee"}}} -->
+<h2 class="wp-block-heading has-text-align-center has-text-color" style="color:#f7f4ee">Why guests come back</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"align":"center","style":{"color":{"text":"#f8efe4"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#f8efe4">Use this trust area for verified, review-backed themes: clean rooms, friendly service, train convenience, and restful stays.</p>
+<!-- wp:paragraph {"align":"center","style":{"color":{"text":"#f2ede5"}}} -->
+<p class="has-text-align-center has-text-color" style="color:#f2ede5">Use this trust area for verified, review-backed themes: clean rooms, friendly service, train convenience, and restful stays.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph {"align":"center","style":{"color":{"text":"#f8efe4"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#f8efe4"><span class="chama-mini-metric">4.4 / 5 rating*</span><span class="chama-mini-metric">115 reviews*</span><span class="chama-mini-metric">#2 of 7 hotels*</span></p>
+<!-- wp:paragraph {"align":"center","style":{"color":{"text":"#f2ede5"}}} -->
+<p class="has-text-align-center has-text-color" style="color:#f2ede5"><span class="chama-mini-metric">4.4 / 5 rating*</span><span class="chama-mini-metric">115 reviews*</span><span class="chama-mini-metric">#2 of 7 hotels*</span></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:quote {"textAlign":"center"} -->
 <blockquote class="wp-block-quote has-text-align-center"><p>"Clean, comfortable, welcoming, and perfectly placed for railroad travelers."</p></blockquote>
 <!-- /wp:quote -->
 
-<!-- wp:paragraph {"align":"center","fontSize":"small","style":{"color":{"text":"#f0d8bc"}}} -->
-<p class="has-text-align-center has-text-color has-small-font-size" style="color:#f0d8bc">*Update review metrics before publishing. See client handoff doc 09.</p>
+<!-- wp:paragraph {"align":"center","fontSize":"small","style":{"color":{"text":"#e3d3bf"}}} -->
+<p class="has-text-align-center has-text-color has-small-font-size" style="color:#e3d3bf">*Update review metrics before publishing. See client handoff doc 09.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -204,8 +204,8 @@ return <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-<div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#6b2e37","text":"#fbf7f1"},"border":{"radius":"999px"}}} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#fbf7f1;background-color:#6b2e37">Book your stay</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#6f8680","text":"#f7f4ee"},"border":{"radius":"999px"}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#f7f4ee;background-color:#6f8680">Book your stay</a></div>
 <!-- /wp:button -->
 
 <!-- wp:button {"className":"is-style-outline","style":{"border":{"radius":"999px"}}} -->

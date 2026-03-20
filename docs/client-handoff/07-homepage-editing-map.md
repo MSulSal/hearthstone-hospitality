@@ -53,10 +53,8 @@ If Excerpt is hidden:
 ## 7) Color Scheme Switcher (Fast Demo Mode)
 - Go to `Appearance -> Customize -> Chama Inn Design`.
 - Change **Color Scheme** to one of:
-  - Sunrise Plaster (Default)
-  - Sage Retreat
-  - Rail Burgundy
-  - Desert Contrast
+  - Exterior Stucco (Default)
+  - Dusty Sage
   - Moonstone Calm (Cool)
   - Alpine Stillness (Cool)
   - Terracotta Dawn (Warm)

@@ -44,13 +44,11 @@ add_action("after_setup_theme", "chama_inn_enqueue_editor_assets");
 function chama_inn_get_color_schemes(): array
 {
     return [
-        "sunrise-plaster" => __("Sunrise Plaster (Default)", "chama-inn"),
-        "sage-retreat"    => __("Sage Retreat", "chama-inn"),
-        "rail-burgundy"   => __("Rail Burgundy", "chama-inn"),
-        "desert-contrast" => __("Desert Contrast", "chama-inn"),
-        "moonstone-calm"  => __("Moonstone Calm (Cool)", "chama-inn"),
+        "sunrise-plaster"  => __("Exterior Stucco (Default)", "chama-inn"),
+        "sage-retreat"     => __("Dusty Sage", "chama-inn"),
+        "moonstone-calm"   => __("Moonstone Calm (Cool)", "chama-inn"),
         "alpine-stillness" => __("Alpine Stillness (Cool)", "chama-inn"),
-        "terracotta-dawn" => __("Terracotta Dawn (Warm)", "chama-inn"),
+        "terracotta-dawn"  => __("Terracotta Dawn (Warm)", "chama-inn"),
     ];
 }
 

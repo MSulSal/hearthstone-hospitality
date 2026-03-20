@@ -3,7 +3,7 @@ Theme Name: Chama Inn
 Theme URI: https://chamastationinn.com
 Author: Your Name
 Description: Custom theme for Chama Station Inn
-Version: 0.3.2
+Version: 0.3.3
 Requires at least: 6.0
 Requires PHP: 8.1
 Text Domain: chama-inn
@@ -11,19 +11,21 @@ Text Domain: chama-inn
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  --chama-bg: #f3eadf;
-  --chama-bg-soft: #e9decf;
-  --chama-bg-deep: #d8c7af;
-  --chama-surface: #fffdf8;
-  --chama-text: #2e2c2a;
-  --chama-text-soft: #5a544d;
-  --chama-text-inverse: #fbf7f1;
-  --chama-muted: #7b8575;
-  --chama-accent: #6b2e37;
-  --chama-accent-soft: #c99b86;
-  --chama-accent-strong: #5a252d;
-  --chama-highlight: #a88659;
-  --chama-border: #dbcdb8;
+  --chama-bg: #f7f4ee;
+  --chama-bg-soft: #f3ebdd;
+  --chama-bg-deep: #e8ddcc;
+  --chama-surface: #fcfaf6;
+  --chama-text: #4e4035;
+  --chama-text-soft: #393633;
+  --chama-text-inverse: #f7f4ee;
+  --chama-muted: #74837a;
+  --chama-accent: #6f8680;
+  --chama-accent-soft: #8e9b8b;
+  --chama-accent-strong: #5f756f;
+  --chama-highlight: #b9895a;
+  --chama-highlight-strong: #9a6a45;
+  --chama-garnet: #6a3e3d;
+  --chama-border: #d9c3a3;
   --chama-space-xs: clamp(0.6rem, 0.45rem + 0.4vw, 0.9rem);
   --chama-space-sm: clamp(0.95rem, 0.7rem + 0.7vw, 1.35rem);
   --chama-space-md: clamp(1.2rem, 0.9rem + 1vw, 1.9rem);
@@ -32,99 +34,71 @@ Text Domain: chama-inn
 }
 
 body.chama-scheme-sage-retreat {
-  --chama-bg: #eef0e8;
-  --chama-bg-soft: #dfe6d8;
-  --chama-bg-deep: #cbd5c3;
-  --chama-surface: #f9faf6;
-  --chama-text: #273127;
-  --chama-text-soft: #4f5c50;
-  --chama-text-inverse: #f5f7f1;
-  --chama-muted: #687462;
-  --chama-accent: #4f5f4d;
-  --chama-accent-soft: #b9a58f;
-  --chama-accent-strong: #3d4a3b;
-  --chama-highlight: #8f7d66;
-  --chama-border: #c7d0c0;
-}
-
-body.chama-scheme-rail-burgundy {
-  --chama-bg: #f1e5dc;
-  --chama-bg-soft: #e4d4c9;
-  --chama-bg-deep: #d0b8a5;
-  --chama-surface: #fbf6f1;
-  --chama-text: #312724;
-  --chama-text-soft: #62514b;
-  --chama-text-inverse: #fbf5ee;
-  --chama-muted: #7e6c65;
-  --chama-accent: #5b202c;
-  --chama-accent-soft: #bc8f7f;
-  --chama-accent-strong: #471822;
-  --chama-highlight: #9d7353;
-  --chama-border: #d7c3b5;
-}
-
-body.chama-scheme-desert-contrast {
-  --chama-bg: #f8f4ee;
-  --chama-bg-soft: #ebe2d7;
-  --chama-bg-deep: #decfbe;
-  --chama-surface: #ffffff;
-  --chama-text: #1e1b19;
-  --chama-text-soft: #413a35;
-  --chama-text-inverse: #ffffff;
-  --chama-muted: #6a6d66;
-  --chama-accent: #57202f;
-  --chama-accent-soft: #c28f79;
-  --chama-accent-strong: #3c1620;
-  --chama-highlight: #9c7a4f;
-  --chama-border: #d9cfbf;
+  --chama-bg: #f6f1e8;
+  --chama-bg-soft: #ece3d4;
+  --chama-bg-deep: #e1d1ba;
+  --chama-surface: #fbf8f2;
+  --chama-text: #4b4036;
+  --chama-text-soft: #3b3733;
+  --chama-text-inverse: #f7f2ea;
+  --chama-muted: #74837a;
+  --chama-accent: #8e9b8b;
+  --chama-accent-soft: #a8b5a7;
+  --chama-accent-strong: #74837a;
+  --chama-highlight: #b9895a;
+  --chama-highlight-strong: #9a6a45;
+  --chama-border: #d7c4aa;
 }
 
 body.chama-scheme-moonstone-calm {
-  --chama-bg: #eef3f5;
-  --chama-bg-soft: #e0e8eb;
-  --chama-bg-deep: #ced9de;
-  --chama-surface: #f9fcfd;
-  --chama-text: #243137;
-  --chama-text-soft: #4b5d65;
-  --chama-text-inverse: #f4f9fb;
-  --chama-muted: #647882;
-  --chama-accent: #3e5561;
-  --chama-accent-soft: #9db0b8;
-  --chama-accent-strong: #30434d;
-  --chama-highlight: #89745b;
-  --chama-border: #c6d4da;
+  --chama-bg: #f0f4f4;
+  --chama-bg-soft: #e4ecec;
+  --chama-bg-deep: #d3dedc;
+  --chama-surface: #f9fcfb;
+  --chama-text: #404f4b;
+  --chama-text-soft: #33413f;
+  --chama-text-inverse: #f4f9f7;
+  --chama-muted: #74837a;
+  --chama-accent: #6f8680;
+  --chama-accent-soft: #9aaea9;
+  --chama-accent-strong: #5c736d;
+  --chama-highlight: #b9895a;
+  --chama-highlight-strong: #9a6a45;
+  --chama-border: #c9d5d2;
 }
 
 body.chama-scheme-alpine-stillness {
-  --chama-bg: #edf2ef;
-  --chama-bg-soft: #dee6e1;
-  --chama-bg-deep: #c9d4cd;
-  --chama-surface: #f8fbf9;
-  --chama-text: #26302b;
-  --chama-text-soft: #4e5c54;
-  --chama-text-inverse: #f4f8f5;
-  --chama-muted: #66756d;
-  --chama-accent: #455a52;
-  --chama-accent-soft: #a5b2ac;
-  --chama-accent-strong: #34453e;
-  --chama-highlight: #8d7a62;
+  --chama-bg: #eef3ef;
+  --chama-bg-soft: #e2e9e3;
+  --chama-bg-deep: #d1dcd3;
+  --chama-surface: #f8fbf8;
+  --chama-text: #424d46;
+  --chama-text-soft: #33403b;
+  --chama-text-inverse: #f4f8f4;
+  --chama-muted: #74837a;
+  --chama-accent: #74837a;
+  --chama-accent-soft: #9faca2;
+  --chama-accent-strong: #617066;
+  --chama-highlight: #b9895a;
+  --chama-highlight-strong: #9a6a45;
   --chama-border: #c7d2cb;
 }
 
 body.chama-scheme-terracotta-dawn {
-  --chama-bg: #f7ede5;
-  --chama-bg-soft: #eddccf;
-  --chama-bg-deep: #dfc4af;
+  --chama-bg: #f7efe3;
+  --chama-bg-soft: #eedfcb;
+  --chama-bg-deep: #e0c5a2;
   --chama-surface: #fff9f3;
-  --chama-text: #332824;
-  --chama-text-soft: #65534c;
+  --chama-text: #4e4035;
+  --chama-text-soft: #3b3531;
   --chama-text-inverse: #fff7ef;
-  --chama-muted: #816c62;
-  --chama-accent: #8a4e3d;
-  --chama-accent-soft: #c79b83;
-  --chama-accent-strong: #6f3d2f;
-  --chama-highlight: #aa7d4f;
-  --chama-border: #dec8b5;
+  --chama-muted: #74837a;
+  --chama-accent: #6f8680;
+  --chama-accent-soft: #8e9b8b;
+  --chama-accent-strong: #5d736e;
+  --chama-highlight: #b9895a;
+  --chama-highlight-strong: #9a6a45;
+  --chama-border: #d6c0a0;
 }
 
 *,
@@ -230,7 +204,7 @@ iframe {
   position: sticky;
   top: 0;
   z-index: 70;
-  background: rgba(255, 253, 248, 0.94);
+  background: rgba(247, 244, 238, 0.94);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--chama-border);
 }
@@ -319,8 +293,8 @@ iframe {
 
 .site-header__cta:hover,
 .site-header__cta:focus-visible {
-  background: var(--chama-accent-strong);
-  border-color: var(--chama-accent-strong);
+  background: var(--chama-highlight-strong);
+  border-color: var(--chama-highlight-strong);
 }
 
 .site-main {
@@ -464,8 +438,8 @@ iframe {
   display: block;
   background: linear-gradient(
     180deg,
-    rgba(18, 13, 11, 0.34) 0%,
-    rgba(18, 13, 11, 0.58) 100%
+    rgba(78, 64, 53, 0.2) 0%,
+    rgba(78, 64, 53, 0.4) 100%
   );
 }
 
@@ -583,7 +557,7 @@ iframe {
 }
 
 .home-content .wp-block-group[class*="chama-home-"] {
-  border-top: 1px solid rgba(219, 205, 184, 0.72);
+  border-top: 1px solid var(--chama-border);
 }
 
 .home-content .chama-home-trust,
@@ -594,8 +568,8 @@ iframe {
 }
 
 .home-content .chama-home-trust .wp-block-quote {
-  border-left-color: #f0cf9d;
-  color: #f8efe4;
+  border-left-color: var(--chama-highlight);
+  color: var(--chama-text-inverse);
 }
 
 .home-content .chama-card {
@@ -616,12 +590,18 @@ iframe {
   margin-bottom: 0.45rem;
   padding: 0.32rem 0.56rem;
   border-radius: 999px;
-  border: 1px solid rgba(168, 134, 89, 0.52);
-  background: #f8f2e9;
+  border: 1px solid var(--chama-highlight);
+  background: var(--chama-bg-soft);
   font-size: 0.84rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--chama-accent-strong);
+}
+
+.home-content .chama-home-trust .chama-mini-metric {
+  border-color: rgba(247, 244, 238, 0.45);
+  background: rgba(247, 244, 238, 0.14);
+  color: var(--chama-text-inverse);
 }
 
 .home-content .wp-block-table {

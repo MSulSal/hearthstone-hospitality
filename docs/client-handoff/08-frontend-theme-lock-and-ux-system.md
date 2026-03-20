@@ -47,22 +47,38 @@ Design implication: the redesign must feel elevated **without** losing comfort, 
 
 ## Visual system (v1 lock)
 
+### Exterior-anchored update
+The physical property renovation now provides a stricter color source of truth:
+- light golden/wheat adobe stucco
+- muted blue-green window/door trim
+- natural light wood doors
+- darker bronze/brown roofline and metal details
+
+Implementation rule: do not center the site around deep burgundy or dark rustic tones.
+
 ### Color palette
-- Warm Plaster: `#F3EADF`
-- Soft Stucco: `#E9DECF`
-- Sandstone: `#D8C7AF`
-- Adobe Blush: `#C99B86`
-- Clay Accent: `#B9735A`
-- Rail Burgundy: `#6B2E37`
-- Sagebrush: `#7B8575`
-- Charcoal Iron: `#2E2C2A`
-- Weathered Brass: `#A88659`
+- Main stucco cream: `#E8DDCC`
+- Warm plaster: `#D9C3A3`
+- Golden adobe: `#C79A63`
+- Soft sand: `#F3EBDD`
+- Pale limestone: `#F7F4EE`
+- Trim muted blue-green: `#6F8680`
+- Trim dusty sage: `#8E9B8B`
+- Trim mineral green-gray: `#74837A`
+- Honey oak: `#B9895A`
+- Toasted cedar: `#9A6A45`
+- Soft walnut: `#7A5943`
+- Iron brown: `#4E4035`
+- Soft charcoal: `#393633`
+- Weathered bronze: `#665447`
+- Optional restrained garnet accent: `#6A3E3D`
 
 Rules:
 - light backgrounds by default
-- burgundy used as anchor/accent, not full-page wash
-- dark tones used for text, footer, strong CTA moments
-- no blue spa cliches
+- trim-inspired blue-green is the signature accent across links, UI states, and small labels
+- warm wood tones support CTA moments, card accents, and hospitality cues
+- dark tones are for text and utility contrast, not heavy visual fields
+- if garnet appears, it is a tiny accent only (hover/badge/seasonal callout)
 
 ### Typography (chosen)
 - **Headlines:** Fraunces
