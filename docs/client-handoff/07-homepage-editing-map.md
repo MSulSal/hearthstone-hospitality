@@ -61,6 +61,20 @@ If Excerpt is hidden:
 
 This lets you compare client preferences without touching CSS.
 
+## 8) Header Navigation and Book CTA
+- Go to `Appearance -> Menus`.
+- Assign your menu to **Primary Menu**.
+- Recommended order:
+  - Home
+  - Stay / Rooms
+  - Dining
+  - Weddings & Events
+  - Explore Chama
+  - About
+  - Contact / Inquire
+
+The header button currently routes to `/contact`. Keep that page published for the CTA to work.
+
 ## Recommended Content Blocks
 
 For this inn profile (small, premium, spa-like), homepage should usually include:

@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 get_header();
 ?>
 
-<main class="home-shell">
+<main id="main-content" class="home-shell">
     <?php if (have_posts()) : ?>
         <?php while (have_posts()) : the_post(); ?>
             <?php
@@ -55,4 +55,3 @@ get_header();
 
 <?php
 get_footer();
-
