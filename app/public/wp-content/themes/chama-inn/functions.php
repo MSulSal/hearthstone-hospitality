@@ -491,7 +491,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 7;
+    $target_version = 8;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -563,6 +563,8 @@ function chama_inn_migrate_seeded_copy(): void
                 "Quietly luxurious stays across from the Cumbres and Toltec depot",
                 "chama-brand-mark",
                 "csi-32.jpg",
+                "csi-30.jpg",
+                "Review themes consistently mention clean rooms, friendly hospitality, and easy train-station convenience.",
             ];
             $should_refresh_home = false;
 
@@ -606,6 +608,19 @@ function chama_inn_migrate_seeded_copy(): void
 
                 if ($fresh_about_pattern !== "") {
                     $updated_content = $fresh_about_pattern;
+                }
+            }
+        }
+
+        if ($slug === "explore-chama") {
+            $should_refresh_explore = strpos($updated_content, "Keep this page curated and concise. Lead with the railroad experience, then add local highlights.") !== false
+                || strpos($updated_content, "Need help planning?") !== false;
+
+            if ($should_refresh_explore) {
+                $fresh_explore_pattern = chama_inn_load_pattern_content("patterns/explore-chama-page.php");
+
+                if ($fresh_explore_pattern !== "") {
+                    $updated_content = $fresh_explore_pattern;
                 }
             }
         }

@@ -7,6 +7,7 @@ $header_cta_url   = function_exists('chama_inn_get_header_cta_url') ? chama_inn_
 $header_cta_label = function_exists('chama_inn_get_header_cta_label') ? chama_inn_get_header_cta_label() : __('Book Your Stay', 'chama-inn');
 $packaged_logo_uri = function_exists('chama_inn_get_packaged_logo_uri') ? chama_inn_get_packaged_logo_uri() : '';
 $site_name = get_bloginfo('name');
+$is_front_page = is_front_page();
 $show_site_title = true;
 ?>
 <!DOCTYPE html>
@@ -25,14 +26,14 @@ $show_site_title = true;
 <header class="site-header">
     <div class="site-header__inner">
         <div class="site-header__brand">
-            <?php if ($packaged_logo_uri !== '') : ?>
+            <?php if ($packaged_logo_uri !== '' && !$is_front_page) : ?>
                 <div class="site-header__logo">
                     <a class="site-header__logo-link" href="<?php echo esc_url(home_url('/')); ?>">
                         <img class="site-header__logo-image" src="<?php echo esc_url($packaged_logo_uri); ?>" alt="<?php echo esc_attr($site_name); ?>">
                     </a>
                 </div>
                 <?php $show_site_title = false; ?>
-            <?php elseif (function_exists('the_custom_logo') && has_custom_logo()) : ?>
+            <?php elseif (function_exists('the_custom_logo') && has_custom_logo() && !$is_front_page) : ?>
                 <div class="site-header__logo">
                     <?php the_custom_logo(); ?>
                 </div>

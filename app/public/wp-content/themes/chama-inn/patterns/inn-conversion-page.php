@@ -97,16 +97,20 @@ return <<<'HTML'
 <h2 class="wp-block-heading has-text-align-center">See the inn</h2>
 <!-- /wp:heading -->
 
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame is-stucco-tint"} -->
+<figure class="wp-block-image size-large chama-photo-frame is-stucco-tint"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-31.jpg" alt="Walkway, flowers, and room-front details at Chama Station Inn"/></figure>
+<!-- /wp:image -->
+
 <!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"16px"}}}} -->
 <div class="wp-block-columns"><!-- wp:column -->
-<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame is-stucco-tint"} -->
-<figure class="wp-block-image size-large chama-photo-frame is-stucco-tint"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-31.jpg" alt="Walkway and courtyard at Chama Station Inn"/></figure>
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-20.jpg" alt="Courtyard seating and garden atmosphere"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
-<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame is-inn-refresh-tint"} -->
-<figure class="wp-block-image size-large chama-photo-frame is-inn-refresh-tint"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-30.jpg" alt="Inn exterior color-tinted to the refreshed stucco palette"/></figure>
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-21.jpg" alt="Guest fireplace room detail"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
@@ -117,8 +121,22 @@ return <<<'HTML'
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
+<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"16px"}}}} -->
+<div class="wp-block-columns"><!-- wp:column -->
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame is-stucco-tint"} -->
+<figure class="wp-block-image size-large chama-photo-frame is-stucco-tint"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-22.jpg" alt="Guest corridor with refreshed stucco tone treatment"/></figure>
+<!-- /wp:image --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-8.jpg" alt="Room entry details and interior wood flooring"/></figure>
+<!-- /wp:image --></div>
+<!-- /wp:column --></div>
+<!-- /wp:columns -->
+
 <!-- wp:paragraph {"align":"center","fontSize":"small"} -->
-<p class="has-text-align-center has-small-font-size">Client-provided image set applied for this draft. Swap individual photos in Theme Editor if needed.</p>
+<p class="has-text-align-center has-small-font-size">Gallery now prioritizes courtyard, room, and railroad atmosphere while suppressing legacy red facade visuals.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -184,7 +202,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center","style":{"color":{"text":"#f2ede5"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#f2ede5">Review themes consistently mention clean rooms, friendly hospitality, and easy train-station convenience.</p>
+<p class="has-text-align-center has-text-color" style="color:#f2ede5">Recent five-star reviews repeatedly call out clean rooms, friendly service, and easy train-station convenience.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"align":"center","style":{"color":{"text":"#f2ede5"}}} -->

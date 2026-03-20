@@ -16,7 +16,7 @@ get_header();
                 $hero_image_url = get_theme_file_uri('assets/images/csi-assets/csi-31.jpg');
             }
             $hero_style     = $hero_image_url !== false
-                ? ' style="background-image:linear-gradient(rgba(199,154,99,0.56), rgba(199,154,99,0.56)),url(' . esc_url($hero_image_url) . ');background-blend-mode:color;"'
+                ? ' style="background-image:url(' . esc_url($hero_image_url) . ');"'
                 : '';
             ?>
             <article id="post-<?php the_ID(); ?>" <?php post_class('home-page'); ?>>
@@ -27,10 +27,12 @@ get_header();
                             <div class="home-hero__logo-wrap">
                                 <img class="home-hero__brand-image" src="<?php echo esc_url($packaged_logo_uri); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
                             </div>
+                            <h1 class="screen-reader-text"><?php echo esc_html(get_bloginfo('name')); ?></h1>
                         <?php elseif (function_exists('the_custom_logo') && has_custom_logo()) : ?>
                             <div class="home-hero__logo-wrap">
                                 <?php the_custom_logo(); ?>
                             </div>
+                            <h1 class="screen-reader-text"><?php echo esc_html(get_bloginfo('name')); ?></h1>
                         <?php else : ?>
                             <h1 class="home-hero__title"><?php echo esc_html(get_bloginfo('name')); ?></h1>
                         <?php endif; ?>

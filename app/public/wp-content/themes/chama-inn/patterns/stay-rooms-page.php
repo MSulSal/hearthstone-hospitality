@@ -59,8 +59,8 @@ return <<<'HTML'
 <!-- /wp:column -->
 
 <!-- wp:column -->
-<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame is-stucco-tint"} -->
-<figure class="wp-block-image size-large chama-photo-frame is-stucco-tint"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-22.jpg" alt="Guest walkway and room doors"/></figure>
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-7.jpg" alt="Walkway bench and room-front details"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 

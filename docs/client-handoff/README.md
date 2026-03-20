@@ -21,6 +21,7 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 9. Pull trust/copy proof points from `09-review-signal-and-proof-points.md`.
 10. Collect final brand/content assets with `10-content-intake-for-final-visual-pass.md`.
 11. Use parsed guest proof lines from `11-guest-proof-kit-reviews-and-tips.md`.
+12. Review exact Tripadvisor signal placement with `12-tripadvisor-signal-implementation-map.md`.
 
 ## Files
 - `00-term-mapping-workbook.md` - replaces prototype language with inn-specific wording.
@@ -35,6 +36,7 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 - `09-review-signal-and-proof-points.md` - Tripadvisor-derived trust themes, safe copy lines, and launch-day claim verification rules.
 - `10-content-intake-for-final-visual-pass.md` - exact client inputs needed to finalize visuals before full operations modules are connected.
 - `11-guest-proof-kit-reviews-and-tips.md` - parsed 5-star review highlights, reusable trust lines, and insider-tip copy.
+- `12-tripadvisor-signal-implementation-map.md` - exact map of where reviews/tips/listing details are implemented in theme patterns.
 - `notebooks/` - markdown presentation guides with visuals for prototype and final-app roadmap storytelling.
 - `assets/` - supporting visuals used by docs and presentation guides.
 
