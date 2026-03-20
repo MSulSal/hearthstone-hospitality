@@ -57,6 +57,9 @@ If Excerpt is hidden:
   - Sage Retreat
   - Rail Burgundy
   - Desert Contrast
+  - Moonstone Calm (Cool)
+  - Alpine Stillness (Cool)
+  - Terracotta Dawn (Warm)
 - Publish to apply instantly site-wide.
 
 This lets you compare client preferences without touching CSS.
