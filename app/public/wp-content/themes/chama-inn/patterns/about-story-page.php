@@ -10,11 +10,11 @@ return <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"level":1,"style":{"color":{"text":"#4e4035"}}} -->
-<h1 class="wp-block-heading has-text-color" style="color:#4e4035">A historic inn, thoughtfully restored for modern Chama stays</h1>
+<h1 class="wp-block-heading has-text-color" style="color:#4e4035">A boutique Chama inn with regional character and modern comfort</h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"style":{"color":{"text":"#393633"}}} -->
-<p class="has-text-color" style="color:#393633">Use this page to connect heritage, restoration, and the inn's long-term vision for guests and community.</p>
+<p class="has-text-color" style="color:#393633">Use this page to connect place, hospitality style, and the inn's long-term vision for guests and community.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 

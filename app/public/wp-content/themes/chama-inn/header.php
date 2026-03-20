@@ -15,6 +15,7 @@ $header_cta_label = function_exists('chama_inn_get_header_cta_label') ? chama_in
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
+<script>document.documentElement.classList.add("has-js");</script>
 
 <a class="skip-link screen-reader-text" href="#main-content"><?php esc_html_e('Skip to content', 'chama-inn'); ?></a>
 
@@ -32,19 +33,28 @@ $header_cta_label = function_exists('chama_inn_get_header_cta_label') ? chama_in
             </a>
         </div>
 
-        <nav class="site-header__nav" aria-label="<?php esc_attr_e('Primary menu', 'chama-inn'); ?>">
-            <?php
-            wp_nav_menu([
-                'theme_location' => 'primary',
-                'menu_id'        => 'primary-menu',
-                'container'      => false,
-                'fallback_cb'    => 'wp_page_menu',
-            ]);
-            ?>
-        </nav>
+        <button class="site-header__menu-toggle" type="button" aria-expanded="false" aria-controls="site-header-panel">
+            <span class="site-header__menu-toggle-line"></span>
+            <span class="site-header__menu-toggle-line"></span>
+            <span class="site-header__menu-toggle-line"></span>
+            <span class="screen-reader-text"><?php esc_html_e('Toggle navigation menu', 'chama-inn'); ?></span>
+        </button>
 
-        <a class="site-header__cta" href="<?php echo esc_url($header_cta_url); ?>">
-            <?php echo esc_html($header_cta_label); ?>
-        </a>
+        <div class="site-header__panel" id="site-header-panel">
+            <nav class="site-header__nav" aria-label="<?php esc_attr_e('Primary menu', 'chama-inn'); ?>">
+                <?php
+                wp_nav_menu([
+                    'theme_location' => 'primary',
+                    'menu_id'        => 'primary-menu',
+                    'container'      => false,
+                    'fallback_cb'    => 'wp_page_menu',
+                ]);
+                ?>
+            </nav>
+
+            <a class="site-header__cta" href="<?php echo esc_url($header_cta_url); ?>">
+                <?php echo esc_html($header_cta_label); ?>
+            </a>
+        </div>
     </div>
 </header>

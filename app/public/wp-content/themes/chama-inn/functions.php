@@ -32,6 +32,14 @@ function chama_inn_enqueue_assets(): void
         [],
         wp_get_theme()->get("Version")
     );
+
+    wp_enqueue_script(
+        "chama-inn-navigation",
+        get_theme_file_uri("assets/js/navigation.js"),
+        [],
+        wp_get_theme()->get("Version"),
+        true
+    );
 }
 add_action("wp_enqueue_scripts", "chama_inn_enqueue_assets");
 
@@ -172,7 +180,7 @@ function chama_inn_get_core_page_blueprint(): array
         [
             "title"   => __("Home", "chama-inn"),
             "slug"    => "home",
-            "excerpt" => __("A restored Chama railroad inn with calm, premium hospitality.", "chama-inn"),
+            "excerpt" => __("A calm, premium Chama stay with railroad-town character and welcoming hospitality.", "chama-inn"),
             "pattern" => "patterns/inn-conversion-page.php",
         ],
         [
@@ -430,7 +438,7 @@ function chama_inn_register_block_patterns(): void
         "about-story-page" => [
             "file"        => "patterns/about-story-page.php",
             "title"       => __("Interior: About and Story", "chama-inn"),
-            "description" => __("Starter layout for restoration story, community role, and inn values.", "chama-inn"),
+            "description" => __("Starter layout for inn story, community role, and guest-first values.", "chama-inn"),
         ],
         "contact-inquiry-page" => [
             "file"        => "patterns/contact-inquiry-page.php",

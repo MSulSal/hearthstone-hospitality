@@ -10,7 +10,7 @@ return <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"level":1,"style":{"color":{"text":"#4e4035"}}} -->
-<h1 class="wp-block-heading has-text-color" style="color:#4e4035">Intimate celebrations in a restored Chama setting</h1>
+<h1 class="wp-block-heading has-text-color" style="color:#4e4035">Intimate celebrations in a calm Chama setting</h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"style":{"color":{"text":"#393633"}}} -->

@@ -103,12 +103,16 @@ Optional control:
 - Go to `Appearance -> Customize -> Chama Inn Design`.
 - Set **Header CTA Page** and **Header CTA Label** to choose the exact route and button text.
 
+Responsive behavior:
+- On mobile widths, header navigation switches to a burger menu automatically.
+- Tapping the menu icon expands/collapses links and closes after a link tap.
+
 ## Recommended Content Blocks
 
 For this inn profile (small, premium, spa-like), homepage should usually include:
 
 1. Hero with clear booking CTA
-2. Positioning intro (restored + modernized + railroad context)
+2. Positioning intro (calm premium stay + railroad-town context)
 3. Stay/Rooms preview
 4. Courtyard/grounds atmosphere section
 5. Dining preview

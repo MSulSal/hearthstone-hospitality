@@ -1,16 +1,16 @@
 # 08) Frontend Theme Lock and UX System (Live Reference Synthesis)
 
 ## Final direction (locked for implementation)
-Chama Station Inn will be presented as a **restored railroad-adjacent New Mexico inn** with a **light, calm, quietly luxurious** guest experience.  
+Chama Station Inn will be presented as a **railroad-adjacent New Mexico inn** with a **light, calm, quietly luxurious** guest experience.  
 This is not a dark lodge, not a kitschy railroad theme build, and not a full destination spa resort.
 
 One-line target:
 
-**A restored Chama railroad inn, lightened and modernized into a calm, quietly luxurious New Mexico stay with courtyard charm, regional soul, and genuine hospitality.**
+**A lightened Chama railroad-town inn with a calm, quietly luxurious New Mexico stay feel, courtyard charm, regional soul, and genuine hospitality.**
 
 ## Ground truth content to preserve from current Chama signal
 Current public/about-site messaging should be treated as source material for the redesign:
-- restoration and renovation narrative is active
+- property refresh and renovation narrative is active
 - deep tie to the Cumbres & Toltec Scenic Railroad
 - downtown Chama walkable convenience
 - future-facing hospitality hub intent: dining, weddings/events, market, fuller food-and-beverage offering
@@ -153,7 +153,7 @@ Optional later:
 - concise, non-directory format
 
 ### About / Our Story
-- restoration narrative
+- inn story and ongoing evolution
 - railroad-town identity
 - ownership vision and modernization goals
 

@@ -6,7 +6,7 @@ if (!defined("ABSPATH")) {
 return <<<'HTML'
 <!-- wp:group {"align":"full","className":"chama-home-hero","style":{"spacing":{"padding":{"top":"92px","bottom":"84px","left":"20px","right":"20px"}},"color":{"background":"#f3eadf"}},"layout":{"type":"constrained","contentSize":"980px"}} -->
 <div class="wp-block-group alignfull chama-home-hero has-background" style="background-color:#f3eadf;padding-top:92px;padding-right:20px;padding-bottom:84px;padding-left:20px"><!-- wp:paragraph {"align":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.12em","fontSize":"13px"},"color":{"text":"#6f8680"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#6f8680;font-size:13px;letter-spacing:0.12em;text-transform:uppercase">Restored railroad inn in Chama, New Mexico</p>
+<p class="has-text-align-center has-text-color" style="color:#6f8680;font-size:13px;letter-spacing:0.12em;text-transform:uppercase">Boutique railroad-town inn in Chama, New Mexico</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"textAlign":"center","level":1,"style":{"typography":{"fontSize":"56px","lineHeight":"1.1"},"color":{"text":"#4e4035"}}} -->
@@ -14,7 +14,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"21px"},"color":{"text":"#393633"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#393633;font-size:21px">A lightened historic inn with clean comfort, welcoming service, and courtyard calm in the heart of Chama.</p>
+<p class="has-text-align-center has-text-color" style="color:#393633;font-size:21px">A lightened Chama inn with clean comfort, welcoming service, and courtyard calm in the heart of town.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
@@ -30,7 +30,7 @@ return <<<'HTML'
 
 <!-- wp:group {"align":"full","className":"chama-home-intro","style":{"spacing":{"padding":{"top":"52px","bottom":"52px","left":"20px","right":"20px"}},"color":{"background":"#e8ddcc"}},"layout":{"type":"constrained","contentSize":"920px"}} -->
 <div class="wp-block-group alignfull chama-home-intro has-background" style="background-color:#e8ddcc;padding-top:52px;padding-right:20px;padding-bottom:52px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
-<h2 class="wp-block-heading has-text-align-center">Historic place. Modern comfort.</h2>
+<h2 class="wp-block-heading has-text-align-center">Quiet place. Modern comfort.</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center"} -->
@@ -55,7 +55,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Use this card for a room category that highlights historic details and classic character.</p>
+<p>Use this card for a room category that highlights regional details and classic character.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->

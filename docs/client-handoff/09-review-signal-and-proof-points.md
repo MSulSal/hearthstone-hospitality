@@ -36,7 +36,7 @@ Use these as reusable lines in hero/support sections:
 
 1. "Known for clean, comfortable rooms and friendly hospitality in the heart of Chama."
 2. "Across from the Cumbres & Toltec depot, with downtown convenience and courtyard calm."
-3. "A historic inn with welcoming service, walkable access, and a quieter pace."
+3. "A Chama inn with welcoming service, walkable access, and a quieter pace."
 4. "Guests return for comfort, location, and staff that make every stay feel easy."
 
 ## Claims we should avoid unless re-verified on launch day
