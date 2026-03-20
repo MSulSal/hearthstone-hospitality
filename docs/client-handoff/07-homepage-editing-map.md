@@ -2,6 +2,18 @@
 
 This guide shows exactly where inn staff can edit homepage content without developer help.
 
+## Auto-created core pages
+The theme now auto-creates these pages if they do not exist:
+- Home
+- Stay / Rooms
+- Dining
+- Weddings & Events
+- Explore Chama
+- About / Our Story
+- Contact / Book / Inquire
+
+It also sets Home as the static front page and assigns the primary menu.
+
 ## What We Changed
 
 The homepage now uses WordPress-native editable fields instead of hardcoded template text.
