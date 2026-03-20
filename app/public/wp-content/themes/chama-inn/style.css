@@ -656,6 +656,16 @@ iframe {
   margin-bottom: 0.5rem;
 }
 
+.home-content .chama-brand-mark {
+  margin: 0 auto 1rem;
+  text-align: center;
+}
+
+.home-content .chama-brand-mark img {
+  width: min(420px, 86vw);
+  height: auto;
+}
+
 .home-content .chama-photo-frame {
   margin-bottom: 0;
   border-radius: 14px;
@@ -669,6 +679,10 @@ iframe {
   width: 100%;
   height: auto;
   filter: sepia(16%) saturate(88%) hue-rotate(-12deg) brightness(1.02);
+}
+
+.home-content .chama-photo-frame.is-stucco-tint img {
+  filter: sepia(34%) saturate(78%) hue-rotate(-30deg) brightness(1.05);
 }
 
 .home-content .chama-mini-metric {
@@ -698,10 +712,27 @@ iframe {
 }
 
 .site-footer {
-  padding: 18px 16px;
-  text-align: center;
+  padding: 16px;
   background: var(--chama-bg-soft);
   border-top: 1px solid var(--chama-border);
+}
+
+.site-footer__inner {
+  width: min(74rem, 100%);
+  margin: 0 auto;
+}
+
+.site-footer__brand {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.site-footer__logo-image {
+  height: 42px;
+  width: auto;
 }
 
 .site-footer__text {
@@ -784,6 +815,11 @@ iframe {
 
   .home-content .wp-block-columns {
     gap: var(--chama-space-sm);
+  }
+
+  .site-footer__brand {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 

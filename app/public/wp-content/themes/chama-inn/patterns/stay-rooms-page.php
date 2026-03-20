@@ -14,7 +14,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"style":{"color":{"text":"#393633"}}} -->
-<p class="has-text-color" style="color:#393633">Use this page to explain room types, amenities, and what guests can expect before they arrive.</p>
+<p class="has-text-color" style="color:#393633">Nine guest rooms with clean comfort, friendly service, and walkable access to the train depot and downtown Chama.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -22,37 +22,37 @@ return <<<'HTML'
 <div class="wp-block-group alignfull has-background" style="background-color:#f7f4ee;padding-top:52px;padding-right:20px;padding-bottom:52px;padding-left:20px"><!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"20px"}}}} -->
 <div class="wp-block-columns"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Room Category One</h3>
+<h3 class="wp-block-heading">Standard Queen</h3>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Replace with room summary, occupancy, and signature features.</p>
+<p>A comfortable setup for couples and solo travelers looking for a clean, quiet room near the depot.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Room Category Two</h3>
+<h3 class="wp-block-heading">Courtyard-View Rooms</h3>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Replace with room summary, occupancy, and signature features.</p>
+<p>Garden-facing options that emphasize calm mornings, evening quiet, and the inn's relaxed pace.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Room Category Three</h3>
+<h3 class="wp-block-heading">Fireplace Rooms</h3>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Replace with room summary, occupancy, and signature features.</p>
+<p>High-demand rooms that guests frequently mention. Reserve early when available.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
 <!-- wp:list -->
-<ul><li>Add check-in and check-out timing.</li><li>Add parking and accessibility notes.</li><li>Add any seasonal stay notes.</li></ul>
+<ul><li>Ask for first-floor rooms if stairs are a concern.</li><li>Fireplace rooms are limited and often book first.</li><li>Some guests prefer upstairs rooms for extra quiet.</li><li>Book early during peak train season.</li></ul>
 <!-- /wp:list -->
 
 <!-- wp:buttons -->

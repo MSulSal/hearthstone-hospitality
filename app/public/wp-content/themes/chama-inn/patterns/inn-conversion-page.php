@@ -5,9 +5,9 @@ if (!defined("ABSPATH")) {
 
 return <<<'HTML'
 <!-- wp:group {"align":"full","className":"chama-home-hero","style":{"spacing":{"padding":{"top":"92px","bottom":"84px","left":"20px","right":"20px"}},"color":{"background":"#f3eadf"}},"layout":{"type":"constrained","contentSize":"980px"}} -->
-<div class="wp-block-group alignfull chama-home-hero has-background" style="background-color:#f3eadf;padding-top:92px;padding-right:20px;padding-bottom:84px;padding-left:20px"><!-- wp:paragraph {"align":"center","style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.12em","fontSize":"13px"},"color":{"text":"#6f8680"}}} -->
-<p class="has-text-align-center has-text-color" style="color:#6f8680;font-size:13px;letter-spacing:0.12em;text-transform:uppercase">Boutique railroad-town inn in Chama, New Mexico</p>
-<!-- /wp:paragraph -->
+<div class="wp-block-group alignfull chama-home-hero has-background" style="background-color:#f3eadf;padding-top:92px;padding-right:20px;padding-bottom:84px;padding-left:20px"><!-- wp:image {"align":"center","sizeSlug":"large","linkDestination":"none","className":"chama-brand-mark"} -->
+<figure class="wp-block-image aligncenter size-large chama-brand-mark"><img src="/wp-content/themes/chama-inn/assets/images/client-logo.webp" alt="Chama Station Inn"/></figure>
+<!-- /wp:image -->
 
 <!-- wp:heading {"textAlign":"center","level":1,"style":{"typography":{"fontSize":"56px","lineHeight":"1.1"},"color":{"text":"#4e4035"}}} -->
 <h1 class="wp-block-heading has-text-align-center has-text-color" style="color:#4e4035;font-size:56px;line-height:1.1">Quietly luxurious stays across from the Cumbres and Toltec depot</h1>
@@ -123,26 +123,26 @@ return <<<'HTML'
 
 <!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"16px"}}}} -->
 <div class="wp-block-columns"><!-- wp:column -->
-<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
-<figure class="wp-block-image size-large chama-photo-frame"><img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/09/63/1f/64/chama-station-inn.jpg?w=900&amp;h=600&amp;s=1" alt="Chama Station Inn exterior and garden side elevation"/></figure>
+<div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame is-stucco-tint"} -->
+<figure class="wp-block-image size-large chama-photo-frame is-stucco-tint"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-31.jpg" alt="Walkway and courtyard at Chama Station Inn"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
-<figure class="wp-block-image size-large chama-photo-frame"><img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0d/76/17/9d/chama-station-inn.jpg?w=900&amp;h=500&amp;s=1" alt="Chama Station Inn exterior view"/></figure>
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-32.jpg" alt="Courtyard seating and garden space"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
-<figure class="wp-block-image size-large chama-photo-frame"><img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/06/30/3e/1b/chama-station-inn.jpg?w=900&amp;h=650&amp;s=1" alt="Chama Station Inn balcony and facade"/></figure>
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-53.jpg" alt="Cumbres and Toltec rail experience near the inn"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
 <!-- wp:paragraph {"align":"center","fontSize":"small"} -->
-<p class="has-text-align-center has-small-font-size">Temporary demo images. Replace with current client-owned photos before production launch.</p>
+<p class="has-text-align-center has-small-font-size">Client-provided image set applied for this draft. Swap individual photos in Theme Editor if needed.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -218,25 +218,29 @@ return <<<'HTML'
 <!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"20px"}}}} -->
 <div class="wp-block-columns"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:quote -->
-<blockquote class="wp-block-quote"><p>"Clean, comfortable, cozy, and right across from the station."</p></blockquote>
+<blockquote class="wp-block-quote"><p>"Clean, comfortable, and cozy like home, with a colorful garden just outside your door."</p><cite>Jacqueline F, October 2023</cite></blockquote>
 <!-- /wp:quote --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:quote -->
-<blockquote class="wp-block-quote"><p>"Friendly team, easy check-in, and walkable to everything we needed."</p></blockquote>
+<blockquote class="wp-block-quote"><p>"Comfortable and friendly, right across from the train station. Rose always makes sure guests are well taken care of."</p><cite>NealA913, September 2023</cite></blockquote>
 <!-- /wp:quote --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:quote -->
-<blockquote class="wp-block-quote"><p>"Courtyard calm and quiet nights made this an easy repeat stay."</p></blockquote>
+<blockquote class="wp-block-quote"><p>"The inn is peaceful, quiet, and in the heart of town. We highly recommend it and would stay again."</p><cite>Christine P, July 2022</cite></blockquote>
 <!-- /wp:quote --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
+<!-- wp:list {"style":{"color":{"text":"#f2ede5"}}} -->
+<ul class="has-text-color" style="color:#f2ede5"><li>"Everything was within walking distance. Rooms were clean and staff were very welcoming." - Liana R, July 2023</li><li>"Rose was amazingly friendly and accommodating. We would definitely come back." - Kate M, May 2023</li><li>"This is now our first choice in Chama. Spotless room and very clean grounds." - Robert D, July 2022</li></ul>
+<!-- /wp:list -->
+
 <!-- wp:paragraph {"align":"center","fontSize":"small","style":{"color":{"text":"#e3d3bf"}}} -->
-<p class="has-text-align-center has-text-color has-small-font-size" style="color:#e3d3bf">*Update review metrics before publishing. See client handoff doc 09.</p>
+<p class="has-text-align-center has-text-color has-small-font-size" style="color:#e3d3bf">*Review metrics should be reconfirmed before launch day.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 

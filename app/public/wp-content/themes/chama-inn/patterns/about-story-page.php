@@ -14,25 +14,25 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"style":{"color":{"text":"#393633"}}} -->
-<p class="has-text-color" style="color:#393633">Use this page to connect place, hospitality style, and the inn's long-term vision for guests and community.</p>
+<p class="has-text-color" style="color:#393633">Welcome to Chama Station Inn in Chama, New Mexico, across from the Cumbres and Toltec Scenic Railroad and close to mountain-town essentials.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"50px","bottom":"50px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"980px"}} -->
 <div class="wp-block-group alignfull has-background" style="background-color:#f7f4ee;padding-top:50px;padding-right:20px;padding-bottom:50px;padding-left:20px"><!-- wp:heading {"level":2} -->
-<h2 class="wp-block-heading">Story timeline</h2>
+<h2 class="wp-block-heading">What guests experience</h2>
 <!-- /wp:heading -->
 
 <!-- wp:list -->
-<ul><li>Historic roots and railroad connection</li><li>Restoration milestones and improvements</li><li>Current chapter and guest-first priorities</li></ul>
+<ul><li>Clean and comfortable rooms</li><li>Friendly, accommodating service</li><li>Courtyard calm in the heart of town</li><li>Easy train-station convenience</li></ul>
 <!-- /wp:list -->
 
 <!-- wp:heading {"level":2} -->
-<h2 class="wp-block-heading">Inn values</h2>
+<h2 class="wp-block-heading">Local access and pace</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Use this area for service values, community role, and commitment to clean, welcoming hospitality.</p>
+<p>The inn is a practical home base for train trips, local dining, hiking access, and nearby outdoor activities while keeping a quieter, more restorative stay experience.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->

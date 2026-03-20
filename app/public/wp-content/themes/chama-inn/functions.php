@@ -195,6 +195,46 @@ function chama_inn_get_packaged_logo_uri(): string
     return "";
 }
 
+function chama_inn_print_branding_styles(): void
+{
+    $logo_uri = chama_inn_get_packaged_logo_uri();
+
+    if ($logo_uri === "") {
+        return;
+    }
+
+    ?>
+    <style id="chama-inn-admin-branding">
+        #wpadminbar #wp-admin-bar-wp-logo > .ab-item .ab-icon::before {
+            content: "";
+            display: block;
+            width: 18px;
+            height: 18px;
+            margin-top: 7px;
+            background-image: url('<?php echo esc_url($logo_uri); ?>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        #wpadminbar #wp-admin-bar-wp-logo.hover > .ab-item .ab-icon,
+        #wpadminbar #wp-admin-bar-wp-logo > .ab-item .ab-icon {
+            width: 24px;
+        }
+
+        body.login h1 a {
+            background-image: url('<?php echo esc_url($logo_uri); ?>');
+            background-size: contain;
+            background-position: center;
+            width: 280px;
+            max-width: 84vw;
+        }
+    </style>
+    <?php
+}
+add_action("admin_head", "chama_inn_print_branding_styles");
+add_action("login_head", "chama_inn_print_branding_styles");
+
 function chama_inn_get_core_page_blueprint(): array
 {
     return [
@@ -451,7 +491,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 4;
+    $target_version = 5;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -483,7 +523,8 @@ function chama_inn_migrate_seeded_copy(): void
         "Position this for intimate weddings, rehearsal dinners, and private gatherings with a warm, romantic, New Mexico setting." => "Feature locally inspired goods, railroad memorabilia, and practical travel essentials guests can purchase on-site or online.",
         "Start event inquiry" => "Browse gift ideas",
         "Intimate celebrations in a calm Chama setting" => "Optional private gatherings in a calm Chama setting",
-    ];
+        "Review themes consistently mention clean rooms, friendly hospitality, and easy train-station convenience." => "Recent five-star reviews repeatedly call out clean rooms, friendly service, and easy train access.",
+        ];
 
     $slugs_to_scan = [
         "home",
@@ -515,6 +556,9 @@ function chama_inn_migrate_seeded_copy(): void
                 "Use this section for your primary promise.",
                 "Restored railroad inn in Chama, New Mexico",
                 "restored railroad inn in chama, new mexico",
+                "Boutique railroad-town inn in Chama, New Mexico",
+                "Temporary demo images. Replace with current client-owned photos before production launch.",
+                "Clean, comfortable, cozy, and right across from the station.",
             ];
             $should_refresh_home = false;
 
@@ -530,6 +574,32 @@ function chama_inn_migrate_seeded_copy(): void
 
                 if ($fresh_home_pattern !== "") {
                     $updated_content = $fresh_home_pattern;
+                }
+            }
+        }
+
+        if ($slug === "stay-rooms") {
+            $should_refresh_stay = strpos($updated_content, "Room Category One") !== false
+                || strpos($updated_content, "Replace with room summary, occupancy, and signature features.") !== false;
+
+            if ($should_refresh_stay) {
+                $fresh_stay_pattern = chama_inn_load_pattern_content("patterns/stay-rooms-page.php");
+
+                if ($fresh_stay_pattern !== "") {
+                    $updated_content = $fresh_stay_pattern;
+                }
+            }
+        }
+
+        if ($slug === "about-our-story") {
+            $should_refresh_about = strpos($updated_content, "Use this page to connect place, hospitality style, and the inn's long-term vision for guests and community.") !== false
+                || strpos($updated_content, "Story timeline") !== false;
+
+            if ($should_refresh_about) {
+                $fresh_about_pattern = chama_inn_load_pattern_content("patterns/about-story-page.php");
+
+                if ($fresh_about_pattern !== "") {
+                    $updated_content = $fresh_about_pattern;
                 }
             }
         }
