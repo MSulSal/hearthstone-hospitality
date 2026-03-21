@@ -231,6 +231,7 @@ function chama_inn_get_logo_variant_uri(string $context = "default"): string
             "assets/images/chama_logo_color_spectrum/iron_brown.png",
         ],
         "hero"      => [
+            "assets/images/chama_logo_bg_extremes/warm_white.png",
             "assets/images/chama_logo_color_spectrum/dusty_sage.png",
             "assets/images/chama_logo_color_spectrum/golden_adobe.png",
             "assets/images/chama_logo_color_spectrum/honey_oak.png",

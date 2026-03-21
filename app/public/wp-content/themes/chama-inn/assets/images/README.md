@@ -7,10 +7,11 @@ Place the client logo here as one of:
 
 Optional color-spectrum variants can live in:
 - `assets/images/chama_logo_color_spectrum/`
+- `assets/images/chama_logo_bg_extremes/`
 
 Context-aware logo order:
 1. Header/Footer: `soft_charcoal.png` -> `iron_brown.png`
-2. Hero (image background): `dusty_sage.png` -> `golden_adobe.png` -> `honey_oak.png`
+2. Hero (image background): `chama_logo_bg_extremes/warm_white.png` -> `dusty_sage.png` -> `golden_adobe.png` -> `honey_oak.png`
 3. Admin bar: `golden_adobe.png` -> `honey_oak.png` -> `trim_blue_green.png`
 4. Login screen: `soft_charcoal.png` -> `iron_brown.png`
 5. Fallback: `assets/images/client-logo.*`
