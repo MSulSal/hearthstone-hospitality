@@ -199,7 +199,7 @@ function chama_inn_get_guest_mobile_nav_items(): array
         [
             "slug"  => "gift-shop",
             "label" => __("Gift Shop", "chama-inn"),
-            "icon"  => "dashicons-cart",
+            "icon"  => "chama-icon-shopping-bag",
             "url"   => home_url("/gift-shop/"),
         ],
         [
@@ -244,6 +244,8 @@ function chama_inn_render_guest_mobile_nav(): void
 
                 $slug = sanitize_title((string) $item["slug"]);
                 $icon_class = sanitize_html_class((string) $item["icon"]);
+                $is_dashicon = strpos((string) $item["icon"], "dashicons-") === 0;
+                $icon_classes = "guest-mobile-nav__icon " . ($is_dashicon ? "dashicons " : "") . $icon_class;
                 $active = is_front_page() && $slug === "home";
 
                 if (!$active && is_page($slug)) {
@@ -252,7 +254,7 @@ function chama_inn_render_guest_mobile_nav(): void
                 ?>
                 <li class="guest-mobile-nav__item<?php echo $active ? " is-active" : ""; ?>">
                     <a href="<?php echo esc_url((string) $item["url"]); ?>" aria-label="<?php echo esc_attr((string) $item["label"]); ?>" title="<?php echo esc_attr((string) $item["label"]); ?>">
-                        <span class="guest-mobile-nav__icon dashicons <?php echo esc_attr($icon_class); ?>" aria-hidden="true"></span>
+                        <span class="<?php echo esc_attr($icon_classes); ?>" aria-hidden="true"></span>
                         <span class="screen-reader-text"><?php echo esc_html((string) $item["label"]); ?></span>
                     </a>
                 </li>
