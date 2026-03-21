@@ -20,6 +20,10 @@ get_header();
                 : '';
             ?>
             <article id="post-<?php the_ID(); ?>" <?php post_class('home-page'); ?>>
+                <?php
+                $raw_content = (string) get_the_content();
+                $has_visual_content = trim(wp_strip_all_tags($raw_content)) !== '';
+                ?>
                 <section class="home-hero"<?php echo $hero_style; ?>>
                     <div class="home-hero__overlay"></div>
                     <div class="home-hero__content">
@@ -40,11 +44,13 @@ get_header();
                     </div>
                 </section>
 
-                <section class="home-content">
-                    <div class="home-content__inner">
-                        <?php the_content(); ?>
-                    </div>
-                </section>
+                <?php if ($has_visual_content) : ?>
+                    <section class="home-content">
+                        <div class="home-content__inner">
+                            <?php the_content(); ?>
+                        </div>
+                    </section>
+                <?php endif; ?>
             </article>
         <?php endwhile; ?>
     <?php else : ?>

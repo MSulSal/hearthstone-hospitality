@@ -301,6 +301,11 @@ function chama_inn_get_logo_variant_uri(string $context = "default"): string
     $context = sanitize_key($context);
 
     $context_paths = [
+        "header-home" => [
+            "assets/images/chama_logo_bg_extremes/warm_white.png",
+            "assets/images/chama_logo_color_spectrum/dusty_sage.png",
+            "assets/images/chama_logo_color_spectrum/trim_blue_green.png",
+        ],
         "header"    => [
             "assets/images/chama_logo_color_spectrum/trim_blue_green.png",
             "assets/images/chama_logo_color_spectrum/dusty_sage.png",
@@ -774,7 +779,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 14;
+    $target_version = 15;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -824,6 +829,12 @@ function chama_inn_migrate_seeded_copy(): void
             continue;
         }
 
+        $is_elementor_managed = (string) get_post_meta((int) $page->ID, "_elementor_edit_mode", true) !== "";
+
+        if ($is_elementor_managed) {
+            continue;
+        }
+
         $original_content = (string) $page->post_content;
         $updated_content  = strtr($original_content, $replacements);
 
@@ -849,6 +860,9 @@ function chama_inn_migrate_seeded_copy(): void
                 "Welcome to your stay app",
                 "Use this app to place orders, request service, and get help from the front desk while you are at the inn.",
                 "Open My Stay",
+                "[chama_guest_action_grid]",
+                "Restaurant Orders",
+                "Service Requests",
             ];
             $should_refresh_home = false;
 
@@ -865,10 +879,7 @@ function chama_inn_migrate_seeded_copy(): void
 
             if ($should_refresh_home) {
                 $fresh_home_pattern = chama_inn_load_pattern_content("patterns/inn-conversion-page.php");
-
-                if ($fresh_home_pattern !== "") {
-                    $updated_content = $fresh_home_pattern;
-                }
+                $updated_content = $fresh_home_pattern;
             }
         }
 

@@ -3,7 +3,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$header_logo_uri = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri('header') : '';
+$header_logo_context = is_front_page() ? 'header-home' : 'header';
+$header_logo_uri = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri($header_logo_context) : '';
 $site_name = get_bloginfo('name');
 $show_site_title = true;
 ?>
