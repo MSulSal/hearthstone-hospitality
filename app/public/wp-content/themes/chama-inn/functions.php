@@ -244,31 +244,6 @@ function chama_inn_customize_register(WP_Customize_Manager $wp_customize): void
         "choices"     => chama_inn_get_color_schemes(),
     ]);
 
-    $wp_customize->add_setting("chama_inn_header_cta_page", [
-        "default"           => 0,
-        "sanitize_callback" => "absint",
-        "type"              => "theme_mod",
-    ]);
-
-    $wp_customize->add_control("chama_inn_header_cta_page", [
-        "label"       => __("Header CTA Page", "chama-inn"),
-        "description" => __("Choose which page the Open App button opens.", "chama-inn"),
-        "section"     => "chama_inn_design",
-        "type"        => "dropdown-pages",
-    ]);
-
-    $wp_customize->add_setting("chama_inn_header_cta_label", [
-        "default"           => "Open App",
-        "sanitize_callback" => "sanitize_text_field",
-        "type"              => "theme_mod",
-    ]);
-
-    $wp_customize->add_control("chama_inn_header_cta_label", [
-        "label"       => __("Header CTA Label", "chama-inn"),
-        "description" => __("Short button text shown in the site header.", "chama-inn"),
-        "section"     => "chama_inn_design",
-        "type"        => "text",
-    ]);
 }
 add_action("customize_register", "chama_inn_customize_register");
 
@@ -281,73 +256,6 @@ function chama_inn_add_color_scheme_body_class(array $classes): array
     return $classes;
 }
 add_filter("body_class", "chama_inn_add_color_scheme_body_class");
-
-function chama_inn_get_header_cta_url(): string
-{
-    $selected_page_id = (int) get_theme_mod("chama_inn_header_cta_page", 0);
-
-    if ($selected_page_id > 0) {
-        $selected_url = get_permalink($selected_page_id);
-
-        if (is_string($selected_url) && $selected_url !== "") {
-            return $selected_url;
-        }
-    }
-
-    $fallback_paths = ["home", "dining", "gift-shop", "service-requests", "contact", "book", "inquire"];
-
-    foreach ($fallback_paths as $path) {
-        $page = get_page_by_path($path);
-
-        if ($page instanceof WP_Post) {
-            $fallback_url = get_permalink($page);
-
-            if (is_string($fallback_url) && $fallback_url !== "") {
-                return $fallback_url;
-            }
-        }
-    }
-
-    return (string) home_url("/");
-}
-
-function chama_inn_get_header_cta_label(): string
-{
-    $label = (string) get_theme_mod("chama_inn_header_cta_label", "Open App");
-    $label = trim($label);
-
-    if ($label === "") {
-        return __("Open App", "chama-inn");
-    }
-
-    return $label;
-}
-
-function chama_inn_migrate_header_cta_label(): void
-{
-    if (!is_admin() || !current_user_can("manage_options")) {
-        return;
-    }
-
-    $migration_version = (int) get_option("chama_inn_header_cta_migration_version", 0);
-
-    if ($migration_version >= 2) {
-        return;
-    }
-
-    $existing_label = trim((string) get_theme_mod("chama_inn_header_cta_label", ""));
-
-    if (
-        $existing_label === ""
-        || strcasecmp($existing_label, "Book Your Stay") === 0
-        || strcasecmp($existing_label, "Open Guest Hub") === 0
-    ) {
-        set_theme_mod("chama_inn_header_cta_label", "Open App");
-    }
-
-    update_option("chama_inn_header_cta_migration_version", 2, false);
-}
-add_action("admin_init", "chama_inn_migrate_header_cta_label");
 
 function chama_inn_redirect_legacy_guest_hub(): void
 {

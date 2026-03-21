@@ -3,8 +3,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$header_cta_url   = function_exists('chama_inn_get_header_cta_url') ? chama_inn_get_header_cta_url() : home_url('/contact');
-$header_cta_label = function_exists('chama_inn_get_header_cta_label') ? chama_inn_get_header_cta_label() : __('Open App', 'chama-inn');
 $header_logo_uri = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri('header') : '';
 $site_name = get_bloginfo('name');
 $show_site_title = true;
@@ -60,10 +58,6 @@ $show_site_title = true;
                     'menu_class' => 'menu',
                 ]); ?>
             </nav>
-
-            <a class="site-header__cta" href="<?php echo esc_url($header_cta_url); ?>">
-                <?php echo esc_html($header_cta_label); ?>
-            </a>
         </div>
     </div>
 </header>
