@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.22.0
+ * Version: 1.23.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -80,6 +80,70 @@ function chama_ops_register_post_types(): void
     ];
 
     register_post_type('stay', $stay_args);
+
+    $room_service_item_labels = [
+        'name'               => __('Room Service Menu', 'chama-ops'),
+        'singular_name'      => __('Room Service Item', 'chama-ops'),
+        'menu_name'          => __('Room Service Menu', 'chama-ops'),
+        'name_admin_bar'     => __('Room Service Item', 'chama-ops'),
+        'add_new'            => __('Add New', 'chama-ops'),
+        'add_new_item'       => __('Add New Menu Item', 'chama-ops'),
+        'new_item'           => __('New Menu Item', 'chama-ops'),
+        'edit_item'          => __('Edit Menu Item', 'chama-ops'),
+        'view_item'          => __('View Menu Item', 'chama-ops'),
+        'all_items'          => __('All Menu Items', 'chama-ops'),
+        'search_items'       => __('Search Menu Items', 'chama-ops'),
+        'not_found'          => __('No menu items found.', 'chama-ops'),
+        'not_found_in_trash' => __('No menu items found in Trash.', 'chama-ops'),
+    ];
+
+    $room_service_item_args = [
+        'labels'             => $room_service_item_labels,
+        'public'             => false,
+        'publicly_queryable' => false,
+        'show_ui'            => true,
+        'show_in_menu'       => true,
+        'show_in_rest'       => true,
+        'menu_position'      => 27,
+        'menu_icon'          => 'dashicons-food',
+        'supports'           => ['title', 'editor'],
+        'has_archive'        => false,
+        'rewrite'            => false,
+    ];
+
+    register_post_type('room_service_item', $room_service_item_args);
+
+    $room_service_order_labels = [
+        'name'               => __('Room Service Orders', 'chama-ops'),
+        'singular_name'      => __('Room Service Order', 'chama-ops'),
+        'menu_name'          => __('Room Service Orders', 'chama-ops'),
+        'name_admin_bar'     => __('Room Service Order', 'chama-ops'),
+        'add_new'            => __('Add New', 'chama-ops'),
+        'add_new_item'       => __('Add New Order', 'chama-ops'),
+        'new_item'           => __('New Order', 'chama-ops'),
+        'edit_item'          => __('Edit Order', 'chama-ops'),
+        'view_item'          => __('View Order', 'chama-ops'),
+        'all_items'          => __('All Orders', 'chama-ops'),
+        'search_items'       => __('Search Orders', 'chama-ops'),
+        'not_found'          => __('No orders found.', 'chama-ops'),
+        'not_found_in_trash' => __('No orders found in Trash.', 'chama-ops'),
+    ];
+
+    $room_service_order_args = [
+        'labels'             => $room_service_order_labels,
+        'public'             => false,
+        'publicly_queryable' => false,
+        'show_ui'            => true,
+        'show_in_menu'       => true,
+        'show_in_rest'       => true,
+        'menu_position'      => 28,
+        'menu_icon'          => 'dashicons-clipboard',
+        'supports'           => ['title', 'editor'],
+        'has_archive'        => false,
+        'rewrite'            => false,
+    ];
+
+    register_post_type('room_service_order', $room_service_order_args);
 }
 add_action('init', 'chama_ops_register_post_types');
 
@@ -122,6 +186,24 @@ function chama_ops_add_meta_boxes(): void
         'stay',
         'side',
         'high'
+    );
+
+    add_meta_box(
+        'chama_room_service_item_details',
+        __('Menu Item Details', 'chama-ops'),
+        'chama_ops_render_room_service_item_meta_box',
+        'room_service_item',
+        'normal',
+        'default'
+    );
+
+    add_meta_box(
+        'chama_room_service_order_details',
+        __('Order Details', 'chama-ops'),
+        'chama_ops_render_room_service_order_meta_box',
+        'room_service_order',
+        'normal',
+        'default'
     );
 }
 add_action('add_meta_boxes', 'chama_ops_add_meta_boxes');
@@ -1137,6 +1219,117 @@ function chama_ops_save_stay_meta(int $post_id): void
 add_action('save_post', 'chama_ops_save_stay_meta');
 
 /**
+ * Sanitize decimal amount stored as a string with two decimals.
+ *
+ * @param string $raw_value Raw amount.
+ * @return string
+ */
+function chama_ops_sanitize_decimal_amount(string $raw_value): string
+{
+    $normalized = preg_replace('/[^0-9.\-]/', '', $raw_value);
+
+    if (!is_string($normalized) || $normalized === '') {
+        return '';
+    }
+
+    $amount = (float) $normalized;
+
+    if ($amount < 0) {
+        $amount = 0.0;
+    }
+
+    return number_format($amount, 2, '.', '');
+}
+
+/**
+ * Save room service menu item metadata.
+ *
+ * @param int $post_id Current post ID.
+ */
+function chama_ops_save_room_service_item_meta(int $post_id): void
+{
+    if (!isset($_POST['chama_ops_room_service_item_nonce'])) {
+        return;
+    }
+
+    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['chama_ops_room_service_item_nonce'])), 'chama_ops_save_room_service_item')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (get_post_type($post_id) !== 'room_service_item') {
+        return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    $price        = isset($_POST['chama_room_service_price']) ? chama_ops_sanitize_decimal_amount((string) wp_unslash($_POST['chama_room_service_price'])) : '';
+    $prep_minutes = isset($_POST['chama_room_service_prep_minutes']) ? max(0, absint(wp_unslash($_POST['chama_room_service_prep_minutes']))) : 0;
+    $is_available = isset($_POST['chama_room_service_available']) ? '1' : '';
+
+    update_post_meta($post_id, '_chama_room_service_price', $price);
+    update_post_meta($post_id, '_chama_room_service_prep_minutes', $prep_minutes);
+    update_post_meta($post_id, '_chama_room_service_available', $is_available);
+}
+add_action('save_post', 'chama_ops_save_room_service_item_meta');
+
+/**
+ * Save room service order metadata.
+ *
+ * @param int $post_id Current post ID.
+ */
+function chama_ops_save_room_service_order_meta(int $post_id): void
+{
+    if (!isset($_POST['chama_ops_room_service_order_nonce'])) {
+        return;
+    }
+
+    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['chama_ops_room_service_order_nonce'])), 'chama_ops_save_room_service_order')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (get_post_type($post_id) !== 'room_service_order') {
+        return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    $item_id     = isset($_POST['chama_order_item_id']) ? absint(wp_unslash($_POST['chama_order_item_id'])) : 0;
+    $quantity    = isset($_POST['chama_order_quantity']) ? max(1, absint(wp_unslash($_POST['chama_order_quantity']))) : 1;
+    $room_number = isset($_POST['chama_order_room_number']) ? sanitize_text_field(wp_unslash($_POST['chama_order_room_number'])) : '';
+    $guest_name  = isset($_POST['chama_order_guest_name']) ? sanitize_text_field(wp_unslash($_POST['chama_order_guest_name'])) : '';
+    $guest_phone = isset($_POST['chama_order_guest_phone']) ? sanitize_text_field(wp_unslash($_POST['chama_order_guest_phone'])) : '';
+    $order_total = isset($_POST['chama_order_total']) ? chama_ops_sanitize_decimal_amount((string) wp_unslash($_POST['chama_order_total'])) : '';
+    $order_state = isset($_POST['chama_order_status']) ? sanitize_key((string) wp_unslash($_POST['chama_order_status'])) : 'submitted';
+
+    $allowed_states = ['submitted', 'in_kitchen', 'ready', 'delivering', 'completed', 'cancelled'];
+
+    if (!in_array($order_state, $allowed_states, true)) {
+        $order_state = 'submitted';
+    }
+
+    update_post_meta($post_id, '_chama_order_item_id', $item_id);
+    update_post_meta($post_id, '_chama_order_quantity', $quantity);
+    update_post_meta($post_id, '_chama_order_room_number', $room_number);
+    update_post_meta($post_id, '_chama_order_guest_name', $guest_name);
+    update_post_meta($post_id, '_chama_order_guest_phone', $guest_phone);
+    update_post_meta($post_id, '_chama_order_total', $order_total);
+    update_post_meta($post_id, '_chama_order_status', $order_state);
+}
+add_action('save_post', 'chama_ops_save_room_service_order_meta');
+
+/**
  * Customize guest admin columns.
  *
  * @param array $columns Existing columns.
@@ -1788,6 +1981,180 @@ function chama_ops_get_overview_action_links(): array
 }
 
 /**
+ * Build room-service order performance metrics.
+ *
+ * @return array<string, int|float>
+ */
+function chama_ops_get_room_service_order_metrics(): array
+{
+    $order_ids = get_posts([
+        'post_type'      => 'room_service_order',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+    ]);
+
+    if (!is_array($order_ids)) {
+        return [
+            'total_orders'     => 0,
+            'open_orders'      => 0,
+            'completed_orders' => 0,
+            'gross_revenue'    => 0.0,
+        ];
+    }
+
+    $open_statuses = ['submitted', 'in_kitchen', 'ready', 'delivering'];
+    $open_orders = 0;
+    $completed_orders = 0;
+    $gross_revenue = 0.0;
+
+    foreach ($order_ids as $order_id_raw) {
+        $order_id = (int) $order_id_raw;
+        $order_status = (string) get_post_meta($order_id, '_chama_order_status', true);
+        $order_total = (string) get_post_meta($order_id, '_chama_order_total', true);
+        $gross_revenue += (float) $order_total;
+
+        if (in_array($order_status, $open_statuses, true)) {
+            $open_orders++;
+        }
+
+        if ($order_status === 'completed') {
+            $completed_orders++;
+        }
+    }
+
+    return [
+        'total_orders'     => count($order_ids),
+        'open_orders'      => $open_orders,
+        'completed_orders' => $completed_orders,
+        'gross_revenue'    => $gross_revenue,
+    ];
+}
+
+/**
+ * Render room service menu item details.
+ *
+ * @param WP_Post $post Current menu item post.
+ */
+function chama_ops_render_room_service_item_meta_box(WP_Post $post): void
+{
+    wp_nonce_field('chama_ops_save_room_service_item', 'chama_ops_room_service_item_nonce');
+
+    $price        = (string) get_post_meta($post->ID, '_chama_room_service_price', true);
+    $prep_minutes = (int) get_post_meta($post->ID, '_chama_room_service_prep_minutes', true);
+    $is_available = (string) get_post_meta($post->ID, '_chama_room_service_available', true);
+    ?>
+    <table class="form-table" role="presentation">
+        <tbody>
+            <tr>
+                <th scope="row"><label for="chama_room_service_price"><?php esc_html_e('Price', 'chama-ops'); ?></label></th>
+                <td>
+                    <input type="text" id="chama_room_service_price" name="chama_room_service_price" value="<?php echo esc_attr($price); ?>" class="regular-text" placeholder="44.00">
+                </td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="chama_room_service_prep_minutes"><?php esc_html_e('Prep Time (minutes)', 'chama-ops'); ?></label></th>
+                <td>
+                    <input type="number" id="chama_room_service_prep_minutes" name="chama_room_service_prep_minutes" min="0" step="1" value="<?php echo esc_attr((string) $prep_minutes); ?>" class="small-text">
+                </td>
+            </tr>
+            <tr>
+                <th scope="row"><?php esc_html_e('Availability', 'chama-ops'); ?></th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="chama_room_service_available" value="1" <?php checked($is_available, '1'); ?>>
+                        <?php esc_html_e('Available to order', 'chama-ops'); ?>
+                    </label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <?php
+}
+
+/**
+ * Render room service order details.
+ *
+ * @param WP_Post $post Current order post.
+ */
+function chama_ops_render_room_service_order_meta_box(WP_Post $post): void
+{
+    wp_nonce_field('chama_ops_save_room_service_order', 'chama_ops_room_service_order_nonce');
+
+    $item_id     = (int) get_post_meta($post->ID, '_chama_order_item_id', true);
+    $quantity    = (int) get_post_meta($post->ID, '_chama_order_quantity', true);
+    $room_number = (string) get_post_meta($post->ID, '_chama_order_room_number', true);
+    $guest_name  = (string) get_post_meta($post->ID, '_chama_order_guest_name', true);
+    $guest_phone = (string) get_post_meta($post->ID, '_chama_order_guest_phone', true);
+    $order_total = (string) get_post_meta($post->ID, '_chama_order_total', true);
+    $order_state = (string) get_post_meta($post->ID, '_chama_order_status', true);
+
+    if ($quantity <= 0) {
+        $quantity = 1;
+    }
+
+    $item_options = get_posts([
+        'post_type'      => 'room_service_item',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    ]);
+    ?>
+    <table class="form-table" role="presentation">
+        <tbody>
+            <tr>
+                <th scope="row"><label for="chama_order_item_id"><?php esc_html_e('Menu Item', 'chama-ops'); ?></label></th>
+                <td>
+                    <select id="chama_order_item_id" name="chama_order_item_id">
+                        <option value="0"><?php esc_html_e('Select item', 'chama-ops'); ?></option>
+                        <?php foreach ($item_options as $item_post) : ?>
+                            <option value="<?php echo esc_attr((string) $item_post->ID); ?>" <?php selected($item_id, (int) $item_post->ID); ?>>
+                                <?php echo esc_html($item_post->post_title); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="chama_order_quantity"><?php esc_html_e('Quantity', 'chama-ops'); ?></label></th>
+                <td><input type="number" id="chama_order_quantity" name="chama_order_quantity" min="1" step="1" value="<?php echo esc_attr((string) $quantity); ?>" class="small-text"></td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="chama_order_room_number"><?php esc_html_e('Room Number', 'chama-ops'); ?></label></th>
+                <td><input type="text" id="chama_order_room_number" name="chama_order_room_number" value="<?php echo esc_attr($room_number); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="chama_order_guest_name"><?php esc_html_e('Guest Name', 'chama-ops'); ?></label></th>
+                <td><input type="text" id="chama_order_guest_name" name="chama_order_guest_name" value="<?php echo esc_attr($guest_name); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="chama_order_guest_phone"><?php esc_html_e('Guest Phone', 'chama-ops'); ?></label></th>
+                <td><input type="text" id="chama_order_guest_phone" name="chama_order_guest_phone" value="<?php echo esc_attr($guest_phone); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="chama_order_total"><?php esc_html_e('Order Total', 'chama-ops'); ?></label></th>
+                <td><input type="text" id="chama_order_total" name="chama_order_total" value="<?php echo esc_attr($order_total); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="chama_order_status"><?php esc_html_e('Order Status', 'chama-ops'); ?></label></th>
+                <td>
+                    <select id="chama_order_status" name="chama_order_status">
+                        <option value="submitted" <?php selected($order_state, 'submitted'); ?>><?php esc_html_e('Submitted', 'chama-ops'); ?></option>
+                        <option value="in_kitchen" <?php selected($order_state, 'in_kitchen'); ?>><?php esc_html_e('In Kitchen', 'chama-ops'); ?></option>
+                        <option value="ready" <?php selected($order_state, 'ready'); ?>><?php esc_html_e('Ready', 'chama-ops'); ?></option>
+                        <option value="delivering" <?php selected($order_state, 'delivering'); ?>><?php esc_html_e('Delivering', 'chama-ops'); ?></option>
+                        <option value="completed" <?php selected($order_state, 'completed'); ?>><?php esc_html_e('Completed', 'chama-ops'); ?></option>
+                        <option value="cancelled" <?php selected($order_state, 'cancelled'); ?>><?php esc_html_e('Cancelled', 'chama-ops'); ?></option>
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <?php
+}
+
+/**
  * Return supported sample demo scenario labels.
  *
  * @return array<string, string>
@@ -2051,6 +2418,7 @@ function chama_ops_render_overview_page(): void
     $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
     $checked_in_total       = (int) ($stay_status_summary['checked_in'] ?? 0);
     $booked_total           = (int) ($stay_status_summary['booked'] ?? 0);
+    $room_service_metrics   = chama_ops_get_room_service_order_metrics();
     $sample_data_counts     = chama_ops_get_sample_data_counts();
     $persistent_guest_count = max(0, $guest_total - (int) $sample_data_counts['guest']);
     $persistent_stay_count  = max(0, $stay_total - (int) $sample_data_counts['stay']);
@@ -2290,8 +2658,8 @@ function chama_ops_render_overview_page(): void
         </p>
 
         <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
-            <h2 style="margin-top:0;"><?php esc_html_e('Guest POS Command Center', 'chama-ops'); ?></h2>
-            <p style="margin-top:0;"><?php esc_html_e('This dashboard also acts as POS control: launch guest-facing pages, watch in-house demand, and drive same-day fulfillment.', 'chama-ops'); ?></p>
+            <h2 style="margin-top:0;"><?php esc_html_e('Guest Experience Command Center', 'chama-ops'); ?></h2>
+            <p style="margin-top:0;"><?php esc_html_e('Launch guest-facing pages, watch in-house demand, and drive same-day fulfillment from one place.', 'chama-ops'); ?></p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Guest Hub Entry', 'chama-ops'); ?></strong><br>
@@ -2299,12 +2667,12 @@ function chama_ops_render_overview_page(): void
                     <a href="<?php echo esc_url($action_links['guest_hub']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Open Guest Hub', 'chama-ops'); ?></a>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
-                    <strong><?php esc_html_e('Restaurant POS', 'chama-ops'); ?></strong><br>
+                    <strong><?php esc_html_e('Restaurant Orders', 'chama-ops'); ?></strong><br>
                     <?php esc_html_e('Sample signature dish included: Filet Mignon.', 'chama-ops'); ?><br>
                     <a href="<?php echo esc_url($action_links['dining_pos']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Open Restaurant Orders Page', 'chama-ops'); ?></a>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
-                    <strong><?php esc_html_e('Gift Shop POS', 'chama-ops'); ?></strong><br>
+                    <strong><?php esc_html_e('Gift Shop Orders', 'chama-ops'); ?></strong><br>
                     <?php esc_html_e('Guest-side catalog and pickup flow controls.', 'chama-ops'); ?><br>
                     <a href="<?php echo esc_url($action_links['gift_shop_pos']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Open Gift Shop Page', 'chama-ops'); ?></a>
                 </div>
@@ -2318,6 +2686,29 @@ function chama_ops_render_overview_page(): void
                     );
                     ?><br>
                     <a href="<?php echo esc_url($action_links['checked_in_stays']); ?>"><?php esc_html_e('Open checked-in queue', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Room Service Queue', 'chama-ops'); ?></strong><br>
+                    <?php
+                    printf(
+                        esc_html__('%1$d open / %2$d total orders', 'chama-ops'),
+                        (int) $room_service_metrics['open_orders'],
+                        (int) $room_service_metrics['total_orders']
+                    );
+                    ?><br>
+                    <a href="<?php echo esc_url(admin_url('edit.php?post_type=room_service_order')); ?>"><?php esc_html_e('Open room-service orders', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Room Service Revenue', 'chama-ops'); ?></strong><br>
+                    <?php
+                    echo esc_html('$' . number_format((float) $room_service_metrics['gross_revenue'], 2));
+                    ?><br>
+                    <?php
+                    printf(
+                        esc_html__('%d completed orders', 'chama-ops'),
+                        (int) $room_service_metrics['completed_orders']
+                    );
+                    ?>
                 </div>
             </div>
         </div>
@@ -4528,4 +4919,383 @@ function chama_ops_render_guest_phone_format_script(): void
     <?php
 }
 add_action('admin_print_footer_scripts', 'chama_ops_render_guest_phone_format_script');
+
+/**
+ * Return available room service menu items.
+ *
+ * @return WP_Post[]
+ */
+function chama_ops_get_available_room_service_items(): array
+{
+    $items = get_posts([
+        'post_type'      => 'room_service_item',
+        'posts_per_page' => -1,
+        'post_status'    => 'publish',
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    ]);
+
+    if (!is_array($items)) {
+        return [];
+    }
+
+    return array_values(array_filter($items, static function ($item): bool {
+        if (!$item instanceof WP_Post) {
+            return false;
+        }
+
+        return (string) get_post_meta((int) $item->ID, '_chama_room_service_available', true) === '1';
+    }));
+}
+
+/**
+ * Render guest room-service app shortcode.
+ *
+ * Usage: [chama_room_service_app]
+ *
+ * @return string
+ */
+function chama_ops_render_room_service_app_shortcode(): string
+{
+    $items = chama_ops_get_available_room_service_items();
+    $notice_key = isset($_GET['chama_room_service']) ? sanitize_key((string) wp_unslash($_GET['chama_room_service'])) : '';
+    $order_ref  = isset($_GET['chama_room_service_order']) ? absint($_GET['chama_room_service_order']) : 0;
+
+    ob_start();
+    ?>
+    <section class="chama-room-service-app" style="margin:0 auto;max-width:1080px;">
+        <?php if ($notice_key === 'submitted' && $order_ref > 0) : ?>
+            <div style="border:1px solid #b7d8c0;background:#ecf8ef;padding:12px;border-radius:10px;margin-bottom:14px;">
+                <?php
+                printf(
+                    esc_html__('Order submitted. Reference #%d. Front desk will keep you updated.', 'chama-ops'),
+                    $order_ref
+                );
+                ?>
+            </div>
+        <?php elseif ($notice_key === 'invalid_item') : ?>
+            <div style="border:1px solid #e2b3b0;background:#fff2f2;padding:12px;border-radius:10px;margin-bottom:14px;">
+                <?php esc_html_e('That menu item is currently unavailable. Please choose another item.', 'chama-ops'); ?>
+            </div>
+        <?php elseif ($notice_key === 'missing_room') : ?>
+            <div style="border:1px solid #e2b3b0;background:#fff2f2;padding:12px;border-radius:10px;margin-bottom:14px;">
+                <?php esc_html_e('Please add a room number before submitting your order.', 'chama-ops'); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (empty($items)) : ?>
+            <p><?php esc_html_e('Room service menu is currently being updated. Please contact the front desk.', 'chama-ops'); ?></p>
+        <?php else : ?>
+            <div class="chama-order-grid">
+                <?php foreach ($items as $item) : ?>
+                    <?php
+                    $item_id      = (int) $item->ID;
+                    $price        = (string) get_post_meta($item_id, '_chama_room_service_price', true);
+                    $prep_minutes = (int) get_post_meta($item_id, '_chama_room_service_prep_minutes', true);
+                    ?>
+                    <article class="chama-order-card">
+                        <h3><?php echo esc_html((string) $item->post_title); ?></h3>
+                        <?php if (trim((string) $item->post_content) !== '') : ?>
+                            <p class="chama-order-meta"><?php echo esc_html(wp_strip_all_tags((string) $item->post_content)); ?></p>
+                        <?php endif; ?>
+                        <?php if ($price !== '') : ?>
+                            <p class="chama-order-price">
+                                <?php
+                                printf(
+                                    esc_html__('$%s', 'chama-ops'),
+                                    esc_html(number_format((float) $price, 2))
+                                );
+                                ?>
+                            </p>
+                        <?php endif; ?>
+                        <?php if ($prep_minutes > 0) : ?>
+                            <p class="chama-order-meta">
+                                <?php
+                                printf(
+                                    esc_html__('Estimated prep: %d min', 'chama-ops'),
+                                    $prep_minutes
+                                );
+                                ?>
+                            </p>
+                        <?php endif; ?>
+
+                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-top:10px;">
+                            <?php wp_nonce_field('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce'); ?>
+                            <input type="hidden" name="action" value="chama_ops_submit_room_service_order">
+                            <input type="hidden" name="chama_room_service_item_id" value="<?php echo esc_attr((string) $item_id); ?>">
+
+                            <p style="margin:0 0 8px;">
+                                <label>
+                                    <?php esc_html_e('Room', 'chama-ops'); ?><br>
+                                    <input type="text" name="chama_room_service_room" required style="width:100%;">
+                                </label>
+                            </p>
+                            <p style="margin:0 0 8px;">
+                                <label>
+                                    <?php esc_html_e('Qty', 'chama-ops'); ?><br>
+                                    <input type="number" name="chama_room_service_qty" min="1" step="1" value="1" required style="width:100%;">
+                                </label>
+                            </p>
+                            <p style="margin:0 0 8px;">
+                                <label>
+                                    <?php esc_html_e('Name (optional)', 'chama-ops'); ?><br>
+                                    <input type="text" name="chama_room_service_guest_name" style="width:100%;">
+                                </label>
+                            </p>
+                            <p style="margin:0 0 8px;">
+                                <label>
+                                    <?php esc_html_e('Phone (optional)', 'chama-ops'); ?><br>
+                                    <input type="text" name="chama_room_service_guest_phone" style="width:100%;">
+                                </label>
+                            </p>
+                            <p style="margin:0 0 10px;">
+                                <label>
+                                    <?php esc_html_e('Notes (optional)', 'chama-ops'); ?><br>
+                                    <textarea name="chama_room_service_notes" rows="2" style="width:100%;"></textarea>
+                                </label>
+                            </p>
+                            <button type="submit" class="wp-element-button" style="width:100%;"><?php esc_html_e('Add and Submit', 'chama-ops'); ?></button>
+                        </form>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </section>
+    <?php
+    return (string) ob_get_clean();
+}
+add_shortcode('chama_room_service_app', 'chama_ops_render_room_service_app_shortcode');
+
+/**
+ * Handle front-end room service order submissions.
+ */
+function chama_ops_submit_room_service_order(): void
+{
+    check_admin_referer('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce');
+
+    $item_id = isset($_POST['chama_room_service_item_id']) ? absint(wp_unslash($_POST['chama_room_service_item_id'])) : 0;
+    $room    = isset($_POST['chama_room_service_room']) ? sanitize_text_field(wp_unslash($_POST['chama_room_service_room'])) : '';
+    $qty     = isset($_POST['chama_room_service_qty']) ? max(1, absint(wp_unslash($_POST['chama_room_service_qty']))) : 1;
+    $name    = isset($_POST['chama_room_service_guest_name']) ? sanitize_text_field(wp_unslash($_POST['chama_room_service_guest_name'])) : '';
+    $phone   = isset($_POST['chama_room_service_guest_phone']) ? sanitize_text_field(wp_unslash($_POST['chama_room_service_guest_phone'])) : '';
+    $notes   = isset($_POST['chama_room_service_notes']) ? sanitize_textarea_field(wp_unslash($_POST['chama_room_service_notes'])) : '';
+
+    $redirect_url = wp_get_referer();
+
+    if (!is_string($redirect_url) || $redirect_url === '') {
+        $redirect_url = (string) home_url('/');
+    }
+
+    if ($room === '') {
+        wp_safe_redirect(add_query_arg('chama_room_service', 'missing_room', $redirect_url));
+        exit;
+    }
+
+    $item_post = get_post($item_id);
+
+    if (!$item_post instanceof WP_Post || $item_post->post_type !== 'room_service_item') {
+        wp_safe_redirect(add_query_arg('chama_room_service', 'invalid_item', $redirect_url));
+        exit;
+    }
+
+    $is_available = (string) get_post_meta($item_id, '_chama_room_service_available', true) === '1';
+
+    if (!$is_available) {
+        wp_safe_redirect(add_query_arg('chama_room_service', 'invalid_item', $redirect_url));
+        exit;
+    }
+
+    $price_raw = (string) get_post_meta($item_id, '_chama_room_service_price', true);
+    $price     = $price_raw !== '' ? (float) $price_raw : 0.0;
+    $total     = number_format($price * $qty, 2, '.', '');
+    $order_note_lines = [];
+
+    if ($name !== '') {
+        $order_note_lines[] = sprintf(__('Guest Name: %s', 'chama-ops'), $name);
+    }
+
+    if ($phone !== '') {
+        $order_note_lines[] = sprintf(__('Guest Phone: %s', 'chama-ops'), $phone);
+    }
+
+    if ($notes !== '') {
+        $order_note_lines[] = sprintf(__('Notes: %s', 'chama-ops'), $notes);
+    }
+
+    $order_content = implode("\n", $order_note_lines);
+    $order_title   = sprintf(
+        __('Room %1$s - %2$s x%3$d', 'chama-ops'),
+        $room,
+        (string) $item_post->post_title,
+        $qty
+    );
+
+    $order_id = wp_insert_post([
+        'post_type'    => 'room_service_order',
+        'post_status'  => 'publish',
+        'post_title'   => $order_title,
+        'post_content' => $order_content,
+    ], true);
+
+    if (is_wp_error($order_id) || (int) $order_id <= 0) {
+        wp_safe_redirect(add_query_arg('chama_room_service', 'invalid_item', $redirect_url));
+        exit;
+    }
+
+    update_post_meta((int) $order_id, '_chama_order_item_id', $item_id);
+    update_post_meta((int) $order_id, '_chama_order_quantity', $qty);
+    update_post_meta((int) $order_id, '_chama_order_room_number', $room);
+    update_post_meta((int) $order_id, '_chama_order_guest_name', $name);
+    update_post_meta((int) $order_id, '_chama_order_guest_phone', $phone);
+    update_post_meta((int) $order_id, '_chama_order_total', $total);
+    update_post_meta((int) $order_id, '_chama_order_status', 'submitted');
+
+    wp_safe_redirect(add_query_arg([
+        'chama_room_service'       => 'submitted',
+        'chama_room_service_order' => (int) $order_id,
+    ], $redirect_url));
+    exit;
+}
+add_action('admin_post_nopriv_chama_ops_submit_room_service_order', 'chama_ops_submit_room_service_order');
+add_action('admin_post_chama_ops_submit_room_service_order', 'chama_ops_submit_room_service_order');
+
+/**
+ * Seed starter room-service menu items for demos.
+ */
+function chama_ops_seed_room_service_menu_items(): void
+{
+    if (!is_admin() || !current_user_can('manage_options')) {
+        return;
+    }
+
+    $seed_version = (int) get_option('chama_ops_room_service_seed_version', 0);
+
+    if ($seed_version >= 1) {
+        return;
+    }
+
+    $items = [
+        [
+            'title'        => 'Filet Mignon',
+            'description'  => '8 oz filet with herb butter, roasted potatoes, and seasonal vegetables.',
+            'price'        => '44.00',
+            'prep_minutes' => 35,
+        ],
+        [
+            'title'        => 'Trout + Lemon Caper',
+            'description'  => 'Pan-seared trout, lemon caper sauce, wild rice, and charred asparagus.',
+            'price'        => '31.00',
+            'prep_minutes' => 24,
+        ],
+        [
+            'title'        => 'Green Chile Chicken Alfredo',
+            'description'  => 'House-made cream sauce, green chile, grilled chicken, and fresh herbs.',
+            'price'        => '26.00',
+            'prep_minutes' => 22,
+        ],
+        [
+            'title'        => 'Garden Salad',
+            'description'  => 'Mixed greens, seasonal vegetables, and house vinaigrette.',
+            'price'        => '9.00',
+            'prep_minutes' => 8,
+        ],
+        [
+            'title'        => 'Hot Cocoa',
+            'description'  => 'Rich cocoa with whipped cream.',
+            'price'        => '6.00',
+            'prep_minutes' => 5,
+        ],
+    ];
+
+    foreach ($items as $item) {
+        $existing_items = get_posts([
+            'post_type'      => 'room_service_item',
+            'title'          => $item['title'],
+            'posts_per_page' => 1,
+            'post_status'    => ['publish', 'draft', 'pending', 'private'],
+        ]);
+        $existing = !empty($existing_items) && $existing_items[0] instanceof WP_Post
+            ? $existing_items[0]
+            : null;
+
+        if ($existing instanceof WP_Post) {
+            continue;
+        }
+
+        $item_id = wp_insert_post([
+            'post_type'    => 'room_service_item',
+            'post_status'  => 'publish',
+            'post_title'   => $item['title'],
+            'post_content' => $item['description'],
+        ], true);
+
+        if (is_wp_error($item_id) || (int) $item_id <= 0) {
+            continue;
+        }
+
+        update_post_meta((int) $item_id, '_chama_room_service_price', $item['price']);
+        update_post_meta((int) $item_id, '_chama_room_service_prep_minutes', (int) $item['prep_minutes']);
+        update_post_meta((int) $item_id, '_chama_room_service_available', '1');
+    }
+
+    update_option('chama_ops_room_service_seed_version', 1, false);
+}
+add_action('admin_init', 'chama_ops_seed_room_service_menu_items');
+
+/**
+ * Customize room-service order admin columns.
+ *
+ * @param array<string, string> $columns Existing columns.
+ * @return array<string, string>
+ */
+function chama_ops_add_room_service_order_columns(array $columns): array
+{
+    $columns['chama_order_room'] = __('Room', 'chama-ops');
+    $columns['chama_order_item'] = __('Menu Item', 'chama-ops');
+    $columns['chama_order_qty'] = __('Qty', 'chama-ops');
+    $columns['chama_order_total'] = __('Total', 'chama-ops');
+    $columns['chama_order_status'] = __('Order Status', 'chama-ops');
+
+    return $columns;
+}
+add_filter('manage_room_service_order_posts_columns', 'chama_ops_add_room_service_order_columns');
+
+/**
+ * Render room-service order custom column values.
+ *
+ * @param string $column Column key.
+ * @param int    $post_id Current post ID.
+ */
+function chama_ops_render_room_service_order_column(string $column, int $post_id): void
+{
+    switch ($column) {
+        case 'chama_order_room':
+            echo esc_html((string) get_post_meta($post_id, '_chama_order_room_number', true));
+            break;
+
+        case 'chama_order_item':
+            $item_id = (int) get_post_meta($post_id, '_chama_order_item_id', true);
+            $item = $item_id > 0 ? get_post($item_id) : null;
+            echo $item instanceof WP_Post
+                ? esc_html((string) $item->post_title)
+                : esc_html__('N/A', 'chama-ops');
+            break;
+
+        case 'chama_order_qty':
+            echo esc_html((string) ((int) get_post_meta($post_id, '_chama_order_quantity', true)));
+            break;
+
+        case 'chama_order_total':
+            $total = (string) get_post_meta($post_id, '_chama_order_total', true);
+            echo $total !== ''
+                ? esc_html('$' . number_format((float) $total, 2))
+                : esc_html__('N/A', 'chama-ops');
+            break;
+
+        case 'chama_order_status':
+            echo esc_html((string) get_post_meta($post_id, '_chama_order_status', true));
+            break;
+    }
+}
+add_action('manage_room_service_order_posts_custom_column', 'chama_ops_render_room_service_order_column', 10, 2);
 

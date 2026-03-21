@@ -4,107 +4,125 @@ if (!defined("ABSPATH")) {
 }
 
 return <<<'HTML'
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"54px","bottom":"54px","left":"20px","right":"20px"}},"color":{"background":"#f3ebdd"}},"layout":{"type":"constrained","contentSize":"1000px"}} -->
-<div class="wp-block-group alignfull has-background" style="background-color:#f3ebdd;padding-top:54px;padding-right:20px;padding-bottom:54px;padding-left:20px"><!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.12em","fontSize":"13px"},"color":{"text":"#6f8680"}}} -->
-<p class="has-text-color" style="color:#6f8680;font-size:13px;letter-spacing:0.12em;text-transform:uppercase">Gift Shop</p>
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"52px","bottom":"52px","left":"20px","right":"20px"}},"color":{"background":"#f3ebdd"}},"layout":{"type":"constrained","contentSize":"1020px"}} -->
+<div class="wp-block-group alignfull has-background" style="background-color:#f3ebdd;padding-top:52px;padding-right:20px;padding-bottom:52px;padding-left:20px"><!-- wp:paragraph {"style":{"typography":{"textTransform":"uppercase","letterSpacing":"0.12em","fontSize":"13px"},"color":{"text":"#5f7a73"}}} -->
+<p class="has-text-color" style="color:#5f7a73;font-size:13px;letter-spacing:0.12em;text-transform:uppercase">Gift Shop</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:heading {"level":1,"style":{"color":{"text":"#4e4035"}}} -->
-<h1 class="wp-block-heading has-text-color" style="color:#4e4035">Guest gift shop orders during your stay</h1>
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading">Shop local goods from your phone</h1>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph {"style":{"color":{"text":"#393633"}}} -->
-<p class="has-text-color" style="color:#393633">This page represents the guest side of the inn POS for retail items. Keep availability and pickup timing current.</p>
-<!-- /wp:paragraph --></div>
+<!-- wp:paragraph -->
+<p>Think of this as the inn's Etsy/Shopify-style guest shop, but inside the same stay app experience. Guests browse, add to cart, and checkout for pickup or drop-off.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul><li>Small curated catalog</li><li>Live in-stock visibility</li><li>Front desk fulfillment workflow</li></ul>
+<!-- /wp:list --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"50px","bottom":"50px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"1040px"}} -->
-<div class="wp-block-group alignfull has-background" style="background-color:#f7f4ee;padding-top:50px;padding-right:20px;padding-bottom:50px;padding-left:20px"><!-- wp:heading {"level":2} -->
-<h2 class="wp-block-heading">Sample catalog (demo data)</h2>
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"44px","bottom":"48px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"1080px"}} -->
+<div class="wp-block-group alignfull has-background" style="background-color:#f7f4ee;padding-top:44px;padding-right:20px;padding-bottom:48px;padding-left:20px"><!-- wp:heading {"level":2} -->
+<h2 class="wp-block-heading">Featured collection</h2>
 <!-- /wp:heading -->
 
-<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"20px"}}}} -->
-<div class="wp-block-columns"><!-- wp:column -->
-<div class="wp-block-column"><!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
-<div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Railroad & Inn Keepsakes</h3>
-<!-- /wp:heading -->
-
-<!-- wp:list -->
-<ul><li>Chama Rail Mug — $18</li><li>Cumbres Route Postcard Set — $9</li><li>Station Inn Canvas Tote — $22</li><li>Vintage Rail Patch Pack — $12</li></ul>
-<!-- /wp:list --></div>
-<!-- /wp:group --></div>
-<!-- /wp:column -->
-
-<!-- wp:column -->
-<div class="wp-block-column"><!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
-<div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Local Comfort & Pantry</h3>
-<!-- /wp:heading -->
-
-<!-- wp:list -->
-<ul><li>Mountain Honey Jar — $14</li><li>Blue Corn Cookie Tin — $16</li><li>Trail Snack Pack — $11</li><li>New Mexico Hot Cocoa Mix — $13</li></ul>
-<!-- /wp:list --></div>
-<!-- /wp:group --></div>
-<!-- /wp:column -->
-
-<!-- wp:column -->
-<div class="wp-block-column"><!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
-<div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Room Convenience</h3>
-<!-- /wp:heading -->
-
-<!-- wp:list -->
-<ul><li>Travel Toothbrush Kit — $6</li><li>Phone Charging Cable — $10</li><li>Sleep Mask + Earplug Set — $8</li><li>Emergency Toiletry Kit — $7</li></ul>
-<!-- /wp:list --></div>
-<!-- /wp:group --></div>
-<!-- /wp:column --></div>
-<!-- /wp:columns -->
+<!-- wp:html -->
+<div class="chama-order-grid">
+  <article class="chama-order-card">
+    <h3>Chama Rail Mug</h3>
+    <p class="chama-order-meta">Matte ceramic mug with station-inspired crest.</p>
+    <p class="chama-order-price">$18</p>
+    <div class="chama-order-actions wp-block-buttons">
+      <div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Add to cart</a></div>
+    </div>
+  </article>
+  <article class="chama-order-card">
+    <h3>Station Inn Canvas Tote</h3>
+    <p class="chama-order-meta">Natural canvas tote, ideal for train-day essentials.</p>
+    <p class="chama-order-price">$22</p>
+    <div class="chama-order-actions wp-block-buttons">
+      <div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Add to cart</a></div>
+    </div>
+  </article>
+  <article class="chama-order-card">
+    <h3>Blue Corn Cookie Tin</h3>
+    <p class="chama-order-meta">House favorite snack pack for your room or trip home.</p>
+    <p class="chama-order-price">$16</p>
+    <div class="chama-order-actions wp-block-buttons">
+      <div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Add to cart</a></div>
+    </div>
+  </article>
+</div>
+<!-- /wp:html -->
 
 <!-- wp:separator -->
 <hr class="wp-block-separator has-alpha-channel-opacity"/>
 <!-- /wp:separator -->
 
-<!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"20px"}}}} -->
-<div class="wp-block-columns"><!-- wp:column -->
-<div class="wp-block-column"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Order flow</h3>
+<!-- wp:heading {"level":2} -->
+<h2 class="wp-block-heading">Travel essentials</h2>
+<!-- /wp:heading -->
+
+<!-- wp:html -->
+<div class="chama-order-grid">
+  <article class="chama-order-card">
+    <h4>Phone Charging Cable</h4>
+    <p class="chama-order-meta">Compatible cable for common devices.</p>
+    <p class="chama-order-price">$10</p>
+    <div class="chama-order-actions wp-block-buttons">
+      <div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Add item</a></div>
+    </div>
+  </article>
+  <article class="chama-order-card">
+    <h4>Emergency Toiletry Kit</h4>
+    <p class="chama-order-meta">Travel-size basics in a compact zip pouch.</p>
+    <p class="chama-order-price">$7</p>
+    <div class="chama-order-actions wp-block-buttons">
+      <div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Add item</a></div>
+    </div>
+  </article>
+  <article class="chama-order-card">
+    <h4>Sleep Mask + Earplug Set</h4>
+    <p class="chama-order-meta">Comfort set for deeper rest.</p>
+    <p class="chama-order-price">$8</p>
+    <div class="chama-order-actions wp-block-buttons">
+      <div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Add item</a></div>
+    </div>
+  </article>
+  <article class="chama-order-card">
+    <h4>Mountain Honey Jar</h4>
+    <p class="chama-order-meta">Local small-batch honey.</p>
+    <p class="chama-order-price">$14</p>
+    <div class="chama-order-actions wp-block-buttons">
+      <div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Add item</a></div>
+    </div>
+  </article>
+</div>
+<!-- /wp:html -->
+
+<!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
+<div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Cart summary (demo)</h3>
 <!-- /wp:heading -->
 
 <!-- wp:list -->
-<ul><li>Added to Cart</li><li>Paid</li><li>Packed</li><li>Ready for Pickup</li><li>Completed</li></ul>
-<!-- /wp:list --></div>
-<!-- /wp:column -->
+<ul><li>Chama Rail Mug x1 - $18</li><li>Blue Corn Cookie Tin x1 - $16</li><li>Phone Charging Cable x1 - $10</li></ul>
+<!-- /wp:list -->
 
-<!-- wp:column -->
-<div class="wp-block-column"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Pickup windows</h3>
-<!-- /wp:heading -->
-
-<!-- wp:list -->
-<ul><li>Front desk pickup: 8:00 AM - 10:00 PM</li><li>Room drop-off: 9:00 AM - 8:00 PM</li><li>Same-day cutoff: 7:30 PM</li></ul>
-<!-- /wp:list --></div>
-<!-- /wp:column -->
-
-<!-- wp:column -->
-<div class="wp-block-column"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Inventory practice</h3>
-<!-- /wp:heading -->
-
-<!-- wp:list -->
-<ul><li>Morning count</li><li>Shift close count</li><li>Low-stock alert below 5 units</li><li>Mark sold-out items immediately</li></ul>
-<!-- /wp:list --></div>
-<!-- /wp:column --></div>
-<!-- /wp:columns -->
+<!-- wp:paragraph -->
+<p><strong>Estimated total:</strong> $44</p>
+<!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#6f8680","text":"#f7f4ee"},"border":{"radius":"999px"}}} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-radius:999px;color:#f7f4ee;background-color:#6f8680">Browse gift shop</a></div>
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Checkout cart</a></div>
 <!-- /wp:button -->
 
-<!-- wp:button {"className":"is-style-outline","style":{"border":{"radius":"999px"}}} -->
-<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" style="border-radius:999px">Ask front desk about stock</a></div>
+<!-- wp:button {"className":"is-style-outline"} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Set front desk pickup</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
+<!-- /wp:group --></div>
 <!-- /wp:group -->
 HTML;

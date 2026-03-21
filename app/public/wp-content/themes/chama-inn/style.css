@@ -684,6 +684,53 @@ iframe {
   margin-bottom: 0.5rem;
 }
 
+.chama-order-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 0;
+}
+
+.chama-order-card {
+  border: 1px solid var(--chama-border);
+  background: var(--chama-surface);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 8px 18px rgba(62, 50, 43, 0.06);
+}
+
+.chama-order-card h3,
+.chama-order-card h4 {
+  margin-top: 0;
+  margin-bottom: 0.45rem;
+}
+
+.chama-order-meta {
+  margin: 0;
+  color: var(--chama-text-soft);
+  font-size: 0.9rem;
+}
+
+.chama-order-price {
+  margin: 0.55rem 0 0.2rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--chama-accent-strong);
+}
+
+.chama-order-actions {
+  margin-top: 0.7rem;
+}
+
+.chama-order-actions .wp-block-button {
+  width: 100%;
+}
+
+.chama-order-actions .wp-block-button__link {
+  width: 100%;
+  text-align: center;
+}
+
 .home-content .chama-brand-mark {
   margin: 0 auto 1rem;
   text-align: center;

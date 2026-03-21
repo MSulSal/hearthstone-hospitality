@@ -6,11 +6,11 @@ if (!defined("ABSPATH")) {
 return <<<'HTML'
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"56px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#e8ddcc"}},"layout":{"type":"constrained","contentSize":"980px"}} -->
 <div class="wp-block-group alignfull has-background" style="background-color:#e8ddcc;padding-top:56px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
-<h2 class="wp-block-heading has-text-align-center">Guest POS app for your stay</h2>
+<h2 class="wp-block-heading has-text-align-center">Guest stay app for your visit</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center">Scan your room QR code to open the guest-facing side of the inn POS: restaurant ordering, gift shop checkout, service requests, and front desk support in one place.</p>
+<p class="has-text-align-center">Scan your room QR code to open restaurant ordering, gift shop checkout, service requests, and front desk support in one place.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
