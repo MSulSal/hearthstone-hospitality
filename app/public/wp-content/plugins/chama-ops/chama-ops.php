@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.24.0
+ * Version: 1.25.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1353,10 +1353,12 @@ function chama_ops_save_room_service_item_meta(int $post_id): void
     $price        = isset($_POST['chama_room_service_price']) ? chama_ops_sanitize_decimal_amount((string) wp_unslash($_POST['chama_room_service_price'])) : '';
     $prep_minutes = isset($_POST['chama_room_service_prep_minutes']) ? max(0, absint(wp_unslash($_POST['chama_room_service_prep_minutes']))) : 0;
     $is_available = isset($_POST['chama_room_service_available']) ? '1' : '';
+    $image_url    = isset($_POST['chama_room_service_image_url']) ? esc_url_raw((string) wp_unslash($_POST['chama_room_service_image_url'])) : '';
 
     update_post_meta($post_id, '_chama_room_service_price', $price);
     update_post_meta($post_id, '_chama_room_service_prep_minutes', $prep_minutes);
     update_post_meta($post_id, '_chama_room_service_available', $is_available);
+    update_post_meta($post_id, '_chama_room_service_image_url', $image_url);
 }
 add_action('save_post', 'chama_ops_save_room_service_item_meta');
 
@@ -2235,6 +2237,7 @@ function chama_ops_render_room_service_item_meta_box(WP_Post $post): void
     $price        = (string) get_post_meta($post->ID, '_chama_room_service_price', true);
     $prep_minutes = (int) get_post_meta($post->ID, '_chama_room_service_prep_minutes', true);
     $is_available = (string) get_post_meta($post->ID, '_chama_room_service_available', true);
+    $image_url    = (string) get_post_meta($post->ID, '_chama_room_service_image_url', true);
     ?>
     <table class="form-table" role="presentation">
         <tbody>
@@ -2257,6 +2260,13 @@ function chama_ops_render_room_service_item_meta_box(WP_Post $post): void
                         <input type="checkbox" name="chama_room_service_available" value="1" <?php checked($is_available, '1'); ?>>
                         <?php esc_html_e('Available to order', 'chama-ops'); ?>
                     </label>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row"><label for="chama_room_service_image_url"><?php esc_html_e('Card Image URL', 'chama-ops'); ?></label></th>
+                <td>
+                    <input type="url" id="chama_room_service_image_url" name="chama_room_service_image_url" value="<?php echo esc_attr($image_url); ?>" class="regular-text" placeholder="https://images.pexels.com/...">
+                    <p class="description"><?php esc_html_e('Optional: use a stock photo or uploaded media URL for a more presentable guest menu.', 'chama-ops'); ?></p>
                 </td>
             </tr>
         </tbody>
@@ -5317,8 +5327,19 @@ function chama_ops_render_room_service_app_shortcode(): string
                     $item_id      = (int) $item->ID;
                     $price        = (string) get_post_meta($item_id, '_chama_room_service_price', true);
                     $prep_minutes = (int) get_post_meta($item_id, '_chama_room_service_prep_minutes', true);
+                    $image_url    = (string) get_post_meta($item_id, '_chama_room_service_image_url', true);
                     ?>
                     <article class="chama-order-card">
+                        <?php if ($image_url !== '') : ?>
+                            <div class="chama-order-card__media">
+                                <img
+                                    src="<?php echo esc_url($image_url); ?>"
+                                    alt="<?php echo esc_attr((string) $item->post_title); ?>"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
+                            </div>
+                        <?php endif; ?>
                         <h3><?php echo esc_html((string) $item->post_title); ?></h3>
                         <?php if (trim((string) $item->post_content) !== '') : ?>
                             <p class="chama-order-meta"><?php echo esc_html(wp_strip_all_tags((string) $item->post_content)); ?></p>
@@ -5965,7 +5986,7 @@ function chama_ops_seed_room_service_menu_items(): void
 
     $seed_version = (int) get_option('chama_ops_room_service_seed_version', 0);
 
-    if ($seed_version >= 1) {
+    if ($seed_version >= 2) {
         return;
     }
 
@@ -5975,30 +5996,35 @@ function chama_ops_seed_room_service_menu_items(): void
             'description'  => '8 oz filet with herb butter, roasted potatoes, and seasonal vegetables.',
             'price'        => '44.00',
             'prep_minutes' => 35,
+            'image_url'    => 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         [
             'title'        => 'Trout + Lemon Caper',
             'description'  => 'Pan-seared trout, lemon caper sauce, wild rice, and charred asparagus.',
             'price'        => '31.00',
             'prep_minutes' => 24,
+            'image_url'    => 'https://images.pexels.com/photos/1516415/pexels-photo-1516415.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         [
             'title'        => 'Green Chile Chicken Alfredo',
             'description'  => 'House-made cream sauce, green chile, grilled chicken, and fresh herbs.',
             'price'        => '26.00',
             'prep_minutes' => 22,
+            'image_url'    => 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         [
             'title'        => 'Garden Salad',
             'description'  => 'Mixed greens, seasonal vegetables, and house vinaigrette.',
             'price'        => '9.00',
             'prep_minutes' => 8,
+            'image_url'    => 'https://images.pexels.com/photos/5938/food-salad-healthy-lunch.jpg?auto=compress&cs=tinysrgb&w=1400',
         ],
         [
             'title'        => 'Hot Cocoa',
             'description'  => 'Rich cocoa with whipped cream.',
             'price'        => '6.00',
             'prep_minutes' => 5,
+            'image_url'    => 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
     ];
 
@@ -6014,6 +6040,11 @@ function chama_ops_seed_room_service_menu_items(): void
             : null;
 
         if ($existing instanceof WP_Post) {
+            $existing_image = (string) get_post_meta((int) $existing->ID, '_chama_room_service_image_url', true);
+
+            if ($existing_image === '' && isset($item['image_url'])) {
+                update_post_meta((int) $existing->ID, '_chama_room_service_image_url', $item['image_url']);
+            }
             continue;
         }
 
@@ -6031,9 +6062,13 @@ function chama_ops_seed_room_service_menu_items(): void
         update_post_meta((int) $item_id, '_chama_room_service_price', $item['price']);
         update_post_meta((int) $item_id, '_chama_room_service_prep_minutes', (int) $item['prep_minutes']);
         update_post_meta((int) $item_id, '_chama_room_service_available', '1');
+
+        if (isset($item['image_url'])) {
+            update_post_meta((int) $item_id, '_chama_room_service_image_url', $item['image_url']);
+        }
     }
 
-    update_option('chama_ops_room_service_seed_version', 1, false);
+    update_option('chama_ops_room_service_seed_version', 2, false);
 }
 add_action('admin_init', 'chama_ops_seed_room_service_menu_items');
 

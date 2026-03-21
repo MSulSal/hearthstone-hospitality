@@ -697,6 +697,21 @@ iframe {
   border-radius: 14px;
   padding: 14px;
   box-shadow: 0 8px 18px rgba(62, 50, 43, 0.06);
+  overflow: hidden;
+}
+
+.chama-order-card__media {
+  margin: -14px -14px 10px;
+  border-bottom: 1px solid var(--chama-border);
+  background: var(--chama-bg-soft);
+  aspect-ratio: 16 / 10;
+}
+
+.chama-order-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .chama-order-card h3,
