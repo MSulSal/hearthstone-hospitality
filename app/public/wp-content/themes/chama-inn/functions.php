@@ -302,8 +302,9 @@ function chama_inn_get_logo_variant_uri(string $context = "default"): string
 
     $context_paths = [
         "header"    => [
+            "assets/images/chama_logo_color_spectrum/trim_blue_green.png",
+            "assets/images/chama_logo_color_spectrum/dusty_sage.png",
             "assets/images/chama_logo_color_spectrum/soft_charcoal.png",
-            "assets/images/chama_logo_color_spectrum/iron_brown.png",
         ],
         "footer"    => [
             "assets/images/chama_logo_color_spectrum/soft_charcoal.png",
