@@ -9,8 +9,9 @@ get_header();
 <main id="main-content" class="site-main">
     <?php if (have_posts()) : ?>
         <?php while (have_posts()) : the_post(); ?>
+            <?php $post_id = (int) get_the_ID(); ?>
             <article id="post-<?php the_ID(); ?>" <?php post_class("page-shell"); ?>>
-                <?php if (!is_front_page()) : ?>
+                <?php if (!is_front_page() && !chama_inn_should_hide_page_hero($post_id)) : ?>
                     <header class="page-shell__hero">
                         <div class="page-shell__hero-inner">
                             <p class="page-shell__eyebrow">

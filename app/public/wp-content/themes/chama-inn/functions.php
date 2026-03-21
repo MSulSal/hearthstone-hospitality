@@ -24,6 +24,23 @@ function chama_inn_setup(): void
 }
 add_action("after_setup_theme", "chama_inn_setup");
 
+function chama_inn_should_hide_page_hero(int $post_id): bool
+{
+    if ($post_id <= 0) {
+        return false;
+    }
+
+    $slug = sanitize_title((string) get_post_field("post_name", $post_id));
+    $hero_free_slugs = [
+        "dining",
+        "gift-shop",
+        "service-requests",
+        "my-stay",
+    ];
+
+    return in_array($slug, $hero_free_slugs, true);
+}
+
 function chama_inn_get_primary_nav_slugs(): array
 {
     return [
@@ -669,6 +686,56 @@ function chama_inn_ensure_core_pages(): void
     }
 }
 add_action("admin_init", "chama_inn_ensure_core_pages");
+
+function chama_inn_refresh_dining_layout_pattern(): void
+{
+    if (!is_admin() || !current_user_can("manage_options")) {
+        return;
+    }
+
+    $migration_version = (int) get_option("chama_inn_dining_layout_version", 0);
+
+    if ($migration_version >= 1) {
+        return;
+    }
+
+    $page = get_page_by_path("dining", OBJECT, "page");
+
+    if (!($page instanceof WP_Post)) {
+        update_option("chama_inn_dining_layout_version", 1, false);
+        return;
+    }
+
+    $current_content = (string) $page->post_content;
+    $legacy_markers = [
+        "Order from your room",
+        "Browse the live room-service menu",
+        "Guest note field for requests or allergies",
+    ];
+
+    $should_refresh = false;
+
+    foreach ($legacy_markers as $marker) {
+        if (strpos($current_content, $marker) !== false) {
+            $should_refresh = true;
+            break;
+        }
+    }
+
+    if ($should_refresh) {
+        $pattern_content = chama_inn_load_pattern_content("patterns/dining-page.php");
+
+        if ($pattern_content !== "") {
+            wp_update_post([
+                "ID"           => (int) $page->ID,
+                "post_content" => $pattern_content,
+            ]);
+        }
+    }
+
+    update_option("chama_inn_dining_layout_version", 1, false);
+}
+add_action("admin_init", "chama_inn_refresh_dining_layout_pattern");
 
 function chama_inn_created_pages_notice(): void
 {
