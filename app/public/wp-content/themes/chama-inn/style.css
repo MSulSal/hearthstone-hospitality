@@ -878,13 +878,13 @@ body.admin-bar .guest-auth-shell__backdrop {
   border-radius: 20px;
   background: linear-gradient(
     135deg,
-    rgba(46, 39, 33, 0.5) 0%,
-    rgba(41, 34, 29, 0.44) 36%,
-    rgba(54, 45, 38, 0.46) 100%
+    rgba(46, 39, 33, 0.34) 0%,
+    rgba(41, 34, 29, 0.28) 36%,
+    rgba(54, 45, 38, 0.3) 100%
   );
-  box-shadow: 0 12px 34px rgba(10, 8, 7, 0.34);
-  backdrop-filter: blur(10px) saturate(1.02);
-  -webkit-backdrop-filter: blur(10px) saturate(1.02);
+  box-shadow: 0 12px 30px rgba(10, 8, 7, 0.28);
+  backdrop-filter: blur(8px) saturate(1.01);
+  -webkit-backdrop-filter: blur(8px) saturate(1.01);
   padding: clamp(1rem, 2.2vw, 1.5rem);
 }
 
@@ -911,7 +911,7 @@ body.admin-bar .guest-auth-shell__backdrop {
       rgba(111, 134, 128, 0.1) 0 1px,
       transparent 1px 82px
     );
-  opacity: 0.03;
+  opacity: 0.02;
   z-index: 0;
 }
 
