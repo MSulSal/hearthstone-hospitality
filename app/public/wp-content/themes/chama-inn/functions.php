@@ -41,17 +41,83 @@ function chama_inn_should_hide_page_hero(int $post_id): bool
     return in_array($slug, $hero_free_slugs, true);
 }
 
-function chama_inn_get_primary_nav_slugs(): array
+function chama_inn_get_primary_nav_items(): array
 {
     return [
-        "home",
-        "my-stay",
-        "dining",
-        "gift-shop",
-        "service-requests",
-        "explore-chama",
-        "contact",
+        [
+            "slug" => "home",
+            "label" => __("Home", "chama-inn"),
+            "fallback_path" => "/",
+        ],
+        [
+            "slug" => "my-stay",
+            "label" => __("My Stay", "chama-inn"),
+            "fallback_path" => "/my-stay/",
+        ],
+        [
+            "slug" => "dining",
+            "label" => __("Restaurant Orders", "chama-inn"),
+            "fallback_path" => "/dining/",
+        ],
+        [
+            "slug" => "gift-shop",
+            "label" => __("Gift Shop", "chama-inn"),
+            "fallback_path" => "/gift-shop/",
+        ],
+        [
+            "slug" => "service-requests",
+            "label" => __("Service Requests", "chama-inn"),
+            "fallback_path" => "/service-requests/",
+        ],
+        [
+            "slug" => "explore-chama",
+            "label" => __("During Your Stay", "chama-inn"),
+            "fallback_path" => "/explore-chama/",
+        ],
+        [
+            "slug" => "contact",
+            "label" => __("Front Desk / Contact", "chama-inn"),
+            "fallback_path" => "/contact/",
+        ],
     ];
+}
+
+function chama_inn_get_primary_nav_slugs(): array
+{
+    return array_map(static function (array $item): string {
+        return sanitize_title((string) ($item["slug"] ?? ""));
+    }, chama_inn_get_primary_nav_items());
+}
+
+function chama_inn_primary_menu_has_items(): bool
+{
+    $locations = get_nav_menu_locations();
+
+    if (!is_array($locations) || empty($locations["primary"])) {
+        return false;
+    }
+
+    $menu_id = (int) $locations["primary"];
+
+    if ($menu_id <= 0) {
+        return false;
+    }
+
+    $menu_items = wp_get_nav_menu_items($menu_id, [
+        "update_post_term_cache" => false,
+    ]);
+
+    if (!is_array($menu_items)) {
+        return false;
+    }
+
+    foreach ($menu_items as $menu_item) {
+        if ($menu_item instanceof WP_Post && (string) $menu_item->post_status === "publish") {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function chama_inn_render_fallback_menu($args = []): void
@@ -79,11 +145,20 @@ function chama_inn_render_fallback_menu($args = []): void
 
     echo '<ul id="' . esc_attr($menu_id) . '" class="' . esc_attr($menu_class) . '">';
 
-    foreach (chama_inn_get_primary_nav_slugs() as $slug) {
-        $page = get_page_by_path($slug, OBJECT, "page");
+    foreach (chama_inn_get_primary_nav_items() as $nav_item) {
+        $slug = isset($nav_item["slug"]) ? sanitize_title((string) $nav_item["slug"]) : "";
 
-        if (!($page instanceof WP_Post)) {
+        if ($slug === "") {
             continue;
+        }
+
+        $page = get_page_by_path($slug, OBJECT, "page");
+        $link_label = isset($nav_item["label"]) ? (string) $nav_item["label"] : $slug;
+        $link_url = isset($nav_item["fallback_path"]) ? (string) home_url((string) $nav_item["fallback_path"]) : (string) home_url("/");
+
+        if ($page instanceof WP_Post) {
+            $link_label = (string) $page->post_title;
+            $link_url = (string) get_permalink($page);
         }
 
         $item_classes = ["menu-item", "menu-item-type-post_type", "menu-item-object-page"];
@@ -94,7 +169,7 @@ function chama_inn_render_fallback_menu($args = []): void
         }
 
         echo '<li class="' . esc_attr(implode(" ", $item_classes)) . '">';
-        echo '<a href="' . esc_url((string) get_permalink($page)) . '">' . esc_html((string) $page->post_title) . "</a>";
+        echo '<a href="' . esc_url($link_url) . '">' . esc_html($link_label) . "</a>";
         echo "</li>";
     }
 

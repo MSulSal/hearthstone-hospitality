@@ -55,14 +55,21 @@ $show_site_title = true;
 
         <div class="site-header__panel" id="site-header-panel">
             <nav class="site-header__nav" aria-label="<?php esc_attr_e('Primary menu', 'chama-inn'); ?>">
-                <?php
-                wp_nav_menu([
-                    'theme_location' => 'primary',
-                    'menu_id'        => 'primary-menu',
-                    'container'      => false,
-                    'fallback_cb'    => 'chama_inn_render_fallback_menu',
-                ]);
-                ?>
+                <?php if (has_nav_menu('primary') && function_exists('chama_inn_primary_menu_has_items') && chama_inn_primary_menu_has_items()) : ?>
+                    <?php
+                    wp_nav_menu([
+                        'theme_location' => 'primary',
+                        'menu_id'        => 'primary-menu',
+                        'container'      => false,
+                        'fallback_cb'    => false,
+                    ]);
+                    ?>
+                <?php else : ?>
+                    <?php chama_inn_render_fallback_menu([
+                        'menu_id'    => 'primary-menu',
+                        'menu_class' => 'menu',
+                    ]); ?>
+                <?php endif; ?>
             </nav>
 
             <a class="site-header__cta" href="<?php echo esc_url($header_cta_url); ?>">
