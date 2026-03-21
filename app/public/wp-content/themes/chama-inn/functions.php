@@ -175,20 +175,34 @@ function chama_inn_render_fallback_menu($args = []): void
 
 function chama_inn_enqueue_assets(): void
 {
+    $theme_version = (string) wp_get_theme()->get("Version");
+
     wp_enqueue_style(
         "chama-inn-style",
         get_stylesheet_uri(),
         [],
-        wp_get_theme()->get("Version")
+        $theme_version
     );
 
     wp_enqueue_script(
         "chama-inn-navigation",
         get_theme_file_uri("assets/js/navigation.js"),
         [],
-        wp_get_theme()->get("Version"),
+        $theme_version,
         true
     );
+
+    wp_enqueue_script(
+        "chama-inn-pwa-register",
+        get_theme_file_uri("assets/js/pwa-register.js"),
+        [],
+        $theme_version,
+        true
+    );
+
+    wp_localize_script("chama-inn-pwa-register", "chamaPwaConfig", [
+        "serviceWorkerUrl" => (string) home_url("/?chama_pwa_sw=1"),
+    ]);
 }
 add_action("wp_enqueue_scripts", "chama_inn_enqueue_assets");
 
@@ -431,6 +445,229 @@ function chama_inn_print_branding_styles(): void
 }
 add_action("admin_head", "chama_inn_print_branding_styles");
 add_action("login_head", "chama_inn_print_branding_styles");
+
+function chama_inn_get_pwa_icon_entries(): array
+{
+    $icon_specs = [
+        [
+            "file"    => "assets/images/pwa/icon-192.png",
+            "sizes"   => "192x192",
+            "purpose" => "any",
+        ],
+        [
+            "file"    => "assets/images/pwa/icon-512.png",
+            "sizes"   => "512x512",
+            "purpose" => "any",
+        ],
+        [
+            "file"    => "assets/images/pwa/icon-maskable-512.png",
+            "sizes"   => "512x512",
+            "purpose" => "maskable",
+        ],
+    ];
+
+    $entries = [];
+
+    foreach ($icon_specs as $spec) {
+        if (!is_array($spec) || !isset($spec["file"], $spec["sizes"], $spec["purpose"])) {
+            continue;
+        }
+
+        $file = (string) $spec["file"];
+
+        if (!file_exists(get_theme_file_path($file))) {
+            continue;
+        }
+
+        $entries[] = [
+            "src"     => (string) get_theme_file_uri($file),
+            "sizes"   => (string) $spec["sizes"],
+            "type"    => "image/png",
+            "purpose" => (string) $spec["purpose"],
+        ];
+    }
+
+    return $entries;
+}
+
+function chama_inn_get_apple_touch_icon_url(): string
+{
+    $file = "assets/images/pwa/apple-touch-icon-180.png";
+
+    if (file_exists(get_theme_file_path($file))) {
+        return (string) get_theme_file_uri($file);
+    }
+
+    return "";
+}
+
+function chama_inn_output_pwa_head_tags(): void
+{
+    if (is_admin()) {
+        return;
+    }
+
+    $manifest_url = (string) home_url("/?chama_pwa_manifest=1");
+    $touch_icon_url = chama_inn_get_apple_touch_icon_url();
+    ?>
+    <link rel="manifest" href="<?php echo esc_url($manifest_url); ?>">
+    <meta name="theme-color" content="#2a221d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <?php if ($touch_icon_url !== "") : ?>
+        <link rel="apple-touch-icon" href="<?php echo esc_url($touch_icon_url); ?>">
+    <?php endif; ?>
+    <?php
+}
+add_action("wp_head", "chama_inn_output_pwa_head_tags", 2);
+
+function chama_inn_should_serve_pwa_payload(string $key): bool
+{
+    if (!isset($_GET[$key])) {
+        return false;
+    }
+
+    $raw_value = (string) wp_unslash($_GET[$key]);
+    $value = strtolower(trim($raw_value));
+
+    if ($value === "") {
+        return true;
+    }
+
+    return in_array($value, ["1", "true", "yes"], true);
+}
+
+function chama_inn_serve_pwa_manifest(): void
+{
+    $icons = chama_inn_get_pwa_icon_entries();
+
+    $manifest = [
+        "id"               => (string) home_url("/"),
+        "name"             => "Chama Station Inn Stay App",
+        "short_name"       => "Chama Stay",
+        "description"      => "Guest stay app for restaurant orders, gift shop purchases, service requests, and front desk support.",
+        "start_url"        => (string) home_url("/"),
+        "scope"            => "/",
+        "display"          => "standalone",
+        "orientation"      => "portrait-primary",
+        "background_color" => "#1f1b18",
+        "theme_color"      => "#2a221d",
+        "icons"            => $icons,
+    ];
+
+    nocache_headers();
+    header("Content-Type: application/manifest+json; charset=utf-8");
+    echo wp_json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function chama_inn_serve_service_worker(): void
+{
+    $theme_version = (string) wp_get_theme()->get("Version");
+    $cache_name = "chama-stay-v" . md5($theme_version . "|pwa");
+
+    $precache_urls = array_values(array_unique([
+        (string) home_url("/"),
+        (string) home_url("/dining/"),
+        (string) home_url("/gift-shop/"),
+        (string) home_url("/service-requests/"),
+        (string) home_url("/explore-chama/"),
+        (string) home_url("/contact/"),
+        (string) get_stylesheet_uri(),
+        (string) get_theme_file_uri("assets/js/navigation.js"),
+        (string) get_theme_file_uri("assets/js/pwa-register.js"),
+        (string) home_url("/?chama_pwa_manifest=1"),
+    ]));
+
+    nocache_headers();
+    header("Content-Type: application/javascript; charset=utf-8");
+    header("Service-Worker-Allowed: /");
+
+    echo "const CACHE_NAME = " . wp_json_encode($cache_name) . ";\n";
+    echo "const PRECACHE_URLS = " . wp_json_encode($precache_urls, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ";\n";
+    ?>
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+          return Promise.resolve();
+        })
+      )
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+
+  if (request.method !== "GET") {
+    return;
+  }
+
+  const url = new URL(request.url);
+
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const cached = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, cached));
+          return response;
+        })
+        .catch(() => caches.match(request).then((hit) => hit || caches.match(PRECACHE_URLS[0])))
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(request).then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        return response;
+      });
+    })
+  );
+});
+    <?php
+    exit;
+}
+
+function chama_inn_maybe_serve_pwa_payloads(): void
+{
+    if (is_admin()) {
+        return;
+    }
+
+    if (chama_inn_should_serve_pwa_payload("chama_pwa_manifest")) {
+        chama_inn_serve_pwa_manifest();
+    }
+
+    if (chama_inn_should_serve_pwa_payload("chama_pwa_sw")) {
+        chama_inn_serve_service_worker();
+    }
+}
+add_action("template_redirect", "chama_inn_maybe_serve_pwa_payloads", 0);
 
 function chama_inn_get_core_page_blueprint(): array
 {
