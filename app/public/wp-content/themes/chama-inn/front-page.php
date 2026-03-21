@@ -12,13 +12,6 @@ get_header();
             <?php
             $hero_logo_uri = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri('hero') : '';
             $hero_gallery_images = function_exists('chama_inn_get_home_hero_gallery_uris') ? chama_inn_get_home_hero_gallery_uris() : [];
-            $featured_image_url = get_the_post_thumbnail_url(get_the_ID(), 'full');
-
-            if (is_string($featured_image_url) && $featured_image_url !== '') {
-                array_unshift($hero_gallery_images, $featured_image_url);
-                $hero_gallery_images = array_values(array_unique($hero_gallery_images));
-            }
-
             $hero_image_url = $hero_gallery_images[0] ?? get_theme_file_uri('assets/images/csi-assets/csi-31.jpg');
             $hero_style     = $hero_image_url !== false
                 ? ' style="background-image:url(' . esc_url($hero_image_url) . ');"'

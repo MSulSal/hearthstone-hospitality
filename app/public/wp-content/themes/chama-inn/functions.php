@@ -299,12 +299,13 @@ function chama_inn_get_packaged_logo_uri(): string
 function chama_inn_get_home_hero_gallery_uris(): array
 {
     $relative_paths = [
-        "assets/images/csi-assets/csin1.jpeg",
-        "assets/images/csi-assets/csin2.jpeg",
-        "assets/images/csi-assets/csin3.jpeg",
-        "assets/images/csi-assets/csi-21.jpg",
+        // Curated: high-quality landscape assets only, excluding files that contain text overlays.
+        "assets/images/csi-assets/csi-15.jpg",
         "assets/images/csi-assets/csi-20.jpg",
-        "assets/images/csi-assets/csi-7.jpg",
+        "assets/images/csi-assets/csi-41.jpg",
+        "assets/images/csi-assets/csi-32.jpg",
+        "assets/images/csi-assets/csi-51.jpg",
+        "assets/images/csi-assets/csi-49.jpg",
     ];
 
     $uris = [];
