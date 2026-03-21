@@ -684,24 +684,64 @@ iframe {
   margin-bottom: 0.5rem;
 }
 
+.chama-service-app__layout {
+  display: grid;
+  gap: clamp(16px, 2.2vw, 28px);
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.9fr);
+  align-items: start;
+}
+
+.chama-service-app__catalog,
+.chama-service-app__panel {
+  min-width: 0;
+}
+
+.chama-service-app__heading {
+  margin: 0 0 0.75rem;
+}
+
+.chama-service-app__section-title {
+  margin: 1.15rem 0 0.65rem;
+  color: var(--chama-accent-strong);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.chama-app-notice {
+  border-radius: 10px;
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.chama-app-notice--success {
+  border: 1px solid #b7d8c0;
+  background: #ecf8ef;
+}
+
+.chama-app-notice--error {
+  border: 1px solid #e2b3b0;
+  background: #fff2f2;
+}
+
 .chama-order-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
   margin-top: 0;
 }
 
 .chama-order-card {
   border: 1px solid var(--chama-border);
-  background: var(--chama-surface);
-  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(247, 244, 238, 0.98), rgba(244, 236, 225, 0.98));
+  border-radius: 16px;
   padding: 14px;
-  box-shadow: 0 8px 18px rgba(62, 50, 43, 0.06);
+  box-shadow: 0 10px 24px rgba(62, 50, 43, 0.08);
   overflow: hidden;
 }
 
 .chama-order-card__media {
-  margin: -14px -14px 10px;
+  margin: -14px -14px 12px;
   border-bottom: 1px solid var(--chama-border);
   background: var(--chama-bg-soft);
   aspect-ratio: 16 / 10;
@@ -717,7 +757,7 @@ iframe {
 .chama-order-card h3,
 .chama-order-card h4 {
   margin-top: 0;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.4rem;
 }
 
 .chama-order-meta {
@@ -726,11 +766,69 @@ iframe {
   font-size: 0.9rem;
 }
 
+.chama-order-card__meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 0.65rem;
+}
+
 .chama-order-price {
-  margin: 0.55rem 0 0.2rem;
-  font-size: 1.05rem;
+  margin: 0;
+  font-size: 1.04rem;
   font-weight: 700;
   color: var(--chama-accent-strong);
+}
+
+.chama-order-chip {
+  margin: 0;
+  border: 1px solid var(--chama-border);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.78rem;
+  color: var(--chama-text-soft);
+  background: rgba(247, 244, 238, 0.9);
+}
+
+.chama-order-panel {
+  position: sticky;
+  top: 92px;
+}
+
+.chama-order-form {
+  margin-top: 0.8rem;
+}
+
+.chama-form-field {
+  margin: 0 0 0.72rem;
+}
+
+.chama-form-field label {
+  display: block;
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--chama-text);
+}
+
+.chama-form-field input,
+.chama-form-field select,
+.chama-form-field textarea {
+  width: 100%;
+  border: 1px solid var(--chama-border);
+  border-radius: 12px;
+  background: var(--chama-surface);
+  color: var(--chama-text);
+  padding: 0.6rem 0.7rem;
+}
+
+.chama-form-field textarea {
+  resize: vertical;
+}
+
+.chama-order-submit {
+  width: 100%;
 }
 
 .chama-order-actions {
@@ -829,6 +927,17 @@ iframe {
   margin: 0;
   font-size: 0.92rem;
   color: var(--chama-text-soft);
+}
+
+@media (max-width: 980px) {
+  .chama-service-app__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .chama-order-panel {
+    position: static;
+    top: auto;
+  }
 }
 
 @media (max-width: 768px) {

@@ -5298,9 +5298,9 @@ function chama_ops_render_room_service_app_shortcode(): string
 
     ob_start();
     ?>
-    <section class="chama-room-service-app" style="margin:0 auto;max-width:1080px;">
+    <section class="chama-room-service-app chama-service-app" style="margin:0 auto;max-width:1160px;">
         <?php if ($notice_key === 'submitted' && $order_ref > 0) : ?>
-            <div style="border:1px solid #b7d8c0;background:#ecf8ef;padding:12px;border-radius:10px;margin-bottom:14px;">
+            <div class="chama-app-notice chama-app-notice--success">
                 <?php
                 printf(
                     esc_html__('Order submitted. Reference #%d. Front desk will keep you updated.', 'chama-ops'),
@@ -5309,11 +5309,11 @@ function chama_ops_render_room_service_app_shortcode(): string
                 ?>
             </div>
         <?php elseif ($notice_key === 'invalid_item') : ?>
-            <div style="border:1px solid #e2b3b0;background:#fff2f2;padding:12px;border-radius:10px;margin-bottom:14px;">
+            <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('That menu item is currently unavailable. Please choose another item.', 'chama-ops'); ?>
             </div>
         <?php elseif ($notice_key === 'missing_room') : ?>
-            <div style="border:1px solid #e2b3b0;background:#fff2f2;padding:12px;border-radius:10px;margin-bottom:14px;">
+            <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('Please add a room number before submitting your order.', 'chama-ops'); ?>
             </div>
         <?php endif; ?>
@@ -5321,89 +5321,116 @@ function chama_ops_render_room_service_app_shortcode(): string
         <?php if (empty($items)) : ?>
             <p><?php esc_html_e('Room service menu is currently being updated. Please contact the front desk.', 'chama-ops'); ?></p>
         <?php else : ?>
-            <div class="chama-order-grid">
-                <?php foreach ($items as $item) : ?>
-                    <?php
-                    $item_id      = (int) $item->ID;
-                    $price        = (string) get_post_meta($item_id, '_chama_room_service_price', true);
-                    $prep_minutes = (int) get_post_meta($item_id, '_chama_room_service_prep_minutes', true);
-                    $image_url    = (string) get_post_meta($item_id, '_chama_room_service_image_url', true);
-                    ?>
-                    <article class="chama-order-card">
-                        <?php if ($image_url !== '') : ?>
-                            <div class="chama-order-card__media">
-                                <img
-                                    src="<?php echo esc_url($image_url); ?>"
-                                    alt="<?php echo esc_attr((string) $item->post_title); ?>"
-                                    loading="lazy"
-                                    decoding="async"
-                                >
-                            </div>
-                        <?php endif; ?>
-                        <h3><?php echo esc_html((string) $item->post_title); ?></h3>
-                        <?php if (trim((string) $item->post_content) !== '') : ?>
-                            <p class="chama-order-meta"><?php echo esc_html(wp_strip_all_tags((string) $item->post_content)); ?></p>
-                        <?php endif; ?>
-                        <?php if ($price !== '') : ?>
-                            <p class="chama-order-price">
-                                <?php
-                                printf(
-                                    esc_html__('$%s', 'chama-ops'),
-                                    esc_html(number_format((float) $price, 2))
-                                );
-                                ?>
-                            </p>
-                        <?php endif; ?>
-                        <?php if ($prep_minutes > 0) : ?>
-                            <p class="chama-order-meta">
-                                <?php
-                                printf(
-                                    esc_html__('Estimated prep: %d min', 'chama-ops'),
-                                    $prep_minutes
-                                );
-                                ?>
-                            </p>
-                        <?php endif; ?>
+            <div class="chama-service-app__layout">
+                <div class="chama-service-app__catalog">
+                    <h3 class="chama-service-app__heading"><?php esc_html_e('Menu', 'chama-ops'); ?></h3>
+                    <div class="chama-order-grid chama-order-grid--restaurant">
+                        <?php foreach ($items as $item) : ?>
+                            <?php
+                            $item_id      = (int) $item->ID;
+                            $price        = (string) get_post_meta($item_id, '_chama_room_service_price', true);
+                            $prep_minutes = (int) get_post_meta($item_id, '_chama_room_service_prep_minutes', true);
+                            $image_url    = (string) get_post_meta($item_id, '_chama_room_service_image_url', true);
+                            ?>
+                            <article class="chama-order-card">
+                                <?php if ($image_url !== '') : ?>
+                                    <div class="chama-order-card__media">
+                                        <img
+                                            src="<?php echo esc_url($image_url); ?>"
+                                            alt="<?php echo esc_attr((string) $item->post_title); ?>"
+                                            loading="lazy"
+                                            decoding="async"
+                                        >
+                                    </div>
+                                <?php endif; ?>
+                                <h3><?php echo esc_html((string) $item->post_title); ?></h3>
+                                <?php if (trim((string) $item->post_content) !== '') : ?>
+                                    <p class="chama-order-meta"><?php echo esc_html(wp_strip_all_tags((string) $item->post_content)); ?></p>
+                                <?php endif; ?>
+                                <div class="chama-order-card__meta-row">
+                                    <?php if ($price !== '') : ?>
+                                        <p class="chama-order-price">
+                                            <?php
+                                            printf(
+                                                esc_html__('$%s', 'chama-ops'),
+                                                esc_html(number_format((float) $price, 2))
+                                            );
+                                            ?>
+                                        </p>
+                                    <?php endif; ?>
+                                    <?php if ($prep_minutes > 0) : ?>
+                                        <p class="chama-order-chip">
+                                            <?php
+                                            printf(
+                                                esc_html__('%d min', 'chama-ops'),
+                                                $prep_minutes
+                                            );
+                                            ?>
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
 
-                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-top:10px;">
+                <aside class="chama-service-app__panel">
+                    <div class="chama-card chama-order-panel">
+                        <h3 class="chama-service-app__heading"><?php esc_html_e('Place your order', 'chama-ops'); ?></h3>
+                        <p class="chama-order-meta"><?php esc_html_e('Choose an item, set quantity, add notes, then submit once.', 'chama-ops'); ?></p>
+
+                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
                             <?php wp_nonce_field('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce'); ?>
                             <input type="hidden" name="action" value="chama_ops_submit_room_service_order">
-                            <input type="hidden" name="chama_room_service_item_id" value="<?php echo esc_attr((string) $item_id); ?>">
 
-                            <p style="margin:0 0 8px;">
-                                <label>
-                                    <?php esc_html_e('Room', 'chama-ops'); ?><br>
-                                    <input type="text" name="chama_room_service_room" required style="width:100%;">
-                                </label>
+                            <p class="chama-form-field">
+                                <label for="chama_room_service_item_id"><?php esc_html_e('Menu item', 'chama-ops'); ?></label>
+                                <select id="chama_room_service_item_id" name="chama_room_service_item_id" required>
+                                    <option value=""><?php esc_html_e('Choose an item', 'chama-ops'); ?></option>
+                                    <?php foreach ($items as $item) : ?>
+                                        <?php
+                                        $item_id      = (int) $item->ID;
+                                        $price        = (string) get_post_meta($item_id, '_chama_room_service_price', true);
+                                        $prep_minutes = (int) get_post_meta($item_id, '_chama_room_service_prep_minutes', true);
+                                        $option_label = (string) $item->post_title;
+
+                                        if ($price !== '') {
+                                            $option_label .= ' - $' . number_format((float) $price, 2);
+                                        }
+
+                                        if ($prep_minutes > 0) {
+                                            $option_label .= ' - ' . $prep_minutes . ' min';
+                                        }
+                                        ?>
+                                        <option value="<?php echo esc_attr((string) $item_id); ?>"><?php echo esc_html($option_label); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </p>
-                            <p style="margin:0 0 8px;">
-                                <label>
-                                    <?php esc_html_e('Qty', 'chama-ops'); ?><br>
-                                    <input type="number" name="chama_room_service_qty" min="1" step="1" value="1" required style="width:100%;">
-                                </label>
+
+                            <p class="chama-form-field">
+                                <label for="chama_room_service_room"><?php esc_html_e('Room', 'chama-ops'); ?></label>
+                                <input id="chama_room_service_room" type="text" name="chama_room_service_room" required>
                             </p>
-                            <p style="margin:0 0 8px;">
-                                <label>
-                                    <?php esc_html_e('Name (optional)', 'chama-ops'); ?><br>
-                                    <input type="text" name="chama_room_service_guest_name" style="width:100%;">
-                                </label>
+                            <p class="chama-form-field">
+                                <label for="chama_room_service_qty"><?php esc_html_e('Qty', 'chama-ops'); ?></label>
+                                <input id="chama_room_service_qty" type="number" name="chama_room_service_qty" min="1" step="1" value="1" required>
                             </p>
-                            <p style="margin:0 0 8px;">
-                                <label>
-                                    <?php esc_html_e('Phone (optional)', 'chama-ops'); ?><br>
-                                    <input type="text" name="chama_room_service_guest_phone" style="width:100%;">
-                                </label>
+                            <p class="chama-form-field">
+                                <label for="chama_room_service_guest_name"><?php esc_html_e('Name (optional)', 'chama-ops'); ?></label>
+                                <input id="chama_room_service_guest_name" type="text" name="chama_room_service_guest_name">
                             </p>
-                            <p style="margin:0 0 10px;">
-                                <label>
-                                    <?php esc_html_e('Notes (optional)', 'chama-ops'); ?><br>
-                                    <textarea name="chama_room_service_notes" rows="2" style="width:100%;"></textarea>
-                                </label>
+                            <p class="chama-form-field">
+                                <label for="chama_room_service_guest_phone"><?php esc_html_e('Phone (optional)', 'chama-ops'); ?></label>
+                                <input id="chama_room_service_guest_phone" type="text" name="chama_room_service_guest_phone">
                             </p>
-                            <button type="submit" class="wp-element-button" style="width:100%;"><?php esc_html_e('Add and Submit', 'chama-ops'); ?></button>
+                            <p class="chama-form-field">
+                                <label for="chama_room_service_notes"><?php esc_html_e('Notes (optional)', 'chama-ops'); ?></label>
+                                <textarea id="chama_room_service_notes" name="chama_room_service_notes" rows="3"></textarea>
+                            </p>
+                            <button type="submit" class="wp-element-button chama-order-submit"><?php esc_html_e('Submit order', 'chama-ops'); ?></button>
                         </form>
-                    </article>
-                <?php endforeach; ?>
+                    </div>
+                </aside>
             </div>
         <?php endif; ?>
     </section>
@@ -5607,31 +5634,43 @@ function chama_ops_get_gift_shop_catalog(): array
             'label' => __('Chama Rail Mug', 'chama-ops'),
             'description' => __('Matte ceramic mug with station-inspired crest.', 'chama-ops'),
             'price' => 18.00,
+            'category' => __('Station Collection', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         'station_canvas_tote' => [
             'label' => __('Station Inn Canvas Tote', 'chama-ops'),
             'description' => __('Natural canvas tote for train-day essentials.', 'chama-ops'),
             'price' => 22.00,
+            'category' => __('Station Collection', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         'blue_corn_cookie_tin' => [
             'label' => __('Blue Corn Cookie Tin', 'chama-ops'),
             'description' => __('House favorite snack pack for your room or trip home.', 'chama-ops'),
             'price' => 16.00,
+            'category' => __('Pantry & Snacks', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         'mountain_honey_jar' => [
             'label' => __('Mountain Honey Jar', 'chama-ops'),
             'description' => __('Local small-batch honey.', 'chama-ops'),
             'price' => 14.00,
+            'category' => __('Pantry & Snacks', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/1638280/pexels-photo-1638280.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         'travel_toiletry_kit' => [
             'label' => __('Emergency Toiletry Kit', 'chama-ops'),
             'description' => __('Travel-size basics in a compact pouch.', 'chama-ops'),
             'price' => 7.00,
+            'category' => __('Stay Essentials', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/4202921/pexels-photo-4202921.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         'sleep_comfort_set' => [
             'label' => __('Sleep Comfort Set', 'chama-ops'),
             'description' => __('Sleep mask and earplug set.', 'chama-ops'),
             'price' => 8.00,
+            'category' => __('Stay Essentials', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/3764579/pexels-photo-3764579.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
     ];
 }
@@ -5647,11 +5686,25 @@ function chama_ops_render_gift_shop_app_shortcode(): string
     $notice_key = isset($_GET['chama_gift_shop']) ? sanitize_key((string) wp_unslash($_GET['chama_gift_shop'])) : '';
     $order_ref  = isset($_GET['chama_gift_order']) ? absint($_GET['chama_gift_order']) : 0;
 
+    $grouped_catalog = [];
+
+    foreach ($catalog as $item_key => $item) {
+        $category = isset($item['category']) && is_string($item['category'])
+            ? $item['category']
+            : __('Collection', 'chama-ops');
+
+        if (!isset($grouped_catalog[$category])) {
+            $grouped_catalog[$category] = [];
+        }
+
+        $grouped_catalog[$category][$item_key] = $item;
+    }
+
     ob_start();
     ?>
-    <section class="chama-gift-shop-app" style="margin:0 auto;max-width:1080px;">
+    <section class="chama-gift-shop-app chama-service-app" style="margin:0 auto;max-width:1160px;">
         <?php if ($notice_key === 'submitted' && $order_ref > 0) : ?>
-            <div style="border:1px solid #b7d8c0;background:#ecf8ef;padding:12px;border-radius:10px;margin-bottom:14px;">
+            <div class="chama-app-notice chama-app-notice--success">
                 <?php
                 printf(
                     esc_html__('Gift order submitted. Reference #%d. Front desk will confirm pickup/drop-off.', 'chama-ops'),
@@ -5660,61 +5713,100 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                 ?>
             </div>
         <?php elseif ($notice_key === 'invalid_item') : ?>
-            <div style="border:1px solid #e2b3b0;background:#fff2f2;padding:12px;border-radius:10px;margin-bottom:14px;">
+            <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('That catalog item is unavailable right now. Please choose another item.', 'chama-ops'); ?>
             </div>
         <?php elseif ($notice_key === 'missing_room') : ?>
-            <div style="border:1px solid #e2b3b0;background:#fff2f2;padding:12px;border-radius:10px;margin-bottom:14px;">
+            <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('Please add your room number before submitting.', 'chama-ops'); ?>
             </div>
         <?php endif; ?>
 
-        <div class="chama-order-grid">
-            <?php foreach ($catalog as $item_key => $item) : ?>
-                <article class="chama-order-card">
-                    <h3><?php echo esc_html((string) $item['label']); ?></h3>
-                    <p class="chama-order-meta"><?php echo esc_html((string) $item['description']); ?></p>
-                    <p class="chama-order-price"><?php echo esc_html('$' . number_format((float) $item['price'], 2)); ?></p>
+        <div class="chama-service-app__layout">
+            <div class="chama-service-app__catalog">
+                <h3 class="chama-service-app__heading"><?php esc_html_e('Gift shop catalog', 'chama-ops'); ?></h3>
 
-                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-top:10px;">
+                <?php foreach ($grouped_catalog as $category_label => $group_items) : ?>
+                    <h4 class="chama-service-app__section-title"><?php echo esc_html($category_label); ?></h4>
+                    <div class="chama-order-grid">
+                        <?php foreach ($group_items as $item) : ?>
+                            <?php
+                            $item_label = isset($item['label']) ? (string) $item['label'] : '';
+                            $item_description = isset($item['description']) ? (string) $item['description'] : '';
+                            $item_price = isset($item['price']) ? (float) $item['price'] : 0.0;
+                            $image_url = isset($item['image_url']) ? (string) $item['image_url'] : '';
+                            ?>
+                            <article class="chama-order-card">
+                                <?php if ($image_url !== '') : ?>
+                                    <div class="chama-order-card__media">
+                                        <img
+                                            src="<?php echo esc_url($image_url); ?>"
+                                            alt="<?php echo esc_attr($item_label); ?>"
+                                            loading="lazy"
+                                            decoding="async"
+                                        >
+                                    </div>
+                                <?php endif; ?>
+                                <h3><?php echo esc_html($item_label); ?></h3>
+                                <p class="chama-order-meta"><?php echo esc_html($item_description); ?></p>
+                                <div class="chama-order-card__meta-row">
+                                    <p class="chama-order-price"><?php echo esc_html('$' . number_format($item_price, 2)); ?></p>
+                                    <p class="chama-order-chip"><?php esc_html_e('Pickup or drop-off', 'chama-ops'); ?></p>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <aside class="chama-service-app__panel">
+                <div class="chama-card chama-order-panel">
+                    <h3 class="chama-service-app__heading"><?php esc_html_e('Checkout', 'chama-ops'); ?></h3>
+                    <p class="chama-order-meta"><?php esc_html_e('Select an item, quantity, and delivery preference, then submit once.', 'chama-ops'); ?></p>
+
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
                         <?php wp_nonce_field('chama_ops_submit_gift_shop_order_action', 'chama_ops_submit_gift_shop_order_nonce'); ?>
                         <input type="hidden" name="action" value="chama_ops_submit_gift_shop_order">
-                        <input type="hidden" name="chama_gift_item_key" value="<?php echo esc_attr($item_key); ?>">
 
-                        <p style="margin:0 0 8px;">
-                            <label>
-                                <?php esc_html_e('Room', 'chama-ops'); ?><br>
-                                <input type="text" name="chama_gift_room_number" required style="width:100%;">
-                            </label>
+                        <p class="chama-form-field">
+                            <label for="chama_gift_item_key"><?php esc_html_e('Item', 'chama-ops'); ?></label>
+                            <select id="chama_gift_item_key" name="chama_gift_item_key" required>
+                                <option value=""><?php esc_html_e('Choose an item', 'chama-ops'); ?></option>
+                                <?php foreach ($catalog as $item_key => $item) : ?>
+                                    <?php
+                                    $item_label = isset($item['label']) ? (string) $item['label'] : '';
+                                    $item_price = isset($item['price']) ? (float) $item['price'] : 0.0;
+                                    $option_label = $item_label . ' - $' . number_format($item_price, 2);
+                                    ?>
+                                    <option value="<?php echo esc_attr($item_key); ?>"><?php echo esc_html($option_label); ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </p>
-                        <p style="margin:0 0 8px;">
-                            <label>
-                                <?php esc_html_e('Qty', 'chama-ops'); ?><br>
-                                <input type="number" name="chama_gift_quantity" min="1" step="1" value="1" required style="width:100%;">
-                            </label>
+
+                        <p class="chama-form-field">
+                            <label for="chama_gift_room_number"><?php esc_html_e('Room', 'chama-ops'); ?></label>
+                            <input id="chama_gift_room_number" type="text" name="chama_gift_room_number" required>
                         </p>
-                        <p style="margin:0 0 8px;">
-                            <label>
-                                <?php esc_html_e('Name (optional)', 'chama-ops'); ?><br>
-                                <input type="text" name="chama_gift_guest_name" style="width:100%;">
-                            </label>
+                        <p class="chama-form-field">
+                            <label for="chama_gift_quantity"><?php esc_html_e('Qty', 'chama-ops'); ?></label>
+                            <input id="chama_gift_quantity" type="number" name="chama_gift_quantity" min="1" step="1" value="1" required>
                         </p>
-                        <p style="margin:0 0 8px;">
-                            <label>
-                                <?php esc_html_e('Phone (optional)', 'chama-ops'); ?><br>
-                                <input type="text" name="chama_gift_guest_phone" style="width:100%;">
-                            </label>
+                        <p class="chama-form-field">
+                            <label for="chama_gift_guest_name"><?php esc_html_e('Name (optional)', 'chama-ops'); ?></label>
+                            <input id="chama_gift_guest_name" type="text" name="chama_gift_guest_name">
                         </p>
-                        <p style="margin:0 0 10px;">
-                            <label>
-                                <?php esc_html_e('Pickup note (optional)', 'chama-ops'); ?><br>
-                                <textarea name="chama_gift_order_notes" rows="2" style="width:100%;"></textarea>
-                            </label>
+                        <p class="chama-form-field">
+                            <label for="chama_gift_guest_phone"><?php esc_html_e('Phone (optional)', 'chama-ops'); ?></label>
+                            <input id="chama_gift_guest_phone" type="text" name="chama_gift_guest_phone">
                         </p>
-                        <button type="submit" class="wp-element-button" style="width:100%;"><?php esc_html_e('Submit order', 'chama-ops'); ?></button>
+                        <p class="chama-form-field">
+                            <label for="chama_gift_order_notes"><?php esc_html_e('Pickup note (optional)', 'chama-ops'); ?></label>
+                            <textarea id="chama_gift_order_notes" name="chama_gift_order_notes" rows="3"></textarea>
+                        </p>
+                        <button type="submit" class="wp-element-button chama-order-submit"><?php esc_html_e('Submit gift order', 'chama-ops'); ?></button>
                     </form>
-                </article>
-            <?php endforeach; ?>
+                </div>
+            </aside>
         </div>
     </section>
     <?php
