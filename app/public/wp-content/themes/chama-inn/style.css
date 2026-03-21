@@ -653,7 +653,7 @@ iframe {
 }
 
 .home-hero[style*="background-image"] {
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
   background-color: rgba(20, 18, 16, 0.92);
