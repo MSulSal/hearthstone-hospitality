@@ -579,7 +579,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 10;
+    $target_version = 11;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -722,6 +722,7 @@ function chama_inn_migrate_seeded_copy(): void
         if ($slug === "dining") {
             $should_refresh_dining = strpos($updated_content, "Service hours") !== false
                 || strpos($updated_content, "Planned expansions") !== false
+                || strpos($updated_content, "Sample menu (demo data)") === false
                 || strpos($updated_content, "Filet Mignon") === false;
 
             if ($should_refresh_dining) {
@@ -736,6 +737,7 @@ function chama_inn_migrate_seeded_copy(): void
         if ($slug === "gift-shop") {
             $should_refresh_gift_shop = strpos($updated_content, "Featured categories") !== false
                 || strpos($updated_content, "Operations readiness") !== false
+                || strpos($updated_content, "Sample catalog (demo data)") === false
                 || strpos($updated_content, "Chama Rail Mug") === false;
 
             if ($should_refresh_gift_shop) {
@@ -784,7 +786,7 @@ function chama_inn_copy_migration_notice(): void
     echo '<div class="notice notice-success is-dismissible"><p>';
     echo esc_html(sprintf(
         /* translators: %d: number of pages updated */
-        __("Chama Inn content update applied to %d page(s) with refined copy and testimonial blocks.", "chama-inn"),
+        __("Chama Inn content update applied to %d page(s), including guest POS sample menu and gift shop catalog blocks.", "chama-inn"),
         $updated_pages
     ));
     echo "</p></div>";
