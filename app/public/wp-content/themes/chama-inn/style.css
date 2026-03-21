@@ -3,7 +3,7 @@ Theme Name: Chama Inn
 Theme URI: https://chamastationinn.com
 Author: Your Name
 Description: Custom theme for Chama Station Inn
-Version: 0.3.4
+Version: 0.3.5
 Requires at least: 6.0
 Requires PHP: 8.1
 Text Domain: chama-inn
@@ -820,6 +820,172 @@ iframe {
   margin-bottom: 0.5rem;
 }
 
+.home-content--app-shell {
+  background: transparent;
+  padding-top: clamp(1rem, 1.8vw, 1.6rem);
+  padding-bottom: clamp(1.3rem, 2vw, 2rem);
+}
+
+.home-content__inner--app-shell {
+  width: min(68rem, calc(100% - (var(--chama-space-sm) * 2)));
+  margin: 0 auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.chama-guest-entry,
+.chama-guest-home,
+.chama-guest-my-stay,
+.chama-guest-state {
+  width: min(68rem, 100%);
+  margin: 0 auto;
+}
+
+.chama-guest-entry__card,
+.chama-guest-state__card {
+  border: 1px solid color-mix(in srgb, var(--chama-border) 68%, #fff 32%);
+  border-radius: 18px;
+  background: linear-gradient(165deg, rgba(249, 242, 232, 0.98) 0%, rgba(241, 230, 212, 0.96) 100%);
+  box-shadow: 0 14px 32px rgba(16, 13, 10, 0.18);
+  padding: clamp(1rem, 1.8vw, 1.5rem);
+}
+
+.chama-guest-entry__eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--chama-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.chama-guest-entry h2,
+.chama-guest-state h2 {
+  margin: 0 0 0.45rem;
+}
+
+.chama-guest-entry p,
+.chama-guest-state p {
+  margin: 0;
+  color: var(--chama-text-soft);
+}
+
+.chama-guest-entry__details {
+  margin-top: 0.95rem;
+}
+
+.chama-guest-entry__details summary {
+  cursor: pointer;
+  list-style: none;
+  border: 1px solid var(--chama-border);
+  border-radius: 999px;
+  padding: 0.56rem 0.9rem;
+  font-weight: 600;
+  color: var(--chama-text);
+  width: fit-content;
+  background: rgba(248, 239, 226, 0.85);
+}
+
+.chama-guest-entry__details summary::-webkit-details-marker {
+  display: none;
+}
+
+.chama-guest-entry__details[open] summary {
+  margin-bottom: 0.9rem;
+}
+
+.chama-form-field--inline label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 500;
+}
+
+.chama-form-field--inline input[type="checkbox"] {
+  width: auto;
+}
+
+.chama-guest-entry__support {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.chama-guest-entry__support a {
+  font-weight: 600;
+  color: var(--chama-accent-strong);
+  text-decoration: none;
+}
+
+.chama-guest-entry__support a:hover,
+.chama-guest-entry__support a:focus-visible {
+  text-decoration: underline;
+}
+
+.chama-guest-home__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.chama-guest-home__bullet-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--chama-text-soft);
+  display: grid;
+  gap: 0.32rem;
+}
+
+.chama-guest-home__orders {
+  margin-top: 14px;
+}
+
+.guest-mobile-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 80;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 29, 25, 0.58) 0%,
+    rgba(31, 26, 22, 0.52) 36%,
+    rgba(42, 35, 30, 0.58) 100%
+  );
+  border-top: 1px solid color-mix(in srgb, var(--chama-border) 45%, transparent 55%);
+  backdrop-filter: blur(10px) saturate(1.03);
+}
+
+.guest-mobile-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.45rem 0.65rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.guest-mobile-nav__item a {
+  display: block;
+  text-align: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.43rem 0.45rem;
+  text-decoration: none;
+  color: var(--chama-nav-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.guest-mobile-nav__item.is-active a {
+  border-color: rgba(248, 239, 228, 0.4);
+  background: rgba(248, 239, 228, 0.12);
+}
+
 .chama-service-app__layout {
   display: grid;
   gap: clamp(16px, 2.2vw, 28px);
@@ -1294,6 +1460,18 @@ iframe {
 
   body {
     padding-bottom: 0;
+  }
+
+  body.has-guest-mobile-nav {
+    padding-bottom: 4.6rem;
+  }
+
+  .guest-mobile-nav {
+    display: block;
+  }
+
+  .chama-guest-home__grid {
+    grid-template-columns: 1fr;
   }
 
   .home-hero {

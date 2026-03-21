@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.26.0
+ * Version: 1.27.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -1037,8 +1037,11 @@ function chama_ops_render_stay_details_meta_box(WP_Post $post): void
     wp_nonce_field('chama_ops_save_stay_details', 'chama_ops_stay_nonce');
 
     $linked_guest_id   = get_post_meta($post->ID, '_chama_stay_guest_id', true);
+    $room_number       = (string) get_post_meta($post->ID, '_chama_stay_room_number', true);
     $check_in          = (string) get_post_meta($post->ID, '_chama_stay_check_in', true);
     $check_out         = (string) get_post_meta($post->ID, '_chama_stay_check_out', true);
+    $checkout_at       = (string) get_post_meta($post->ID, '_chama_stay_checkout_at', true);
+    $has_access_code   = trim((string) get_post_meta($post->ID, '_chama_stay_access_code_hash', true)) !== '';
     $status            = get_post_meta($post->ID, '_chama_stay_status', true);
     $revenue           = (string) get_post_meta($post->ID, '_chama_stay_revenue', true);
     $nights            = chama_ops_calculate_stay_nights($check_in, $check_out);
@@ -1086,6 +1089,23 @@ function chama_ops_render_stay_details_meta_box(WP_Post $post): void
 
             <tr>
                 <th scope="row">
+                    <label for="chama_stay_room_number"><?php esc_html_e('Room Number', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="text"
+                        id="chama_stay_room_number"
+                        name="chama_stay_room_number"
+                        value="<?php echo esc_attr($room_number); ?>"
+                        class="regular-text"
+                        placeholder="<?php esc_attr_e('Example: 5', 'chama-ops'); ?>"
+                    >
+                    <p class="description"><?php esc_html_e('Used by guests to sign in to the stay app.', 'chama-ops'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
                     <label for="chama_stay_check_out"><?php esc_html_e('Check-out Date', 'chama-ops'); ?></label>
                 </th>
                 <td>
@@ -1095,6 +1115,45 @@ function chama_ops_render_stay_details_meta_box(WP_Post $post): void
                         name="chama_stay_check_out"
                         value="<?php echo esc_attr($check_out); ?>"
                     >
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="chama_stay_checkout_at"><?php esc_html_e('Checkout Date/Time', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="datetime-local"
+                        id="chama_stay_checkout_at"
+                        name="chama_stay_checkout_at"
+                        value="<?php echo esc_attr($checkout_at); ?>"
+                    >
+                    <p class="description"><?php esc_html_e('Optional precise session expiry. If blank, app sessions expire at 11:00 on check-out date.', 'chama-ops'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="chama_stay_access_code"><?php esc_html_e('Guest Access Code', 'chama-ops'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="password"
+                        id="chama_stay_access_code"
+                        name="chama_stay_access_code"
+                        value=""
+                        class="regular-text"
+                        autocomplete="new-password"
+                        placeholder="<?php esc_attr_e('Set or rotate code', 'chama-ops'); ?>"
+                    >
+                    <p class="description">
+                        <?php
+                        echo $has_access_code
+                            ? esc_html__('A code is already set. Enter a new one only if you want to rotate it.', 'chama-ops')
+                            : esc_html__('Set the code guests receive at check-in.', 'chama-ops');
+                        ?>
+                    </p>
                 </td>
             </tr>
 
@@ -1280,17 +1339,26 @@ function chama_ops_save_stay_meta(int $post_id): void
     }
 
     $linked_guest_id = isset($_POST['chama_stay_guest_id']) ? absint(wp_unslash($_POST['chama_stay_guest_id'])) : 0;
+    $room_number     = isset($_POST['chama_stay_room_number']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_room_number'])) : '';
     $check_in        = isset($_POST['chama_stay_check_in']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_check_in'])) : '';
     $check_out       = isset($_POST['chama_stay_check_out']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_check_out'])) : '';
+    $checkout_at     = isset($_POST['chama_stay_checkout_at']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_checkout_at'])) : '';
+    $access_code     = isset($_POST['chama_stay_access_code']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_access_code'])) : '';
     $status          = isset($_POST['chama_stay_status']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_status'])) : 'lead';
     $revenue         = isset($_POST['chama_stay_revenue']) ? sanitize_text_field(wp_unslash($_POST['chama_stay_revenue'])) : '';
     $nights          = chama_ops_calculate_stay_nights($check_in, $check_out);
 
     update_post_meta($post_id, '_chama_stay_guest_id', $linked_guest_id);
+    update_post_meta($post_id, '_chama_stay_room_number', strtoupper(trim($room_number)));
     update_post_meta($post_id, '_chama_stay_check_in', $check_in);
     update_post_meta($post_id, '_chama_stay_check_out', $check_out);
+    update_post_meta($post_id, '_chama_stay_checkout_at', $checkout_at);
     update_post_meta($post_id, '_chama_stay_status', $status);
     update_post_meta($post_id, '_chama_stay_revenue', $revenue);
+
+    if ($access_code !== '') {
+        update_post_meta($post_id, '_chama_stay_access_code_hash', wp_hash_password($access_code));
+    }
 
     if ($nights !== null) {
         update_post_meta($post_id, '_chama_stay_nights', $nights);
@@ -5279,14 +5347,337 @@ function chama_ops_get_available_room_service_items(): array
 }
 
 /**
+ * Return the default front-desk phone number used in guest app CTAs.
+ */
+function chama_ops_get_front_desk_phone_number(): string
+{
+    $configured = trim((string) get_option('chama_ops_front_desk_phone', ''));
+
+    if ($configured !== '') {
+        return $configured;
+    }
+
+    return '(575) 000-0000';
+}
+
+/**
+ * Build a tel: link for front-desk actions.
+ */
+function chama_ops_get_front_desk_tel_href(): string
+{
+    $phone = chama_ops_get_front_desk_phone_number();
+    $normalized = preg_replace('/[^0-9+]/', '', $phone);
+
+    if (!is_string($normalized) || $normalized === '') {
+        return '';
+    }
+
+    if ($normalized[0] !== '+' && strlen($normalized) === 10) {
+        $normalized = '+1' . $normalized;
+    }
+
+    return 'tel:' . $normalized;
+}
+
+/**
+ * Cookie name used for guest stay sessions.
+ */
+function chama_ops_get_guest_session_cookie_name(): string
+{
+    return 'chama_guest_session';
+}
+
+/**
+ * Build transient key from session token.
+ *
+ * @param string $token Guest session token.
+ */
+function chama_ops_get_guest_session_transient_key(string $token): string
+{
+    return 'chama_ops_guest_session_' . $token;
+}
+
+/**
+ * Set the guest-session cookie.
+ *
+ * @param string $token Session token.
+ * @param int    $expires_at UTC timestamp for forced expiry at checkout.
+ * @param bool   $remember Whether to persist cookie across browser restarts.
+ */
+function chama_ops_set_guest_session_cookie(string $token, int $expires_at, bool $remember): void
+{
+    $cookie_name = chama_ops_get_guest_session_cookie_name();
+    $cookie_expiry = $remember ? $expires_at : 0;
+    $path = defined('COOKIEPATH') && is_string(COOKIEPATH) && COOKIEPATH !== '' ? COOKIEPATH : '/';
+    $domain = defined('COOKIE_DOMAIN') && is_string(COOKIE_DOMAIN) ? COOKIE_DOMAIN : '';
+    $secure = is_ssl();
+
+    if (PHP_VERSION_ID >= 70300) {
+        setcookie($cookie_name, $token, [
+            'expires'  => $cookie_expiry,
+            'path'     => $path,
+            'domain'   => $domain,
+            'secure'   => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    } else {
+        setcookie($cookie_name, $token, $cookie_expiry, $path, $domain, $secure, true);
+    }
+
+    $_COOKIE[$cookie_name] = $token;
+}
+
+/**
+ * Clear the guest-session cookie from the browser.
+ */
+function chama_ops_clear_guest_session_cookie(): void
+{
+    $cookie_name = chama_ops_get_guest_session_cookie_name();
+    $path = defined('COOKIEPATH') && is_string(COOKIEPATH) && COOKIEPATH !== '' ? COOKIEPATH : '/';
+    $domain = defined('COOKIE_DOMAIN') && is_string(COOKIE_DOMAIN) ? COOKIE_DOMAIN : '';
+    $secure = is_ssl();
+
+    if (PHP_VERSION_ID >= 70300) {
+        setcookie($cookie_name, '', [
+            'expires'  => time() - HOUR_IN_SECONDS,
+            'path'     => $path,
+            'domain'   => $domain,
+            'secure'   => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    } else {
+        setcookie($cookie_name, '', time() - HOUR_IN_SECONDS, $path, $domain, $secure, true);
+    }
+
+    unset($_COOKIE[$cookie_name]);
+}
+
+/**
+ * Resolve checkout-based session expiry timestamp for a stay.
+ *
+ * @param int $stay_id Stay post ID.
+ */
+function chama_ops_get_stay_session_expiry_timestamp(int $stay_id): int
+{
+    $expires_at_raw = trim((string) get_post_meta($stay_id, '_chama_stay_checkout_at', true));
+    $expires_at = $expires_at_raw !== '' ? strtotime($expires_at_raw) : false;
+
+    if (!is_int($expires_at) || $expires_at <= 0) {
+        $check_out = trim((string) get_post_meta($stay_id, '_chama_stay_check_out', true));
+        $expires_at = $check_out !== '' ? strtotime($check_out . ' 11:00:00') : false;
+    }
+
+    if (!is_int($expires_at) || $expires_at <= 0) {
+        return time() + (3 * DAY_IN_SECONDS);
+    }
+
+    return $expires_at;
+}
+
+/**
+ * Locate an active stay by room number and access code.
+ *
+ * @param string $room_number Submitted room number.
+ * @param string $access_code Submitted access code.
+ */
+function chama_ops_find_stay_for_guest_sign_in(string $room_number, string $access_code): ?WP_Post
+{
+    $normalized_room = strtoupper(trim($room_number));
+    $normalized_code = trim($access_code);
+
+    if ($normalized_room === '' || $normalized_code === '') {
+        return null;
+    }
+
+    $candidate_ids = get_posts([
+        'post_type'      => 'stay',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'fields'         => 'ids',
+        'meta_query'     => [
+            [
+                'key'     => '_chama_stay_room_number',
+                'value'   => $normalized_room,
+                'compare' => '=',
+            ],
+        ],
+    ]);
+
+    if (!is_array($candidate_ids) || empty($candidate_ids)) {
+        return null;
+    }
+
+    foreach ($candidate_ids as $candidate_id) {
+        $stay_id = (int) $candidate_id;
+
+        if ($stay_id <= 0) {
+            continue;
+        }
+
+        $status = sanitize_key((string) get_post_meta($stay_id, '_chama_stay_status', true));
+
+        if (!in_array($status, ['booked', 'checked_in'], true)) {
+            continue;
+        }
+
+        $expires_at = chama_ops_get_stay_session_expiry_timestamp($stay_id);
+
+        if ($expires_at <= time()) {
+            continue;
+        }
+
+        $access_code_hash = trim((string) get_post_meta($stay_id, '_chama_stay_access_code_hash', true));
+
+        if ($access_code_hash === '') {
+            continue;
+        }
+
+        if (!wp_check_password($normalized_code, $access_code_hash, $stay_id)) {
+            continue;
+        }
+
+        $stay_post = get_post($stay_id);
+
+        if ($stay_post instanceof WP_Post && $stay_post->post_type === 'stay') {
+            return $stay_post;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Persist and start a guest session.
+ *
+ * @param WP_Post $stay_post Active stay record.
+ * @param string  $room_number Guest room number.
+ * @param bool    $remember Whether browser persistence is requested.
+ */
+function chama_ops_create_guest_session(WP_Post $stay_post, string $room_number, bool $remember): bool
+{
+    $stay_id = (int) $stay_post->ID;
+
+    if ($stay_id <= 0) {
+        return false;
+    }
+
+    $expires_at = chama_ops_get_stay_session_expiry_timestamp($stay_id);
+
+    if ($expires_at <= time()) {
+        return false;
+    }
+
+    $token = wp_generate_password(40, false, false);
+    $guest_id = (int) get_post_meta($stay_id, '_chama_stay_guest_id', true);
+    $session_payload = [
+        'stay_id'     => $stay_id,
+        'guest_id'    => $guest_id,
+        'room_number' => strtoupper(trim($room_number)),
+        'expires_at'  => $expires_at,
+        'created_at'  => time(),
+    ];
+
+    $session_ttl = max(300, $expires_at - time());
+
+    set_transient(chama_ops_get_guest_session_transient_key($token), $session_payload, $session_ttl);
+    chama_ops_set_guest_session_cookie($token, $expires_at, $remember);
+
+    return true;
+}
+
+/**
+ * Return the current guest session payload if authenticated.
+ *
+ * @return array<string, int|string>|null
+ */
+function chama_ops_get_guest_session(): ?array
+{
+    static $is_loaded = false;
+    static $cached_session = null;
+
+    if ($is_loaded) {
+        return is_array($cached_session) ? $cached_session : null;
+    }
+
+    $is_loaded = true;
+    $cookie_name = chama_ops_get_guest_session_cookie_name();
+    $token = isset($_COOKIE[$cookie_name]) ? sanitize_text_field((string) wp_unslash($_COOKIE[$cookie_name])) : '';
+
+    if ($token === '') {
+        return null;
+    }
+
+    $session_key = chama_ops_get_guest_session_transient_key($token);
+    $session_data = get_transient($session_key);
+
+    if (!is_array($session_data)) {
+        chama_ops_clear_guest_session_cookie();
+        return null;
+    }
+
+    $expires_at = isset($session_data['expires_at']) ? (int) $session_data['expires_at'] : 0;
+
+    if ($expires_at > 0 && $expires_at <= time()) {
+        delete_transient($session_key);
+        chama_ops_clear_guest_session_cookie();
+        return null;
+    }
+
+    $cached_session = [
+        'token'       => $token,
+        'stay_id'     => isset($session_data['stay_id']) ? (int) $session_data['stay_id'] : 0,
+        'guest_id'    => isset($session_data['guest_id']) ? (int) $session_data['guest_id'] : 0,
+        'room_number' => isset($session_data['room_number']) ? (string) $session_data['room_number'] : '',
+        'expires_at'  => $expires_at,
+        'created_at'  => isset($session_data['created_at']) ? (int) $session_data['created_at'] : 0,
+    ];
+
+    return $cached_session;
+}
+
+/**
+ * Clear active guest session from cookie + transient.
+ */
+function chama_ops_clear_guest_session(): void
+{
+    $session = chama_ops_get_guest_session();
+
+    if (is_array($session) && isset($session['token']) && is_string($session['token']) && $session['token'] !== '') {
+        delete_transient(chama_ops_get_guest_session_transient_key($session['token']));
+    }
+
+    chama_ops_clear_guest_session_cookie();
+}
+
+/**
+ * Determine whether a guest session is active.
+ */
+function chama_ops_is_guest_authenticated(): bool
+{
+    return is_array(chama_ops_get_guest_session());
+}
+
+/**
  * Resolve room context for guest submissions.
  */
 function chama_ops_get_guest_room_context(): string
 {
+    $session = chama_ops_get_guest_session();
+
+    if (is_array($session) && isset($session['room_number'])) {
+        $session_room = strtoupper(trim((string) $session['room_number']));
+
+        if ($session_room !== '') {
+            return $session_room;
+        }
+    }
+
     $query_room = isset($_GET['room']) ? sanitize_text_field((string) wp_unslash($_GET['room'])) : '';
 
     if ($query_room !== '') {
-        return $query_room;
+        return strtoupper(trim($query_room));
     }
 
     if (is_user_logged_in()) {
@@ -5303,13 +5694,13 @@ function chama_ops_get_guest_room_context(): string
                 $value = trim((string) get_user_meta($user_id, $meta_key, true));
 
                 if ($value !== '') {
-                    return $value;
+                    return strtoupper($value);
                 }
             }
         }
     }
 
-    return 'Auto';
+    return '';
 }
 
 /**
@@ -5489,6 +5880,10 @@ function chama_ops_print_guest_cart_script_once(): void
  */
 function chama_ops_render_room_service_app_shortcode(): string
 {
+    if (!chama_ops_is_guest_authenticated()) {
+        return chama_ops_render_guest_auth_required_state();
+    }
+
     $items = chama_ops_get_available_room_service_items();
     $notice_key = isset($_GET['chama_room_service']) ? sanitize_key((string) wp_unslash($_GET['chama_room_service'])) : '';
     $order_ref  = isset($_GET['chama_room_service_order']) ? absint($_GET['chama_room_service_order']) : 0;
@@ -5596,6 +5991,34 @@ function chama_ops_render_room_service_app_shortcode(): string
                             </div>
                             <p class="chama-cart-total"><strong><?php esc_html_e('Total', 'chama-ops'); ?>:</strong> <span data-cart-total>$0.00</span></p>
 
+                            <p class="chama-form-field">
+                                <label for="chama_order_delivery_method"><?php esc_html_e('Delivery method', 'chama-ops'); ?></label>
+                                <select id="chama_order_delivery_method" name="chama_order_delivery_method">
+                                    <option value="room_delivery"><?php esc_html_e('Room delivery', 'chama-ops'); ?></option>
+                                    <option value="pickup"><?php esc_html_e('Pickup', 'chama-ops'); ?></option>
+                                </select>
+                            </p>
+
+                            <p class="chama-form-field">
+                                <label for="chama_order_requested_time"><?php esc_html_e('Requested time', 'chama-ops'); ?></label>
+                                <input type="time" id="chama_order_requested_time" name="chama_order_requested_time">
+                            </p>
+
+                            <p class="chama-form-field">
+                                <label for="chama_order_tip_percent"><?php esc_html_e('Tip', 'chama-ops'); ?></label>
+                                <select id="chama_order_tip_percent" name="chama_order_tip_percent">
+                                    <option value="0"><?php esc_html_e('No tip', 'chama-ops'); ?></option>
+                                    <option value="10">10%</option>
+                                    <option value="15">15%</option>
+                                    <option value="20">20%</option>
+                                </select>
+                            </p>
+
+                            <p class="chama-form-field">
+                                <label for="chama_order_notes"><?php esc_html_e('Allergy / special notes', 'chama-ops'); ?></label>
+                                <textarea id="chama_order_notes" name="chama_order_notes" rows="3"></textarea>
+                            </p>
+
                             <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled><?php esc_html_e('Submit order', 'chama-ops'); ?></button>
                         </form>
                     </div>
@@ -5616,12 +6039,29 @@ function chama_ops_submit_room_service_order(): void
 {
     check_admin_referer('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce');
 
+    if (!chama_ops_is_guest_authenticated()) {
+        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('home', '/')));
+        exit;
+    }
+
     $cart_payload = isset($_POST['chama_room_service_cart']) ? (string) wp_unslash($_POST['chama_room_service_cart']) : '';
+    $delivery_method = isset($_POST['chama_order_delivery_method']) ? sanitize_key((string) wp_unslash($_POST['chama_order_delivery_method'])) : 'room_delivery';
+    $requested_time = isset($_POST['chama_order_requested_time']) ? sanitize_text_field((string) wp_unslash($_POST['chama_order_requested_time'])) : '';
+    $tip_percent = isset($_POST['chama_order_tip_percent']) ? absint(wp_unslash($_POST['chama_order_tip_percent'])) : 0;
+    $order_notes = isset($_POST['chama_order_notes']) ? sanitize_textarea_field((string) wp_unslash($_POST['chama_order_notes'])) : '';
+
+    if (!in_array($delivery_method, ['room_delivery', 'pickup'], true)) {
+        $delivery_method = 'room_delivery';
+    }
+
+    if (!in_array($tip_percent, [0, 10, 15, 20], true)) {
+        $tip_percent = 0;
+    }
 
     $redirect_url = wp_get_referer();
 
     if (!is_string($redirect_url) || $redirect_url === '') {
-        $redirect_url = (string) home_url('/');
+        $redirect_url = (string) home_url('/dining/');
     }
 
     $cart = [];
@@ -5656,7 +6096,7 @@ function chama_ops_submit_room_service_order(): void
     }
 
     $validated_cart = [];
-    $order_total = 0.0;
+    $subtotal = 0.0;
     $total_qty = 0;
     $order_lines = [];
 
@@ -5678,7 +6118,7 @@ function chama_ops_submit_room_service_order(): void
         $line_total = $price * $qty;
 
         $validated_cart[$item_id] = $qty;
-        $order_total += $line_total;
+        $subtotal += $line_total;
         $total_qty += $qty;
         $order_lines[] = sprintf(
             __('%1$s x%2$d - $%3$s', 'chama-ops'),
@@ -5695,6 +6135,13 @@ function chama_ops_submit_room_service_order(): void
 
     $room = chama_ops_get_guest_room_context();
     $order_note_lines = $order_lines;
+
+    if ($order_notes !== '') {
+        $order_note_lines[] = __('Guest notes:', 'chama-ops') . ' ' . $order_notes;
+    }
+
+    $tip_amount = $subtotal * ($tip_percent / 100);
+    $order_total = $subtotal + $tip_amount;
 
     $order_title = sprintf(
         __('Room %1$s - %2$d item(s)', 'chama-ops'),
@@ -5722,6 +6169,12 @@ function chama_ops_submit_room_service_order(): void
     update_post_meta((int) $order_id, '_chama_order_room_number', $room);
     update_post_meta((int) $order_id, '_chama_order_guest_name', '');
     update_post_meta((int) $order_id, '_chama_order_guest_phone', '');
+    update_post_meta((int) $order_id, '_chama_order_delivery_method', $delivery_method);
+    update_post_meta((int) $order_id, '_chama_order_requested_time', $requested_time);
+    update_post_meta((int) $order_id, '_chama_order_tip_percent', $tip_percent);
+    update_post_meta((int) $order_id, '_chama_order_tip_amount', number_format($tip_amount, 2, '.', ''));
+    update_post_meta((int) $order_id, '_chama_order_subtotal', number_format($subtotal, 2, '.', ''));
+    update_post_meta((int) $order_id, '_chama_order_notes', $order_notes);
     update_post_meta((int) $order_id, '_chama_order_total', number_format($order_total, 2, '.', ''));
     update_post_meta((int) $order_id, '_chama_order_status', 'submitted');
 
@@ -5756,12 +6209,709 @@ function chama_ops_get_guest_page_url(string $slug, string $fallback_path): stri
 }
 
 /**
+ * Resolve and validate redirect target from sign-in flow.
+ *
+ * @param string $raw_redirect Raw redirect value.
+ */
+function chama_ops_get_guest_redirect_target(string $raw_redirect): string
+{
+    $fallback = chama_ops_get_guest_page_url('home', '/');
+
+    if ($raw_redirect === '') {
+        return $fallback;
+    }
+
+    $validated = wp_validate_redirect($raw_redirect, $fallback);
+
+    if (!is_string($validated) || $validated === '') {
+        return $fallback;
+    }
+
+    return $validated;
+}
+
+/**
+ * Render a small auth-required state used by protected shortcodes.
+ */
+function chama_ops_render_guest_auth_required_state(): string
+{
+    $sign_in_url = chama_ops_get_guest_page_url('home', '/');
+    $front_desk_phone = chama_ops_get_front_desk_phone_number();
+    $front_desk_tel = chama_ops_get_front_desk_tel_href();
+
+    ob_start();
+    ?>
+    <section class="chama-guest-state chama-guest-state--auth-required">
+        <div class="chama-guest-state__card">
+            <h2><?php esc_html_e('Sign in to continue', 'chama-ops'); ?></h2>
+            <p><?php esc_html_e('Use your room number and check-in code to open the guest app.', 'chama-ops'); ?></p>
+            <div class="chama-order-actions wp-block-buttons">
+                <div class="wp-block-button">
+                    <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($sign_in_url); ?>">
+                        <?php esc_html_e('Go to sign in', 'chama-ops'); ?>
+                    </a>
+                </div>
+                <?php if ($front_desk_tel !== '') : ?>
+                    <div class="wp-block-button is-style-outline">
+                        <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($front_desk_tel); ?>">
+                            <?php
+                            printf(
+                                esc_html__('Call front desk (%s)', 'chama-ops'),
+                                esc_html($front_desk_phone)
+                            );
+                            ?>
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+    <?php
+
+    return (string) ob_get_clean();
+}
+
+/**
+ * Return auth notice copy by key.
+ *
+ * @param string $notice_key Current notice key.
+ */
+function chama_ops_get_guest_auth_notice_copy(string $notice_key): string
+{
+    if ($notice_key === 'invalid') {
+        return __('We could not verify that room and code. Please try again or contact the front desk.', 'chama-ops');
+    }
+
+    if ($notice_key === 'expired') {
+        return __('Your guest session has expired at checkout. Please ask front desk for a new code if you need access.', 'chama-ops');
+    }
+
+    if ($notice_key === 'signed_out') {
+        return __('You have been signed out of the guest app.', 'chama-ops');
+    }
+
+    return '';
+}
+
+/**
+ * Handle guest sign-in action.
+ */
+function chama_ops_handle_guest_sign_in(): void
+{
+    check_admin_referer('chama_ops_guest_sign_in_action', 'chama_ops_guest_sign_in_nonce');
+
+    $room_number = isset($_POST['chama_guest_room']) ? sanitize_text_field((string) wp_unslash($_POST['chama_guest_room'])) : '';
+    $access_code = isset($_POST['chama_guest_access_code']) ? sanitize_text_field((string) wp_unslash($_POST['chama_guest_access_code'])) : '';
+    $remember = isset($_POST['chama_guest_remember']) && (string) wp_unslash($_POST['chama_guest_remember']) === '1';
+    $raw_redirect = isset($_POST['chama_guest_redirect']) ? (string) wp_unslash($_POST['chama_guest_redirect']) : '';
+    $landing_url = chama_ops_get_guest_page_url('home', '/');
+
+    if ($room_number === '' || $access_code === '') {
+        wp_safe_redirect(add_query_arg([
+            'chama_guest_auth'     => 'invalid',
+            'chama_guest_redirect' => $raw_redirect,
+        ], $landing_url));
+        exit;
+    }
+
+    $stay_post = chama_ops_find_stay_for_guest_sign_in($room_number, $access_code);
+
+    if (!$stay_post instanceof WP_Post) {
+        wp_safe_redirect(add_query_arg([
+            'chama_guest_auth'     => 'invalid',
+            'chama_guest_redirect' => $raw_redirect,
+        ], $landing_url));
+        exit;
+    }
+
+    $started = chama_ops_create_guest_session($stay_post, $room_number, $remember);
+
+    if (!$started) {
+        wp_safe_redirect(add_query_arg([
+            'chama_guest_auth'     => 'expired',
+            'chama_guest_redirect' => $raw_redirect,
+        ], $landing_url));
+        exit;
+    }
+
+    $target = chama_ops_get_guest_redirect_target($raw_redirect);
+    wp_safe_redirect($target);
+    exit;
+}
+add_action('admin_post_nopriv_chama_ops_guest_sign_in', 'chama_ops_handle_guest_sign_in');
+add_action('admin_post_chama_ops_guest_sign_in', 'chama_ops_handle_guest_sign_in');
+
+/**
+ * Handle guest sign-out action.
+ */
+function chama_ops_handle_guest_sign_out(): void
+{
+    check_admin_referer('chama_ops_guest_sign_out_action', 'chama_ops_guest_sign_out_nonce');
+
+    chama_ops_clear_guest_session();
+
+    $landing_url = chama_ops_get_guest_page_url('home', '/');
+    wp_safe_redirect(add_query_arg('chama_guest_auth', 'signed_out', $landing_url));
+    exit;
+}
+add_action('admin_post_nopriv_chama_ops_guest_sign_out', 'chama_ops_handle_guest_sign_out');
+add_action('admin_post_chama_ops_guest_sign_out', 'chama_ops_handle_guest_sign_out');
+
+/**
+ * Enforce guest authentication on protected app pages.
+ */
+function chama_ops_enforce_guest_page_auth(): void
+{
+    if (is_admin() || wp_doing_ajax() || wp_doing_cron()) {
+        return;
+    }
+
+    $protected_slugs = [
+        'dining',
+        'gift-shop',
+        'perks-info',
+        'explore-chama',
+        'help',
+        'my-stay',
+    ];
+
+    $is_protected = false;
+
+    foreach ($protected_slugs as $slug) {
+        if (is_page($slug)) {
+            $is_protected = true;
+            break;
+        }
+    }
+
+    if (!$is_protected || chama_ops_is_guest_authenticated()) {
+        return;
+    }
+
+    $landing_url = chama_ops_get_guest_page_url('home', '/');
+    $request_uri = isset($_SERVER['REQUEST_URI']) ? (string) wp_unslash($_SERVER['REQUEST_URI']) : '/';
+    $redirect_target = home_url($request_uri);
+
+    wp_safe_redirect(add_query_arg('chama_guest_redirect', $redirect_target, $landing_url));
+    exit;
+}
+add_action('template_redirect', 'chama_ops_enforce_guest_page_auth', 7);
+
+/**
+ * Return latest active room-service + gift orders for a room.
+ *
+ * @param string $room_number Guest room number.
+ * @return array<int, array<string, int|string>>
+ */
+function chama_ops_get_guest_active_orders_for_room(string $room_number): array
+{
+    $normalized_room = strtoupper(trim($room_number));
+
+    if ($normalized_room === '') {
+        return [];
+    }
+
+    $orders = [];
+
+    $room_service_ids = get_posts([
+        'post_type'      => 'room_service_order',
+        'posts_per_page' => 6,
+        'post_status'    => 'publish',
+        'fields'         => 'ids',
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'meta_query'     => [
+            [
+                'key'     => '_chama_order_room_number',
+                'value'   => $normalized_room,
+                'compare' => '=',
+            ],
+            [
+                'key'     => '_chama_order_status',
+                'value'   => ['completed', 'cancelled'],
+                'compare' => 'NOT IN',
+            ],
+        ],
+    ]);
+
+    if (is_array($room_service_ids)) {
+        foreach ($room_service_ids as $order_id) {
+            $orders[] = [
+                'id'     => (int) $order_id,
+                'type'   => 'dining',
+                'title'  => (string) get_the_title((int) $order_id),
+                'status' => (string) get_post_meta((int) $order_id, '_chama_order_status', true),
+                'date'   => (string) get_post_field('post_date', (int) $order_id),
+            ];
+        }
+    }
+
+    $gift_order_ids = get_posts([
+        'post_type'      => 'gift_shop_order',
+        'posts_per_page' => 6,
+        'post_status'    => 'publish',
+        'fields'         => 'ids',
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'meta_query'     => [
+            [
+                'key'     => '_chama_gift_room_number',
+                'value'   => $normalized_room,
+                'compare' => '=',
+            ],
+            [
+                'key'     => '_chama_gift_order_status',
+                'value'   => ['completed', 'cancelled'],
+                'compare' => 'NOT IN',
+            ],
+        ],
+    ]);
+
+    if (is_array($gift_order_ids)) {
+        foreach ($gift_order_ids as $order_id) {
+            $orders[] = [
+                'id'     => (int) $order_id,
+                'type'   => 'gift',
+                'title'  => (string) get_the_title((int) $order_id),
+                'status' => (string) get_post_meta((int) $order_id, '_chama_gift_order_status', true),
+                'date'   => (string) get_post_field('post_date', (int) $order_id),
+            ];
+        }
+    }
+
+    usort($orders, static function (array $left, array $right): int {
+        $left_ts = isset($left['date']) ? strtotime((string) $left['date']) : 0;
+        $right_ts = isset($right['date']) ? strtotime((string) $right['date']) : 0;
+
+        if (!is_int($left_ts)) {
+            $left_ts = 0;
+        }
+
+        if (!is_int($right_ts)) {
+            $right_ts = 0;
+        }
+
+        return $right_ts <=> $left_ts;
+    });
+
+    return array_slice($orders, 0, 6);
+}
+
+/**
+ * Human-friendly order status labels.
+ *
+ * @param string $status_key Raw order status key.
+ */
+function chama_ops_get_guest_order_status_label(string $status_key): string
+{
+    $labels = [
+        'submitted'  => __('Submitted', 'chama-ops'),
+        'confirmed'  => __('Confirmed', 'chama-ops'),
+        'in_kitchen' => __('Preparing', 'chama-ops'),
+        'preparing'  => __('Preparing', 'chama-ops'),
+        'ready'      => __('Ready', 'chama-ops'),
+        'delivering' => __('Out for delivery', 'chama-ops'),
+        'picked'     => __('Picked', 'chama-ops'),
+        'completed'  => __('Completed', 'chama-ops'),
+        'cancelled'  => __('Cancelled', 'chama-ops'),
+    ];
+
+    $normalized_key = sanitize_key($status_key);
+
+    if (isset($labels[$normalized_key])) {
+        return (string) $labels[$normalized_key];
+    }
+
+    if ($normalized_key === '') {
+        return __('Submitted', 'chama-ops');
+    }
+
+    return ucwords(str_replace('_', ' ', $normalized_key));
+}
+
+/**
+ * Render guest sign-in / home shell shortcode.
+ *
+ * Usage: [chama_guest_home_shell]
+ */
+function chama_ops_render_guest_home_shell_shortcode(): string
+{
+    $session = chama_ops_get_guest_session();
+
+    if (!is_array($session)) {
+        $notice_key = isset($_GET['chama_guest_auth']) ? sanitize_key((string) wp_unslash($_GET['chama_guest_auth'])) : '';
+        $redirect_target = isset($_GET['chama_guest_redirect']) ? (string) wp_unslash($_GET['chama_guest_redirect']) : '';
+        $front_desk_phone = chama_ops_get_front_desk_phone_number();
+        $front_desk_tel = chama_ops_get_front_desk_tel_href();
+        $notice_copy = chama_ops_get_guest_auth_notice_copy($notice_key);
+        $open_form = $notice_copy !== '';
+
+        ob_start();
+        ?>
+        <section class="chama-guest-entry">
+            <div class="chama-guest-entry__card">
+                <p class="chama-guest-entry__eyebrow"><?php esc_html_e('Guest App Access', 'chama-ops'); ?></p>
+                <h2><?php esc_html_e('Welcome to your stay app', 'chama-ops'); ?></h2>
+                <p><?php esc_html_e('Sign in with your room number and check-in access code. Guests can enter from a room QR code or by opening this URL directly.', 'chama-ops'); ?></p>
+
+                <?php if ($notice_copy !== '') : ?>
+                    <div class="chama-app-notice chama-app-notice--error">
+                        <?php echo esc_html($notice_copy); ?>
+                    </div>
+                <?php endif; ?>
+
+                <details class="chama-guest-entry__details" <?php echo $open_form ? 'open' : ''; ?>>
+                    <summary><?php esc_html_e('Continue', 'chama-ops'); ?></summary>
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
+                        <?php wp_nonce_field('chama_ops_guest_sign_in_action', 'chama_ops_guest_sign_in_nonce'); ?>
+                        <input type="hidden" name="action" value="chama_ops_guest_sign_in">
+                        <input type="hidden" name="chama_guest_redirect" value="<?php echo esc_attr($redirect_target); ?>">
+
+                        <p class="chama-form-field">
+                            <label for="chama_guest_room"><?php esc_html_e('Room Number', 'chama-ops'); ?></label>
+                            <input
+                                id="chama_guest_room"
+                                name="chama_guest_room"
+                                type="text"
+                                autocomplete="off"
+                                inputmode="text"
+                                required
+                            >
+                        </p>
+
+                        <p class="chama-form-field">
+                            <label for="chama_guest_access_code"><?php esc_html_e('Access Code', 'chama-ops'); ?></label>
+                            <input
+                                id="chama_guest_access_code"
+                                name="chama_guest_access_code"
+                                type="password"
+                                autocomplete="one-time-code"
+                                required
+                            >
+                        </p>
+
+                        <p class="chama-form-field chama-form-field--inline">
+                            <label for="chama_guest_remember">
+                                <input id="chama_guest_remember" name="chama_guest_remember" type="checkbox" value="1">
+                                <?php esc_html_e('Remember this device until checkout', 'chama-ops'); ?>
+                            </label>
+                        </p>
+
+                        <button type="submit" class="wp-element-button chama-order-submit">
+                            <?php esc_html_e('Open stay app', 'chama-ops'); ?>
+                        </button>
+                    </form>
+                </details>
+
+                <div class="chama-guest-entry__support">
+                    <p><?php esc_html_e('Need help signing in?', 'chama-ops'); ?></p>
+                    <?php if ($front_desk_tel !== '') : ?>
+                        <a href="<?php echo esc_url($front_desk_tel); ?>">
+                            <?php
+                            printf(
+                                esc_html__('Call front desk: %s', 'chama-ops'),
+                                esc_html($front_desk_phone)
+                            );
+                            ?>
+                        </a>
+                    <?php else : ?>
+                        <span><?php echo esc_html($front_desk_phone); ?></span>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
+        <?php
+
+        return (string) ob_get_clean();
+    }
+
+    $room_number = isset($session['room_number']) ? (string) $session['room_number'] : '';
+    $stay_id = isset($session['stay_id']) ? (int) $session['stay_id'] : 0;
+    $check_out = $stay_id > 0 ? (string) get_post_meta($stay_id, '_chama_stay_check_out', true) : '';
+    $active_orders = chama_ops_get_guest_active_orders_for_room($room_number);
+    $actions = [
+        [
+            'title' => __('Dining', 'chama-ops'),
+            'url'   => chama_ops_get_guest_page_url('dining', '/dining/'),
+        ],
+        [
+            'title' => __('Gift Shop', 'chama-ops'),
+            'url'   => chama_ops_get_guest_page_url('gift-shop', '/gift-shop/'),
+        ],
+        [
+            'title' => __('Perks & Info', 'chama-ops'),
+            'url'   => chama_ops_get_guest_page_url('perks-info', '/perks-info/'),
+        ],
+        [
+            'title' => __('Explore Town', 'chama-ops'),
+            'url'   => chama_ops_get_guest_page_url('explore-chama', '/explore-chama/'),
+        ],
+        [
+            'title' => __('Help', 'chama-ops'),
+            'url'   => chama_ops_get_guest_page_url('help', '/help/'),
+        ],
+        [
+            'title' => __('My Stay', 'chama-ops'),
+            'url'   => chama_ops_get_guest_page_url('my-stay', '/my-stay/'),
+        ],
+    ];
+
+    ob_start();
+    ?>
+    <section class="chama-guest-home">
+        <div class="chama-guest-home__grid">
+            <article class="chama-card">
+                <p class="chama-service-app__section-title"><?php esc_html_e('Stay', 'chama-ops'); ?></p>
+                <h2><?php esc_html_e('Welcome back', 'chama-ops'); ?></h2>
+                <p class="chama-order-meta">
+                    <?php
+                    printf(
+                        esc_html__('Room %1$s%2$s', 'chama-ops'),
+                        esc_html($room_number !== '' ? $room_number : 'N/A'),
+                        $check_out !== '' ? esc_html(' - Checkout ' . $check_out) : ''
+                    );
+                    ?>
+                </p>
+            </article>
+
+            <article class="chama-card">
+                <p class="chama-service-app__section-title"><?php esc_html_e('Today at the inn', 'chama-ops'); ?></p>
+                <ul class="chama-guest-home__bullet-list">
+                    <li><?php esc_html_e('Room-service ordering is open for active guests.', 'chama-ops'); ?></li>
+                    <li><?php esc_html_e('Front desk support is available from the Help tab.', 'chama-ops'); ?></li>
+                    <li><?php esc_html_e('Use Explore Town for train-day and walkable recommendations.', 'chama-ops'); ?></li>
+                </ul>
+            </article>
+        </div>
+
+        <div class="chama-order-grid">
+            <?php foreach ($actions as $action) : ?>
+                <article class="chama-order-card">
+                    <h3><?php echo esc_html($action['title']); ?></h3>
+                    <div class="chama-order-actions wp-block-buttons">
+                        <div class="wp-block-button">
+                            <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($action['url']); ?>">
+                                <?php esc_html_e('Open', 'chama-ops'); ?>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="chama-card chama-guest-home__orders">
+            <p class="chama-service-app__section-title"><?php esc_html_e('Active orders', 'chama-ops'); ?></p>
+            <?php if (empty($active_orders)) : ?>
+                <p class="chama-order-meta"><?php esc_html_e('No active orders right now.', 'chama-ops'); ?></p>
+            <?php else : ?>
+                <ul class="chama-cart-lines">
+                    <?php foreach ($active_orders as $order) : ?>
+                        <?php
+                        $type_label = isset($order['type']) && $order['type'] === 'gift'
+                            ? __('Gift Shop', 'chama-ops')
+                            : __('Dining', 'chama-ops');
+                        $status_label = chama_ops_get_guest_order_status_label(isset($order['status']) ? (string) $order['status'] : '');
+                        ?>
+                        <li class="chama-cart-line">
+                            <div class="chama-cart-line__info">
+                                <strong><?php echo esc_html($type_label . ' - ' . (string) ($order['title'] ?? '')); ?></strong>
+                                <span><?php echo esc_html($status_label); ?></span>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+    </section>
+    <?php
+
+    return (string) ob_get_clean();
+}
+add_shortcode('chama_guest_home_shell', 'chama_ops_render_guest_home_shell_shortcode');
+
+/**
+ * Render My Stay screen shortcode.
+ *
+ * Usage: [chama_guest_my_stay]
+ */
+function chama_ops_render_guest_my_stay_shortcode(): string
+{
+    $session = chama_ops_get_guest_session();
+
+    if (!is_array($session)) {
+        return chama_ops_render_guest_auth_required_state();
+    }
+
+    $room_number = isset($session['room_number']) ? (string) $session['room_number'] : '';
+    $stay_id = isset($session['stay_id']) ? (int) $session['stay_id'] : 0;
+    $check_in = $stay_id > 0 ? (string) get_post_meta($stay_id, '_chama_stay_check_in', true) : '';
+    $check_out = $stay_id > 0 ? (string) get_post_meta($stay_id, '_chama_stay_check_out', true) : '';
+    $active_orders = chama_ops_get_guest_active_orders_for_room($room_number);
+    $logout_url = wp_nonce_url(
+        admin_url('admin-post.php?action=chama_ops_guest_sign_out'),
+        'chama_ops_guest_sign_out_action',
+        'chama_ops_guest_sign_out_nonce'
+    );
+
+    ob_start();
+    ?>
+    <section class="chama-guest-my-stay">
+        <div class="chama-card">
+            <h2><?php esc_html_e('My Stay', 'chama-ops'); ?></h2>
+            <p class="chama-order-meta">
+                <?php
+                printf(
+                    esc_html__('Room %1$s - %2$s to %3$s', 'chama-ops'),
+                    esc_html($room_number !== '' ? $room_number : 'N/A'),
+                    esc_html($check_in !== '' ? $check_in : __('Check-in pending', 'chama-ops')),
+                    esc_html($check_out !== '' ? $check_out : __('Checkout pending', 'chama-ops'))
+                );
+                ?>
+            </p>
+        </div>
+
+        <div class="chama-card" style="margin-top:14px;">
+            <p class="chama-service-app__section-title"><?php esc_html_e('Orders', 'chama-ops'); ?></p>
+            <?php if (empty($active_orders)) : ?>
+                <p class="chama-order-meta"><?php esc_html_e('No active orders yet. Open Dining or Gift Shop to place one.', 'chama-ops'); ?></p>
+            <?php else : ?>
+                <ul class="chama-cart-lines">
+                    <?php foreach ($active_orders as $order) : ?>
+                        <li class="chama-cart-line">
+                            <div class="chama-cart-line__info">
+                                <strong><?php echo esc_html((string) ($order['title'] ?? '')); ?></strong>
+                                <span><?php echo esc_html(chama_ops_get_guest_order_status_label((string) ($order['status'] ?? 'submitted'))); ?></span>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+
+        <div class="chama-order-actions wp-block-buttons" style="margin-top:12px;">
+            <div class="wp-block-button is-style-outline">
+                <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($logout_url); ?>">
+                    <?php esc_html_e('Log out', 'chama-ops'); ?>
+                </a>
+            </div>
+        </div>
+    </section>
+    <?php
+
+    return (string) ob_get_clean();
+}
+add_shortcode('chama_guest_my_stay', 'chama_ops_render_guest_my_stay_shortcode');
+
+/**
+ * Render perks/info cards shortcode.
+ *
+ * Usage: [chama_guest_perks_info]
+ */
+function chama_ops_render_guest_perks_info_shortcode(): string
+{
+    if (!chama_ops_is_guest_authenticated()) {
+        return chama_ops_render_guest_auth_required_state();
+    }
+
+    $perks = [
+        [
+            'title' => __('Wi-Fi', 'chama-ops'),
+            'details' => __('Available in rooms and courtyard. Ask front desk for latest network details.', 'chama-ops'),
+        ],
+        [
+            'title' => __('Quiet hours', 'chama-ops'),
+            'details' => __('Please keep noise low from 10:00 PM through 7:00 AM.', 'chama-ops'),
+        ],
+        [
+            'title' => __('Housekeeping requests', 'chama-ops'),
+            'details' => __('Use Help to request towels, toiletries, extra blankets, or refresh service.', 'chama-ops'),
+        ],
+        [
+            'title' => __('Train-day convenience', 'chama-ops'),
+            'details' => __('The scenic railroad depot is directly across the street.', 'chama-ops'),
+        ],
+    ];
+
+    ob_start();
+    ?>
+    <section class="chama-order-grid">
+        <?php foreach ($perks as $perk) : ?>
+            <article class="chama-order-card">
+                <h3><?php echo esc_html($perk['title']); ?></h3>
+                <p class="chama-order-meta"><?php echo esc_html($perk['details']); ?></p>
+            </article>
+        <?php endforeach; ?>
+    </section>
+    <?php
+
+    return (string) ob_get_clean();
+}
+add_shortcode('chama_guest_perks_info', 'chama_ops_render_guest_perks_info_shortcode');
+
+/**
+ * Render help center shortcuts + service request form.
+ *
+ * Usage: [chama_guest_help_center]
+ */
+function chama_ops_render_guest_help_center_shortcode(): string
+{
+    if (!chama_ops_is_guest_authenticated()) {
+        return chama_ops_render_guest_auth_required_state();
+    }
+
+    $front_desk_phone = chama_ops_get_front_desk_phone_number();
+    $front_desk_tel = chama_ops_get_front_desk_tel_href();
+
+    ob_start();
+    ?>
+    <section class="chama-guest-help-center">
+        <div class="chama-order-grid">
+            <?php if ($front_desk_tel !== '') : ?>
+                <article class="chama-order-card">
+                    <h3><?php esc_html_e('Call front desk', 'chama-ops'); ?></h3>
+                    <p class="chama-order-meta"><?php echo esc_html($front_desk_phone); ?></p>
+                    <div class="chama-order-actions wp-block-buttons">
+                        <div class="wp-block-button">
+                            <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($front_desk_tel); ?>">
+                                <?php esc_html_e('Call now', 'chama-ops'); ?>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            <?php endif; ?>
+
+            <article class="chama-order-card">
+                <h3><?php esc_html_e('Request an item', 'chama-ops'); ?></h3>
+                <p class="chama-order-meta"><?php esc_html_e('Use the request form below for towels, toiletries, crib, or amenity needs.', 'chama-ops'); ?></p>
+            </article>
+
+            <article class="chama-order-card">
+                <h3><?php esc_html_e('Report an issue', 'chama-ops'); ?></h3>
+                <p class="chama-order-meta"><?php esc_html_e('Choose Maintenance in the request form and include details so staff can respond quickly.', 'chama-ops'); ?></p>
+            </article>
+        </div>
+
+        <div style="margin-top:14px;">
+            <?php echo do_shortcode('[chama_service_request_app]'); ?>
+        </div>
+    </section>
+    <?php
+
+    return (string) ob_get_clean();
+}
+add_shortcode('chama_guest_help_center', 'chama_ops_render_guest_help_center_shortcode');
+
+/**
  * Render guest action grid shortcode.
  *
  * Usage: [chama_guest_action_grid]
  */
 function chama_ops_render_guest_action_grid_shortcode(): string
 {
+    if (!chama_ops_is_guest_authenticated()) {
+        return chama_ops_render_guest_auth_required_state();
+    }
+
     $actions = [
         [
             'title' => __('Restaurant Orders', 'chama-ops'),
@@ -5775,8 +6925,13 @@ function chama_ops_render_guest_action_grid_shortcode(): string
         ],
         [
             'title' => __('Service Requests', 'chama-ops'),
-            'url' => chama_ops_get_guest_page_url('service-requests', '/service-requests/'),
-            'label' => __('Submit a request', 'chama-ops'),
+            'url' => chama_ops_get_guest_page_url('help', '/help/'),
+            'label' => __('Open help center', 'chama-ops'),
+        ],
+        [
+            'title' => __('Perks & Info', 'chama-ops'),
+            'url' => chama_ops_get_guest_page_url('perks-info', '/perks-info/'),
+            'label' => __('View perks', 'chama-ops'),
         ],
         [
             'title' => __('During Your Stay', 'chama-ops'),
@@ -5784,9 +6939,9 @@ function chama_ops_render_guest_action_grid_shortcode(): string
             'label' => __('See stay tips', 'chama-ops'),
         ],
         [
-            'title' => __('Front Desk Help', 'chama-ops'),
-            'url' => chama_ops_get_guest_page_url('contact', '/contact/'),
-            'label' => __('Contact front desk', 'chama-ops'),
+            'title' => __('My Stay', 'chama-ops'),
+            'url' => chama_ops_get_guest_page_url('my-stay', '/my-stay/'),
+            'label' => __('View orders and session', 'chama-ops'),
         ],
     ];
 
@@ -5872,6 +7027,10 @@ function chama_ops_get_gift_shop_catalog(): array
  */
 function chama_ops_render_gift_shop_app_shortcode(): string
 {
+    if (!chama_ops_is_guest_authenticated()) {
+        return chama_ops_render_guest_auth_required_state();
+    }
+
     $catalog = chama_ops_get_gift_shop_catalog();
     $notice_key = isset($_GET['chama_gift_shop']) ? sanitize_key((string) wp_unslash($_GET['chama_gift_shop'])) : '';
     $order_ref  = isset($_GET['chama_gift_order']) ? absint($_GET['chama_gift_order']) : 0;
@@ -5974,6 +7133,24 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                         </div>
                         <p class="chama-cart-total"><strong><?php esc_html_e('Total', 'chama-ops'); ?>:</strong> <span data-cart-total>$0.00</span></p>
 
+                        <p class="chama-form-field">
+                            <label for="chama_gift_fulfillment_method"><?php esc_html_e('Fulfillment', 'chama-ops'); ?></label>
+                            <select id="chama_gift_fulfillment_method" name="chama_gift_fulfillment_method">
+                                <option value="room_delivery"><?php esc_html_e('Room delivery', 'chama-ops'); ?></option>
+                                <option value="front_desk_pickup"><?php esc_html_e('Front desk pickup', 'chama-ops'); ?></option>
+                            </select>
+                        </p>
+
+                        <p class="chama-form-field">
+                            <label for="chama_gift_fulfillment_window"><?php esc_html_e('Preferred window', 'chama-ops'); ?></label>
+                            <input type="text" id="chama_gift_fulfillment_window" name="chama_gift_fulfillment_window" placeholder="<?php esc_attr_e('Example: after 6:30 PM', 'chama-ops'); ?>">
+                        </p>
+
+                        <p class="chama-form-field">
+                            <label for="chama_gift_notes"><?php esc_html_e('Notes', 'chama-ops'); ?></label>
+                            <textarea id="chama_gift_notes" name="chama_gift_notes" rows="3"></textarea>
+                        </p>
+
                         <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled><?php esc_html_e('Submit gift order', 'chama-ops'); ?></button>
                     </form>
                 </div>
@@ -5994,8 +7171,20 @@ function chama_ops_submit_gift_shop_order(): void
 {
     check_admin_referer('chama_ops_submit_gift_shop_order_action', 'chama_ops_submit_gift_shop_order_nonce');
 
+    if (!chama_ops_is_guest_authenticated()) {
+        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('home', '/')));
+        exit;
+    }
+
     $catalog = chama_ops_get_gift_shop_catalog();
     $cart_payload = isset($_POST['chama_gift_cart']) ? (string) wp_unslash($_POST['chama_gift_cart']) : '';
+    $fulfillment_method = isset($_POST['chama_gift_fulfillment_method']) ? sanitize_key((string) wp_unslash($_POST['chama_gift_fulfillment_method'])) : 'room_delivery';
+    $fulfillment_window = isset($_POST['chama_gift_fulfillment_window']) ? sanitize_text_field((string) wp_unslash($_POST['chama_gift_fulfillment_window'])) : '';
+    $guest_notes = isset($_POST['chama_gift_notes']) ? sanitize_textarea_field((string) wp_unslash($_POST['chama_gift_notes'])) : '';
+
+    if (!in_array($fulfillment_method, ['room_delivery', 'front_desk_pickup'], true)) {
+        $fulfillment_method = 'room_delivery';
+    }
 
     $redirect_url = wp_get_referer();
 
@@ -6065,6 +7254,11 @@ function chama_ops_submit_gift_shop_order(): void
     }
 
     $room = chama_ops_get_guest_room_context();
+
+    if ($guest_notes !== '') {
+        $order_note_lines[] = __('Guest notes:', 'chama-ops') . ' ' . $guest_notes;
+    }
+
     $order_title = sprintf(
         __('Room %1$s - Gift Order (%2$d item(s))', 'chama-ops'),
         $room,
@@ -6091,6 +7285,9 @@ function chama_ops_submit_gift_shop_order(): void
     update_post_meta((int) $order_id, '_chama_gift_room_number', $room);
     update_post_meta((int) $order_id, '_chama_gift_guest_name', '');
     update_post_meta((int) $order_id, '_chama_gift_guest_phone', '');
+    update_post_meta((int) $order_id, '_chama_gift_fulfillment_method', $fulfillment_method);
+    update_post_meta((int) $order_id, '_chama_gift_fulfillment_window', $fulfillment_window);
+    update_post_meta((int) $order_id, '_chama_gift_guest_notes', $guest_notes);
     update_post_meta((int) $order_id, '_chama_gift_total', number_format($order_total, 2, '.', ''));
     update_post_meta((int) $order_id, '_chama_gift_order_status', 'submitted');
 
@@ -6110,6 +7307,12 @@ add_action('admin_post_chama_ops_submit_gift_shop_order', 'chama_ops_submit_gift
  */
 function chama_ops_render_service_request_app_shortcode(): string
 {
+    if (!chama_ops_is_guest_authenticated()) {
+        return chama_ops_render_guest_auth_required_state();
+    }
+
+    $session     = chama_ops_get_guest_session();
+    $room_number = is_array($session) && isset($session['room_number']) ? (string) $session['room_number'] : '';
     $notice_key  = isset($_GET['chama_service_request']) ? sanitize_key((string) wp_unslash($_GET['chama_service_request'])) : '';
     $request_ref = isset($_GET['chama_service_request_id']) ? absint($_GET['chama_service_request_id']) : 0;
 
@@ -6159,9 +7362,10 @@ function chama_ops_render_service_request_app_shortcode(): string
             <p style="margin:0 0 8px;">
                 <label>
                     <?php esc_html_e('Room', 'chama-ops'); ?><br>
-                    <input type="text" name="chama_service_request_room" required style="width:100%;">
+                    <strong><?php echo esc_html($room_number !== '' ? $room_number : __('Assigned at check-in', 'chama-ops')); ?></strong>
                 </label>
             </p>
+            <input type="hidden" name="chama_service_request_room" value="<?php echo esc_attr($room_number); ?>">
             <p style="margin:0 0 8px;">
                 <label>
                     <?php esc_html_e('Name (optional)', 'chama-ops'); ?><br>
@@ -6197,6 +7401,11 @@ function chama_ops_submit_service_request(): void
 {
     check_admin_referer('chama_ops_submit_service_request_action', 'chama_ops_submit_service_request_nonce');
 
+    if (!chama_ops_is_guest_authenticated()) {
+        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('home', '/')));
+        exit;
+    }
+
     $category = isset($_POST['chama_service_request_category']) ? sanitize_key((string) wp_unslash($_POST['chama_service_request_category'])) : 'front_desk';
     $priority = isset($_POST['chama_service_request_priority']) ? sanitize_key((string) wp_unslash($_POST['chama_service_request_priority'])) : 'normal';
     $room     = isset($_POST['chama_service_request_room']) ? sanitize_text_field(wp_unslash($_POST['chama_service_request_room'])) : '';
@@ -6218,7 +7427,11 @@ function chama_ops_submit_service_request(): void
     $redirect_url = wp_get_referer();
 
     if (!is_string($redirect_url) || $redirect_url === '') {
-        $redirect_url = (string) home_url('/service-requests/');
+        $redirect_url = (string) home_url('/help/');
+    }
+
+    if ($room === '') {
+        $room = chama_ops_get_guest_room_context();
     }
 
     if ($room === '') {

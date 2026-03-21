@@ -40,6 +40,12 @@ get_header();
 
                     </div>
                 </section>
+
+                <section class="home-content home-content--app-shell">
+                    <div class="home-content__inner home-content__inner--app-shell">
+                        <?php echo do_shortcode('[chama_guest_home_shell]'); ?>
+                    </div>
+                </section>
             </article>
         <?php endwhile; ?>
     <?php else : ?>

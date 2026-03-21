@@ -34,7 +34,10 @@ function chama_inn_should_hide_page_hero(int $post_id): bool
     $hero_free_slugs = [
         "dining",
         "gift-shop",
-        "service-requests",
+        "perks-info",
+        "explore-chama",
+        "help",
+        "my-stay",
     ];
 
     return in_array($slug, $hero_free_slugs, true);
@@ -50,7 +53,7 @@ function chama_inn_get_primary_nav_items(): array
         ],
         [
             "slug" => "dining",
-            "label" => __("Restaurant Orders", "chama-inn"),
+            "label" => __("Dining", "chama-inn"),
             "fallback_path" => "/dining/",
         ],
         [
@@ -59,19 +62,24 @@ function chama_inn_get_primary_nav_items(): array
             "fallback_path" => "/gift-shop/",
         ],
         [
-            "slug" => "service-requests",
-            "label" => __("Service Requests", "chama-inn"),
-            "fallback_path" => "/service-requests/",
+            "slug" => "perks-info",
+            "label" => __("Perks & Info", "chama-inn"),
+            "fallback_path" => "/perks-info/",
         ],
         [
             "slug" => "explore-chama",
-            "label" => __("During Your Stay", "chama-inn"),
+            "label" => __("Explore Town", "chama-inn"),
             "fallback_path" => "/explore-chama/",
         ],
         [
-            "slug" => "contact",
-            "label" => __("Front Desk / Contact", "chama-inn"),
-            "fallback_path" => "/contact/",
+            "slug" => "help",
+            "label" => __("Help", "chama-inn"),
+            "fallback_path" => "/help/",
+        ],
+        [
+            "slug" => "my-stay",
+            "label" => __("My Stay", "chama-inn"),
+            "fallback_path" => "/my-stay/",
         ],
     ];
 }
@@ -173,6 +181,85 @@ function chama_inn_render_fallback_menu($args = []): void
     echo "</ul>";
 }
 
+function chama_inn_get_guest_mobile_nav_items(): array
+{
+    return [
+        [
+            "slug"  => "home",
+            "label" => __("Home", "chama-inn"),
+            "url"   => home_url("/"),
+        ],
+        [
+            "slug"  => "my-stay",
+            "label" => __("Orders", "chama-inn"),
+            "url"   => home_url("/my-stay/"),
+        ],
+        [
+            "slug"  => "explore-chama",
+            "label" => __("Explore", "chama-inn"),
+            "url"   => home_url("/explore-chama/"),
+        ],
+        [
+            "slug"  => "help",
+            "label" => __("Help", "chama-inn"),
+            "url"   => home_url("/help/"),
+        ],
+    ];
+}
+
+function chama_inn_has_active_guest_session(): bool
+{
+    if (!function_exists("chama_ops_is_guest_authenticated")) {
+        return false;
+    }
+
+    return chama_ops_is_guest_authenticated();
+}
+
+function chama_inn_render_guest_mobile_nav(): void
+{
+    if (is_admin() || !chama_inn_has_active_guest_session()) {
+        return;
+    }
+
+    $items = chama_inn_get_guest_mobile_nav_items();
+    ?>
+    <nav class="guest-mobile-nav" aria-label="<?php esc_attr_e("Guest app navigation", "chama-inn"); ?>">
+        <ul class="guest-mobile-nav__list">
+            <?php foreach ($items as $item) : ?>
+                <?php
+                if (!is_array($item) || !isset($item["slug"], $item["label"], $item["url"])) {
+                    continue;
+                }
+
+                $slug = sanitize_title((string) $item["slug"]);
+                $active = is_front_page() && $slug === "home";
+
+                if (!$active && is_page($slug)) {
+                    $active = true;
+                }
+                ?>
+                <li class="guest-mobile-nav__item<?php echo $active ? " is-active" : ""; ?>">
+                    <a href="<?php echo esc_url((string) $item["url"]); ?>">
+                        <?php echo esc_html((string) $item["label"]); ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </nav>
+    <?php
+}
+
+function chama_inn_add_guest_session_body_class(array $classes): array
+{
+    if (chama_inn_has_active_guest_session()) {
+        $classes[] = "has-guest-mobile-nav";
+    }
+
+    return $classes;
+}
+add_filter("body_class", "chama_inn_add_guest_session_body_class");
+
 function chama_inn_enqueue_assets(): void
 {
     $theme_version = (string) wp_get_theme()->get("Version");
@@ -273,7 +360,7 @@ add_filter("body_class", "chama_inn_add_color_scheme_body_class");
 
 function chama_inn_redirect_legacy_guest_hub(): void
 {
-    if (!is_page("guest-hub") && !is_page("my-stay")) {
+    if (!is_page("guest-hub")) {
         return;
     }
 
@@ -288,6 +375,35 @@ function chama_inn_redirect_legacy_guest_hub(): void
     exit;
 }
 add_action("template_redirect", "chama_inn_redirect_legacy_guest_hub");
+
+function chama_inn_redirect_legacy_guest_paths(): void
+{
+    if (is_admin()) {
+        return;
+    }
+
+    $redirect_map = [
+        "service-requests" => "help",
+        "contact"          => "help",
+    ];
+
+    foreach ($redirect_map as $legacy_slug => $target_slug) {
+        if (!is_page($legacy_slug)) {
+            continue;
+        }
+
+        $target_page = get_page_by_path($target_slug, OBJECT, "page");
+        $target_url = $target_page instanceof WP_Post ? (string) get_permalink($target_page) : (string) home_url("/" . trim($target_slug, "/") . "/");
+
+        if ($target_url === "") {
+            $target_url = (string) home_url("/");
+        }
+
+        wp_safe_redirect($target_url, 301);
+        exit;
+    }
+}
+add_action("template_redirect", "chama_inn_redirect_legacy_guest_paths");
 
 function chama_inn_get_packaged_logo_uri(): string
 {
@@ -570,9 +686,10 @@ function chama_inn_serve_service_worker(): void
         (string) home_url("/"),
         (string) home_url("/dining/"),
         (string) home_url("/gift-shop/"),
-        (string) home_url("/service-requests/"),
+        (string) home_url("/perks-info/"),
         (string) home_url("/explore-chama/"),
-        (string) home_url("/contact/"),
+        (string) home_url("/help/"),
+        (string) home_url("/my-stay/"),
         (string) get_stylesheet_uri(),
         (string) get_theme_file_uri("assets/js/navigation.js"),
         (string) get_theme_file_uri("assets/js/pwa-register.js"),
@@ -624,13 +741,7 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const cached = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, cached));
-          return response;
-        })
-        .catch(() => caches.match(request).then((hit) => hit || caches.match(PRECACHE_URLS[0])))
+      fetch(request).catch(() => caches.match(PRECACHE_URLS[0]))
     );
     return;
   }
@@ -691,22 +802,28 @@ function chama_inn_get_core_page_blueprint(): array
             "pattern" => "patterns/gift-shop-page.php",
         ],
         [
-            "title"   => __("Service Requests", "chama-inn"),
-            "slug"    => "service-requests",
-            "excerpt" => __("Request housekeeping, amenities, and front-desk support.", "chama-inn"),
-            "pattern" => "patterns/service-requests-page.php",
+            "title"   => __("Perks & Info", "chama-inn"),
+            "slug"    => "perks-info",
+            "excerpt" => __("Amenities, included perks, hours, and practical stay info.", "chama-inn"),
+            "pattern" => "patterns/perks-info-page.php",
         ],
         [
-            "title"   => __("During Your Stay", "chama-inn"),
+            "title"   => __("Explore Town", "chama-inn"),
             "slug"    => "explore-chama",
             "excerpt" => __("What to do at the inn and in Chama during your current stay.", "chama-inn"),
             "pattern" => "patterns/explore-chama-page.php",
         ],
         [
-            "title"   => __("Front Desk / Contact", "chama-inn"),
-            "slug"    => "contact",
-            "excerpt" => __("Direct contact, urgent help path, and stay support details.", "chama-inn"),
-            "pattern" => "patterns/contact-inquiry-page.php",
+            "title"   => __("Help", "chama-inn"),
+            "slug"    => "help",
+            "excerpt" => __("Call front desk, submit requests, and track support updates.", "chama-inn"),
+            "pattern" => "patterns/help-page.php",
+        ],
+        [
+            "title"   => __("My Stay", "chama-inn"),
+            "slug"    => "my-stay",
+            "excerpt" => __("Stay summary, active orders, and guest session controls.", "chama-inn"),
+            "pattern" => "patterns/my-stay-page.php",
         ],
     ];
 }
@@ -789,7 +906,7 @@ function chama_inn_set_default_nav_menu(array $pages_by_slug): void
 
     $menu_order = chama_inn_get_primary_nav_slugs();
 
-    $legacy_slugs_to_remove = ["weddings-events", "stay-rooms", "guest-hub", "about-our-story"];
+    $legacy_slugs_to_remove = ["weddings-events", "stay-rooms", "guest-hub", "about-our-story", "service-requests", "contact"];
     $menu_items = wp_get_nav_menu_items($menu_id);
 
     if (is_array($menu_items)) {
@@ -1046,7 +1163,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 15;
+    $target_version = 16;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -1081,10 +1198,10 @@ function chama_inn_migrate_seeded_copy(): void
         "home",
         "dining",
         "gift-shop",
-        "service-requests",
+        "perks-info",
         "explore-chama",
-        "about-our-story",
-        "contact",
+        "help",
+        "my-stay",
     ];
 
     $updated_pages = 0;
@@ -1164,20 +1281,6 @@ function chama_inn_migrate_seeded_copy(): void
             }
         }
 
-        if ($slug === "about-our-story") {
-            $should_refresh_about = strpos($updated_content, "Use this page to connect place, hospitality style, and the inn's long-term vision for guests and community.") !== false
-                || strpos($updated_content, "Story timeline") !== false
-                || strpos($updated_content, "What guests experience") !== false;
-
-            if ($should_refresh_about) {
-                $fresh_about_pattern = chama_inn_load_pattern_content("patterns/about-story-page.php");
-
-                if ($fresh_about_pattern !== "") {
-                    $updated_content = $fresh_about_pattern;
-                }
-            }
-        }
-
         if ($slug === "explore-chama") {
             $should_refresh_explore = strpos($updated_content, "Keep this page curated and concise. Lead with the railroad experience, then add local highlights.") !== false
                 || strpos($updated_content, "Need help planning?") !== false
@@ -1207,16 +1310,39 @@ function chama_inn_migrate_seeded_copy(): void
             }
         }
 
-        if ($slug === "service-requests") {
-            $should_refresh_service_requests = strpos($updated_content, "Guests should be able to ask for help in less than a minute.") !== false
-                || strpos($updated_content, "Implementation note:") !== false
-                || strpos($updated_content, "[chama_service_request_app]") === false;
+        if ($slug === "help") {
+            $should_refresh_help = strpos($updated_content, "Guests should be able to ask for help in less than a minute.") !== false
+                || strpos($updated_content, "[chama_guest_help_center]") === false;
 
-            if ($should_refresh_service_requests) {
-                $fresh_service_requests_pattern = chama_inn_load_pattern_content("patterns/service-requests-page.php");
+            if ($should_refresh_help) {
+                $fresh_help_pattern = chama_inn_load_pattern_content("patterns/help-page.php");
 
-                if ($fresh_service_requests_pattern !== "") {
-                    $updated_content = $fresh_service_requests_pattern;
+                if ($fresh_help_pattern !== "") {
+                    $updated_content = $fresh_help_pattern;
+                }
+            }
+        }
+
+        if ($slug === "perks-info") {
+            $should_refresh_perks = strpos($updated_content, "[chama_guest_perks_info]") === false;
+
+            if ($should_refresh_perks) {
+                $fresh_perks_pattern = chama_inn_load_pattern_content("patterns/perks-info-page.php");
+
+                if ($fresh_perks_pattern !== "") {
+                    $updated_content = $fresh_perks_pattern;
+                }
+            }
+        }
+
+        if ($slug === "my-stay") {
+            $should_refresh_my_stay = strpos($updated_content, "[chama_guest_my_stay]") === false;
+
+            if ($should_refresh_my_stay) {
+                $fresh_my_stay_pattern = chama_inn_load_pattern_content("patterns/my-stay-page.php");
+
+                if ($fresh_my_stay_pattern !== "") {
+                    $updated_content = $fresh_my_stay_pattern;
                 }
             }
         }
@@ -1313,25 +1439,25 @@ function chama_inn_register_block_patterns(): void
             "title"       => __("Interior: Gift Shop", "chama-inn"),
             "description" => __("Guest-side catalog and pickup flow for gift shop items.", "chama-inn"),
         ],
-        "service-requests-page" => [
-            "file"        => "patterns/service-requests-page.php",
-            "title"       => __("Interior: Service Requests", "chama-inn"),
-            "description" => __("Housekeeping and support request surface for active guests.", "chama-inn"),
+        "perks-info-page" => [
+            "file"        => "patterns/perks-info-page.php",
+            "title"       => __("Interior: Perks and Info", "chama-inn"),
+            "description" => __("Amenities, practical stay details, and included perks for active guests.", "chama-inn"),
         ],
         "explore-chama-page" => [
             "file"        => "patterns/explore-chama-page.php",
-            "title"       => __("Interior: During Your Stay", "chama-inn"),
-            "description" => __("What to do at the inn and in Chama during your current stay.", "chama-inn"),
+            "title"       => __("Interior: Explore Town", "chama-inn"),
+            "description" => __("What to do at the inn and around Chama during your stay.", "chama-inn"),
         ],
-        "about-story-page" => [
-            "file"        => "patterns/about-story-page.php",
-            "title"       => __("Interior: About and Story", "chama-inn"),
-            "description" => __("Optional brand-story page kept secondary to in-stay app flows.", "chama-inn"),
+        "help-page" => [
+            "file"        => "patterns/help-page.php",
+            "title"       => __("Interior: Help Center", "chama-inn"),
+            "description" => __("One-tap support, request form, and urgent front-desk actions.", "chama-inn"),
         ],
-        "contact-inquiry-page" => [
-            "file"        => "patterns/contact-inquiry-page.php",
-            "title"       => __("Interior: Front Desk and Contact", "chama-inn"),
-            "description" => __("Direct support contact page for guests who need quick assistance.", "chama-inn"),
+        "my-stay-page" => [
+            "file"        => "patterns/my-stay-page.php",
+            "title"       => __("Interior: My Stay", "chama-inn"),
+            "description" => __("Stay summary, active orders, and session controls.", "chama-inn"),
         ],
     ];
 

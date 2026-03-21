@@ -25,6 +25,12 @@ if (!defined('ABSPATH')) {
     </div>
 </footer>
 
+<?php
+if (function_exists('chama_inn_render_guest_mobile_nav')) {
+    chama_inn_render_guest_mobile_nav();
+}
+?>
+
 <?php wp_footer(); ?>
 </body>
 </html>

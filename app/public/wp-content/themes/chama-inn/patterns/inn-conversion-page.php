@@ -3,4 +3,8 @@ if (!defined("ABSPATH")) {
     exit;
 }
 
-return '';
+return <<<'HTML'
+<!-- wp:shortcode -->
+[chama_guest_home_shell]
+<!-- /wp:shortcode -->
+HTML;
