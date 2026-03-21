@@ -197,6 +197,12 @@ function chama_inn_get_guest_mobile_nav_items(): array
             "url"   => home_url("/dining/"),
         ],
         [
+            "slug"  => "gift-shop",
+            "label" => __("Gift Shop", "chama-inn"),
+            "icon"  => "dashicons-cart",
+            "url"   => home_url("/gift-shop/"),
+        ],
+        [
             "slug"  => "explore-chama",
             "label" => __("Explore", "chama-inn"),
             "icon"  => "dashicons-location-alt",
