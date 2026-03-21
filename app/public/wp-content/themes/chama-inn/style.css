@@ -835,6 +835,112 @@ iframe {
   box-shadow: none;
 }
 
+.guest-auth-shell {
+  min-height: 100vh;
+}
+
+.guest-auth-shell__backdrop {
+  position: relative;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: grid;
+  place-items: center;
+}
+
+body.admin-bar .guest-auth-shell__backdrop {
+  min-height: calc(100vh - 32px);
+}
+
+.guest-auth-shell__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 15%, rgba(236, 206, 145, 0.35) 0%, rgba(236, 206, 145, 0) 58%),
+    linear-gradient(165deg, rgba(25, 22, 19, 0.36) 0%, rgba(31, 26, 22, 0.42) 100%);
+}
+
+.guest-auth-shell__inner {
+  width: min(28rem, calc(100% - 2rem));
+  position: relative;
+  z-index: 2;
+}
+
+.chama-guest-auth-screen {
+  margin: 0;
+}
+
+.chama-guest-auth-screen__card {
+  border: 1px solid rgba(245, 236, 222, 0.24);
+  border-radius: 20px;
+  background: linear-gradient(165deg, rgba(252, 248, 241, 0.2) 0%, rgba(238, 228, 208, 0.14) 100%);
+  box-shadow: 0 16px 44px rgba(16, 13, 10, 0.32);
+  backdrop-filter: blur(14px) saturate(1.05);
+  -webkit-backdrop-filter: blur(14px) saturate(1.05);
+  padding: clamp(1rem, 2.2vw, 1.5rem);
+}
+
+.chama-guest-auth-screen__brand {
+  margin-bottom: 0.65rem;
+  text-align: center;
+}
+
+.chama-guest-auth-screen__brand img {
+  width: min(17rem, 100%);
+  height: auto;
+}
+
+.chama-guest-auth-screen__card h1 {
+  margin: 0 0 0.4rem;
+  color: #f7eee1;
+  text-align: center;
+  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+}
+
+.chama-guest-auth-screen__card > p {
+  margin: 0 0 0.8rem;
+  color: rgba(247, 238, 225, 0.9);
+  text-align: center;
+}
+
+.chama-guest-auth-screen .chama-order-form {
+  margin-top: 0.25rem;
+}
+
+.chama-guest-auth-screen .chama-form-field label {
+  color: #f8eee2;
+}
+
+.chama-guest-auth-screen .chama-form-field input,
+.chama-guest-auth-screen .chama-form-field select,
+.chama-guest-auth-screen .chama-form-field textarea {
+  background: rgba(248, 241, 230, 0.93);
+}
+
+.chama-guest-auth-screen__support {
+  margin-top: 0.85rem;
+  text-align: center;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.chama-guest-auth-screen__support p {
+  margin: 0;
+  color: rgba(247, 238, 225, 0.88);
+}
+
+.chama-guest-auth-screen__support a {
+  color: #f9f1e4;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.chama-guest-auth-screen__support a:hover,
+.chama-guest-auth-screen__support a:focus-visible {
+  text-decoration: underline;
+}
+
 .chama-guest-entry,
 .chama-guest-home,
 .chama-guest-my-stay,
@@ -1355,6 +1461,10 @@ iframe {
 @media (max-width: 768px) {
   .admin-bar .site-header {
     top: 46px;
+  }
+
+  body.admin-bar .guest-auth-shell__backdrop {
+    min-height: calc(100vh - 46px);
   }
 
   .site-header__logo-image {

@@ -683,6 +683,7 @@ function chama_inn_serve_service_worker(): void
     $cache_name = "chama-stay-v" . md5($theme_version . "|pwa");
 
     $precache_urls = array_values(array_unique([
+        (string) home_url("/guest-access/"),
         (string) home_url("/"),
         (string) home_url("/dining/"),
         (string) home_url("/gift-shop/"),
@@ -783,6 +784,12 @@ add_action("template_redirect", "chama_inn_maybe_serve_pwa_payloads", 0);
 function chama_inn_get_core_page_blueprint(): array
 {
     return [
+        [
+            "title"   => __("Guest Access", "chama-inn"),
+            "slug"    => "guest-access",
+            "excerpt" => __("Secure room-number and access-code sign in for in-stay guests.", "chama-inn"),
+            "pattern" => "patterns/guest-access-page.php",
+        ],
         [
             "title"   => __("Home", "chama-inn"),
             "slug"    => "home",
@@ -1163,7 +1170,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 16;
+    $target_version = 17;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -1195,6 +1202,7 @@ function chama_inn_migrate_seeded_copy(): void
         ];
 
     $slugs_to_scan = [
+        "guest-access",
         "home",
         "dining",
         "gift-shop",
@@ -1277,6 +1285,18 @@ function chama_inn_migrate_seeded_copy(): void
 
                 if ($fresh_stay_pattern !== "") {
                     $updated_content = $fresh_stay_pattern;
+                }
+            }
+        }
+
+        if ($slug === "guest-access") {
+            $should_refresh_guest_access = strpos($updated_content, "[chama_guest_auth_app]") === false;
+
+            if ($should_refresh_guest_access) {
+                $fresh_guest_access_pattern = chama_inn_load_pattern_content("patterns/guest-access-page.php");
+
+                if ($fresh_guest_access_pattern !== "") {
+                    $updated_content = $fresh_guest_access_pattern;
                 }
             }
         }
@@ -1419,6 +1439,11 @@ function chama_inn_register_block_patterns(): void
     }
 
     $pattern_registry = [
+        "guest-access-page" => [
+            "file"        => "patterns/guest-access-page.php",
+            "title"       => __("Guest Access", "chama-inn"),
+            "description" => __("Guest authentication screen for room number and access code entry.", "chama-inn"),
+        ],
         "inn-conversion-page" => [
             "file"        => "patterns/inn-conversion-page.php",
             "title"       => __("Guest App Home (QR Entry)", "chama-inn"),

@@ -6040,7 +6040,7 @@ function chama_ops_submit_room_service_order(): void
     check_admin_referer('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce');
 
     if (!chama_ops_is_guest_authenticated()) {
-        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('home', '/')));
+        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('guest-access', '/guest-access/')));
         exit;
     }
 
@@ -6235,7 +6235,7 @@ function chama_ops_get_guest_redirect_target(string $raw_redirect): string
  */
 function chama_ops_render_guest_auth_required_state(): string
 {
-    $sign_in_url = chama_ops_get_guest_page_url('home', '/');
+    $sign_in_url = chama_ops_get_guest_page_url('guest-access', '/guest-access/');
     $front_desk_phone = chama_ops_get_front_desk_phone_number();
     $front_desk_tel = chama_ops_get_front_desk_tel_href();
 
@@ -6248,7 +6248,7 @@ function chama_ops_render_guest_auth_required_state(): string
             <div class="chama-order-actions wp-block-buttons">
                 <div class="wp-block-button">
                     <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($sign_in_url); ?>">
-                        <?php esc_html_e('Go to sign in', 'chama-ops'); ?>
+                        <?php esc_html_e('Go to guest sign in', 'chama-ops'); ?>
                     </a>
                 </div>
                 <?php if ($front_desk_tel !== '') : ?>
@@ -6304,7 +6304,7 @@ function chama_ops_handle_guest_sign_in(): void
     $access_code = isset($_POST['chama_guest_access_code']) ? sanitize_text_field((string) wp_unslash($_POST['chama_guest_access_code'])) : '';
     $remember = isset($_POST['chama_guest_remember']) && (string) wp_unslash($_POST['chama_guest_remember']) === '1';
     $raw_redirect = isset($_POST['chama_guest_redirect']) ? (string) wp_unslash($_POST['chama_guest_redirect']) : '';
-    $landing_url = chama_ops_get_guest_page_url('home', '/');
+    $landing_url = chama_ops_get_guest_page_url('guest-access', '/guest-access/');
 
     if ($room_number === '' || $access_code === '') {
         wp_safe_redirect(add_query_arg([
@@ -6350,7 +6350,7 @@ function chama_ops_handle_guest_sign_out(): void
 
     chama_ops_clear_guest_session();
 
-    $landing_url = chama_ops_get_guest_page_url('home', '/');
+    $landing_url = chama_ops_get_guest_page_url('guest-access', '/guest-access/');
     wp_safe_redirect(add_query_arg('chama_guest_auth', 'signed_out', $landing_url));
     exit;
 }
@@ -6366,6 +6366,26 @@ function chama_ops_enforce_guest_page_auth(): void
         return;
     }
 
+    $auth_slug = 'guest-access';
+    $auth_url = chama_ops_get_guest_page_url($auth_slug, '/guest-access/');
+    $is_auth_page = is_page($auth_slug);
+
+    if ($is_auth_page && chama_ops_is_guest_authenticated()) {
+        $redirect_raw = isset($_GET['chama_guest_redirect']) ? (string) wp_unslash($_GET['chama_guest_redirect']) : '';
+        $target_url = chama_ops_get_guest_redirect_target($redirect_raw);
+
+        if ($target_url === $auth_url) {
+            $target_url = chama_ops_get_guest_page_url('home', '/');
+        }
+
+        wp_safe_redirect($target_url);
+        exit;
+    }
+
+    if ($is_auth_page) {
+        return;
+    }
+
     $protected_slugs = [
         'dining',
         'gift-shop',
@@ -6375,12 +6395,14 @@ function chama_ops_enforce_guest_page_auth(): void
         'my-stay',
     ];
 
-    $is_protected = false;
+    $is_protected = is_front_page() || is_page('home');
 
-    foreach ($protected_slugs as $slug) {
-        if (is_page($slug)) {
-            $is_protected = true;
-            break;
+    if (!$is_protected) {
+        foreach ($protected_slugs as $slug) {
+            if (is_page($slug)) {
+                $is_protected = true;
+                break;
+            }
         }
     }
 
@@ -6388,11 +6410,10 @@ function chama_ops_enforce_guest_page_auth(): void
         return;
     }
 
-    $landing_url = chama_ops_get_guest_page_url('home', '/');
     $request_uri = isset($_SERVER['REQUEST_URI']) ? (string) wp_unslash($_SERVER['REQUEST_URI']) : '/';
     $redirect_target = home_url($request_uri);
 
-    wp_safe_redirect(add_query_arg('chama_guest_redirect', $redirect_target, $landing_url));
+    wp_safe_redirect(add_query_arg('chama_guest_redirect', $redirect_target, $auth_url));
     exit;
 }
 add_action('template_redirect', 'chama_ops_enforce_guest_page_auth', 7);
@@ -6530,6 +6551,145 @@ function chama_ops_get_guest_order_status_label(string $status_key): string
 }
 
 /**
+ * Render guest auth form card.
+ *
+ * @param string $notice_key Guest auth notice key.
+ * @param string $redirect_target Requested redirect after sign-in.
+ */
+function chama_ops_render_guest_auth_form_card(string $notice_key = '', string $redirect_target = ''): string
+{
+    $front_desk_phone = chama_ops_get_front_desk_phone_number();
+    $front_desk_tel = chama_ops_get_front_desk_tel_href();
+    $notice_copy = chama_ops_get_guest_auth_notice_copy($notice_key);
+    $logo_uri = '';
+
+    if (function_exists('chama_inn_get_logo_variant_uri')) {
+        $logo_uri = (string) chama_inn_get_logo_variant_uri('hero');
+    }
+
+    if ($logo_uri === '' && function_exists('chama_inn_get_packaged_logo_uri')) {
+        $logo_uri = (string) chama_inn_get_packaged_logo_uri();
+    }
+
+    ob_start();
+    ?>
+    <section class="chama-guest-auth-screen">
+        <div class="chama-guest-auth-screen__card">
+            <?php if ($logo_uri !== '') : ?>
+                <div class="chama-guest-auth-screen__brand">
+                    <img src="<?php echo esc_url($logo_uri); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+                </div>
+            <?php endif; ?>
+
+            <h1><?php esc_html_e('Guest sign in', 'chama-ops'); ?></h1>
+            <p><?php esc_html_e('Enter your room number and access code provided at check-in.', 'chama-ops'); ?></p>
+
+            <?php if ($notice_copy !== '') : ?>
+                <div class="chama-app-notice chama-app-notice--error">
+                    <?php echo esc_html($notice_copy); ?>
+                </div>
+            <?php endif; ?>
+
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
+                <?php wp_nonce_field('chama_ops_guest_sign_in_action', 'chama_ops_guest_sign_in_nonce'); ?>
+                <input type="hidden" name="action" value="chama_ops_guest_sign_in">
+                <input type="hidden" name="chama_guest_redirect" value="<?php echo esc_attr($redirect_target); ?>">
+
+                <p class="chama-form-field">
+                    <label for="chama_guest_room"><?php esc_html_e('Room Number', 'chama-ops'); ?></label>
+                    <input
+                        id="chama_guest_room"
+                        name="chama_guest_room"
+                        type="text"
+                        autocomplete="off"
+                        inputmode="text"
+                        required
+                    >
+                </p>
+
+                <p class="chama-form-field">
+                    <label for="chama_guest_access_code"><?php esc_html_e('Access Code', 'chama-ops'); ?></label>
+                    <input
+                        id="chama_guest_access_code"
+                        name="chama_guest_access_code"
+                        type="password"
+                        autocomplete="one-time-code"
+                        required
+                    >
+                </p>
+
+                <p class="chama-form-field chama-form-field--inline">
+                    <label for="chama_guest_remember">
+                        <input id="chama_guest_remember" name="chama_guest_remember" type="checkbox" value="1">
+                        <?php esc_html_e('Remember this device until checkout', 'chama-ops'); ?>
+                    </label>
+                </p>
+
+                <button type="submit" class="wp-element-button chama-order-submit">
+                    <?php esc_html_e('Sign in', 'chama-ops'); ?>
+                </button>
+            </form>
+
+            <div class="chama-guest-auth-screen__support">
+                <p><?php esc_html_e('Need help?', 'chama-ops'); ?></p>
+                <?php if ($front_desk_tel !== '') : ?>
+                    <a href="<?php echo esc_url($front_desk_tel); ?>">
+                        <?php
+                        printf(
+                            esc_html__('Call front desk: %s', 'chama-ops'),
+                            esc_html($front_desk_phone)
+                        );
+                        ?>
+                    </a>
+                <?php else : ?>
+                    <span><?php echo esc_html($front_desk_phone); ?></span>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+    <?php
+
+    return (string) ob_get_clean();
+}
+
+/**
+ * Render guest auth access screen.
+ *
+ * Usage: [chama_guest_auth_app]
+ */
+function chama_ops_render_guest_auth_app_shortcode(): string
+{
+    $redirect_target = isset($_GET['chama_guest_redirect']) ? (string) wp_unslash($_GET['chama_guest_redirect']) : '';
+
+    if (chama_ops_is_guest_authenticated()) {
+        $continue_url = chama_ops_get_guest_redirect_target($redirect_target);
+
+        ob_start();
+        ?>
+        <section class="chama-guest-auth-screen">
+            <div class="chama-guest-auth-screen__card">
+                <h1><?php esc_html_e('You are already signed in', 'chama-ops'); ?></h1>
+                <p><?php esc_html_e('Continue to your stay app.', 'chama-ops'); ?></p>
+                <div class="chama-order-actions wp-block-buttons">
+                    <div class="wp-block-button">
+                        <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($continue_url); ?>">
+                            <?php esc_html_e('Open app', 'chama-ops'); ?>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <?php
+
+        return (string) ob_get_clean();
+    }
+
+    $notice_key = isset($_GET['chama_guest_auth']) ? sanitize_key((string) wp_unslash($_GET['chama_guest_auth'])) : '';
+    return chama_ops_render_guest_auth_form_card($notice_key, $redirect_target);
+}
+add_shortcode('chama_guest_auth_app', 'chama_ops_render_guest_auth_app_shortcode');
+
+/**
  * Render guest sign-in / home shell shortcode.
  *
  * Usage: [chama_guest_home_shell]
@@ -6539,90 +6699,7 @@ function chama_ops_render_guest_home_shell_shortcode(): string
     $session = chama_ops_get_guest_session();
 
     if (!is_array($session)) {
-        $notice_key = isset($_GET['chama_guest_auth']) ? sanitize_key((string) wp_unslash($_GET['chama_guest_auth'])) : '';
-        $redirect_target = isset($_GET['chama_guest_redirect']) ? (string) wp_unslash($_GET['chama_guest_redirect']) : '';
-        $front_desk_phone = chama_ops_get_front_desk_phone_number();
-        $front_desk_tel = chama_ops_get_front_desk_tel_href();
-        $notice_copy = chama_ops_get_guest_auth_notice_copy($notice_key);
-        $open_form = $notice_copy !== '';
-
-        ob_start();
-        ?>
-        <section class="chama-guest-entry">
-            <div class="chama-guest-entry__card">
-                <p class="chama-guest-entry__eyebrow"><?php esc_html_e('Guest App Access', 'chama-ops'); ?></p>
-                <h2><?php esc_html_e('Welcome to your stay app', 'chama-ops'); ?></h2>
-                <p><?php esc_html_e('Sign in with your room number and check-in access code. Guests can enter from a room QR code or by opening this URL directly.', 'chama-ops'); ?></p>
-
-                <?php if ($notice_copy !== '') : ?>
-                    <div class="chama-app-notice chama-app-notice--error">
-                        <?php echo esc_html($notice_copy); ?>
-                    </div>
-                <?php endif; ?>
-
-                <details class="chama-guest-entry__details" <?php echo $open_form ? 'open' : ''; ?>>
-                    <summary><?php esc_html_e('Continue', 'chama-ops'); ?></summary>
-                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
-                        <?php wp_nonce_field('chama_ops_guest_sign_in_action', 'chama_ops_guest_sign_in_nonce'); ?>
-                        <input type="hidden" name="action" value="chama_ops_guest_sign_in">
-                        <input type="hidden" name="chama_guest_redirect" value="<?php echo esc_attr($redirect_target); ?>">
-
-                        <p class="chama-form-field">
-                            <label for="chama_guest_room"><?php esc_html_e('Room Number', 'chama-ops'); ?></label>
-                            <input
-                                id="chama_guest_room"
-                                name="chama_guest_room"
-                                type="text"
-                                autocomplete="off"
-                                inputmode="text"
-                                required
-                            >
-                        </p>
-
-                        <p class="chama-form-field">
-                            <label for="chama_guest_access_code"><?php esc_html_e('Access Code', 'chama-ops'); ?></label>
-                            <input
-                                id="chama_guest_access_code"
-                                name="chama_guest_access_code"
-                                type="password"
-                                autocomplete="one-time-code"
-                                required
-                            >
-                        </p>
-
-                        <p class="chama-form-field chama-form-field--inline">
-                            <label for="chama_guest_remember">
-                                <input id="chama_guest_remember" name="chama_guest_remember" type="checkbox" value="1">
-                                <?php esc_html_e('Remember this device until checkout', 'chama-ops'); ?>
-                            </label>
-                        </p>
-
-                        <button type="submit" class="wp-element-button chama-order-submit">
-                            <?php esc_html_e('Open stay app', 'chama-ops'); ?>
-                        </button>
-                    </form>
-                </details>
-
-                <div class="chama-guest-entry__support">
-                    <p><?php esc_html_e('Need help signing in?', 'chama-ops'); ?></p>
-                    <?php if ($front_desk_tel !== '') : ?>
-                        <a href="<?php echo esc_url($front_desk_tel); ?>">
-                            <?php
-                            printf(
-                                esc_html__('Call front desk: %s', 'chama-ops'),
-                                esc_html($front_desk_phone)
-                            );
-                            ?>
-                        </a>
-                    <?php else : ?>
-                        <span><?php echo esc_html($front_desk_phone); ?></span>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </section>
-        <?php
-
-        return (string) ob_get_clean();
+        return chama_ops_render_guest_auth_required_state();
     }
 
     $room_number = isset($session['room_number']) ? (string) $session['room_number'] : '';
@@ -7172,7 +7249,7 @@ function chama_ops_submit_gift_shop_order(): void
     check_admin_referer('chama_ops_submit_gift_shop_order_action', 'chama_ops_submit_gift_shop_order_nonce');
 
     if (!chama_ops_is_guest_authenticated()) {
-        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('home', '/')));
+        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('guest-access', '/guest-access/')));
         exit;
     }
 
@@ -7402,7 +7479,7 @@ function chama_ops_submit_service_request(): void
     check_admin_referer('chama_ops_submit_service_request_action', 'chama_ops_submit_service_request_nonce');
 
     if (!chama_ops_is_guest_authenticated()) {
-        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('home', '/')));
+        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('guest-access', '/guest-access/')));
         exit;
     }
 
