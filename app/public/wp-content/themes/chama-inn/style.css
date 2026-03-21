@@ -1130,18 +1130,58 @@ body.admin-bar .guest-auth-shell__backdrop {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   font-size: 20px;
   width: 20px;
   height: 20px;
   line-height: 20px;
   opacity: 0.92;
+  color: currentColor;
 }
 
 .guest-mobile-nav__icon.chama-icon-shopping-bag::before {
-  content: "🛍";
-  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
-  font-size: 18px;
-  line-height: 1;
+  content: "";
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 7px;
+  bottom: 2px;
+  border: 1.8px solid currentColor;
+  border-radius: 3px 3px 4px 4px;
+}
+
+.guest-mobile-nav__icon.chama-icon-shopping-bag::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 2px;
+  height: 7px;
+  border: 1.8px solid currentColor;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.guest-mobile-nav__icon.chama-icon-plate-cutlery::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  border: 1.8px solid currentColor;
+  border-radius: 999px;
+}
+
+.guest-mobile-nav__icon.chama-icon-plate-cutlery::after {
+  content: "";
+  position: absolute;
+  inset: 2px 0;
+  background:
+    linear-gradient(currentColor, currentColor) left 1px center / 1.6px 13px no-repeat,
+    linear-gradient(currentColor, currentColor) left 3.8px 5px / 1.2px 3px no-repeat,
+    linear-gradient(currentColor, currentColor) left 3.8px 9px / 1.2px 3px no-repeat,
+    linear-gradient(currentColor, currentColor) right 1px center / 1.6px 13px no-repeat;
 }
 
 .guest-mobile-nav__item.is-active a {

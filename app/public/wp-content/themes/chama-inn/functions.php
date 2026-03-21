@@ -193,7 +193,7 @@ function chama_inn_get_guest_mobile_nav_items(): array
         [
             "slug"  => "dining",
             "label" => __("Restaurant", "chama-inn"),
-            "icon"  => "dashicons-food",
+            "icon"  => "chama-icon-plate-cutlery",
             "url"   => home_url("/dining/"),
         ],
         [
