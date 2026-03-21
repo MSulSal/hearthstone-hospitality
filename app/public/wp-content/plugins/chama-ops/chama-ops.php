@@ -2747,6 +2747,22 @@ function chama_ops_render_overview_page(): void
     $notice_phone_scanned = isset($_GET['chama_ops_phone_scanned'])
         ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_phone_scanned'])))
         : 0;
+    $seeded_guest_login = get_transient('chama_ops_seeded_guest_login');
+    $seeded_guest_room = '';
+    $seeded_guest_code = '';
+
+    if (
+        is_array($seeded_guest_login)
+        && isset($seeded_guest_login['room'], $seeded_guest_login['code'])
+    ) {
+        $seeded_guest_room = strtoupper(trim((string) $seeded_guest_login['room']));
+        $seeded_guest_code = trim((string) $seeded_guest_login['code']);
+    }
+
+    if ($seeded_guest_room !== '' && $seeded_guest_code !== '') {
+        delete_transient('chama_ops_seeded_guest_login');
+    }
+
     $scenario_labels = chama_ops_get_demo_scenario_labels();
     $seed_notice_messages = [
         'sample_data_seeded' => [
@@ -2947,6 +2963,20 @@ function chama_ops_render_overview_page(): void
                     }
 
                     echo esc_html($notice_message);
+                    ?>
+                </p>
+            </div>
+        <?php endif; ?>
+        <?php if ($seeded_guest_room !== '' && $seeded_guest_code !== '') : ?>
+            <div class="notice notice-info inline">
+                <p>
+                    <?php
+                    printf(
+                        /* translators: 1: room number, 2: access code. */
+                        esc_html__('Guest app test login seeded. Room: %1$s | Access code: %2$s', 'chama-ops'),
+                        esc_html($seeded_guest_room),
+                        esc_html($seeded_guest_code)
+                    );
                     ?>
                 </p>
             </div>
@@ -3824,6 +3854,10 @@ function chama_ops_seed_sample_data(): void
     }
 
     $guest_ids = [];
+    $used_room_numbers = [];
+    $next_room_number = 101;
+    $seeded_login_room = '';
+    $seeded_login_code = '';
 
     foreach ($guest_definitions as $guest_data) {
         $guest_id = wp_insert_post([
@@ -3876,13 +3910,60 @@ function chama_ops_seed_sample_data(): void
         update_post_meta($stay_id, '_chama_stay_status', $stay_data['status']);
         update_post_meta($stay_id, '_chama_stay_revenue', $stay_data['revenue']);
 
+        $room_number = isset($stay_data['room_number']) ? strtoupper(trim((string) $stay_data['room_number'])) : '';
+
+        if ($room_number === '') {
+            while (in_array((string) $next_room_number, $used_room_numbers, true)) {
+                $next_room_number++;
+            }
+            $room_number = (string) $next_room_number;
+            $next_room_number++;
+        }
+
+        $used_room_numbers[] = $room_number;
+        update_post_meta($stay_id, '_chama_stay_room_number', $room_number);
+
         $nights = chama_ops_calculate_stay_nights($stay_data['check_in'], $stay_data['check_out']);
 
         if ($nights !== null) {
             update_post_meta($stay_id, '_chama_stay_nights', $nights);
         }
 
+        $status = sanitize_key((string) $stay_data['status']);
+        $is_guest_auth_stay = in_array($status, ['booked', 'checked_in'], true);
+
+        if ($is_guest_auth_stay) {
+            $access_code = isset($stay_data['access_code']) ? trim((string) $stay_data['access_code']) : '';
+
+            if ($access_code === '') {
+                $normalized_room_for_code = preg_replace('/[^a-zA-Z0-9]/', '', $room_number);
+                $access_code = 'stay' . (is_string($normalized_room_for_code) && $normalized_room_for_code !== '' ? $normalized_room_for_code : (string) $stay_id);
+            }
+
+            update_post_meta($stay_id, '_chama_stay_access_code_hash', wp_hash_password($access_code));
+
+            $checkout_at = trim((string) get_post_meta($stay_id, '_chama_stay_checkout_at', true));
+            if ($checkout_at === '' && $stay_data['check_out'] !== '') {
+                $default_checkout = strtotime($stay_data['check_out'] . ' 11:00:00');
+                if (is_int($default_checkout) && $default_checkout > 0) {
+                    update_post_meta($stay_id, '_chama_stay_checkout_at', gmdate('Y-m-d\TH:i', $default_checkout));
+                }
+            }
+
+            if ($seeded_login_room === '' && chama_ops_get_stay_session_expiry_timestamp((int) $stay_id) > time()) {
+                $seeded_login_room = $room_number;
+                $seeded_login_code = $access_code;
+            }
+        }
+
         update_post_meta($stay_id, '_chama_ops_sample_data', '1');
+    }
+
+    if ($seeded_login_room !== '' && $seeded_login_code !== '') {
+        set_transient('chama_ops_seeded_guest_login', [
+            'room' => $seeded_login_room,
+            'code' => $seeded_login_code,
+        ], DAY_IN_SECONDS);
     }
 
     $redirect = add_query_arg([
@@ -3893,6 +3974,106 @@ function chama_ops_seed_sample_data(): void
     exit;
 }
 add_action('admin_post_chama_ops_seed_sample_data', 'chama_ops_seed_sample_data');
+
+/**
+ * Backfill room numbers and access-code hashes on existing sample stays once.
+ */
+function chama_ops_backfill_sample_guest_access_once(): void
+{
+    if (!is_admin() || !current_user_can('manage_options')) {
+        return;
+    }
+
+    $target_version = 1;
+    $current_version = (int) get_option('chama_ops_sample_guest_access_version', 0);
+
+    if ($current_version >= $target_version) {
+        return;
+    }
+
+    $sample_stay_ids = get_posts([
+        'post_type'      => 'stay',
+        'post_status'    => ['publish', 'draft'],
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'meta_query'     => [
+            [
+                'key'   => '_chama_ops_sample_data',
+                'value' => '1',
+            ],
+        ],
+        'orderby'        => 'date',
+        'order'          => 'ASC',
+    ]);
+
+    if (!is_array($sample_stay_ids) || empty($sample_stay_ids)) {
+        update_option('chama_ops_sample_guest_access_version', $target_version, false);
+        return;
+    }
+
+    $next_room_number = 101;
+    $used_room_numbers = [];
+    $seeded_login_room = '';
+    $seeded_login_code = '';
+
+    foreach ($sample_stay_ids as $sample_stay_id) {
+        $stay_id = (int) $sample_stay_id;
+
+        if ($stay_id <= 0) {
+            continue;
+        }
+
+        $status = sanitize_key((string) get_post_meta($stay_id, '_chama_stay_status', true));
+
+        if (!in_array($status, ['booked', 'checked_in'], true)) {
+            continue;
+        }
+
+        $room_number = strtoupper(trim((string) get_post_meta($stay_id, '_chama_stay_room_number', true)));
+
+        if ($room_number === '') {
+            while (in_array((string) $next_room_number, $used_room_numbers, true)) {
+                $next_room_number++;
+            }
+            $room_number = (string) $next_room_number;
+            $next_room_number++;
+            update_post_meta($stay_id, '_chama_stay_room_number', $room_number);
+        }
+
+        $used_room_numbers[] = $room_number;
+        $access_code_hash = trim((string) get_post_meta($stay_id, '_chama_stay_access_code_hash', true));
+        $access_code = 'stay' . preg_replace('/[^a-zA-Z0-9]/', '', $room_number);
+
+        if ($access_code_hash === '') {
+            update_post_meta($stay_id, '_chama_stay_access_code_hash', wp_hash_password($access_code));
+        }
+
+        $check_out = trim((string) get_post_meta($stay_id, '_chama_stay_check_out', true));
+        $checkout_at = trim((string) get_post_meta($stay_id, '_chama_stay_checkout_at', true));
+
+        if ($checkout_at === '' && $check_out !== '') {
+            $default_checkout = strtotime($check_out . ' 11:00:00');
+            if (is_int($default_checkout) && $default_checkout > 0) {
+                update_post_meta($stay_id, '_chama_stay_checkout_at', gmdate('Y-m-d\TH:i', $default_checkout));
+            }
+        }
+
+        if ($seeded_login_room === '' && chama_ops_get_stay_session_expiry_timestamp($stay_id) > time()) {
+            $seeded_login_room = $room_number;
+            $seeded_login_code = $access_code;
+        }
+    }
+
+    if ($seeded_login_room !== '' && $seeded_login_code !== '') {
+        set_transient('chama_ops_seeded_guest_login', [
+            'room' => $seeded_login_room,
+            'code' => $seeded_login_code,
+        ], DAY_IN_SECONDS);
+    }
+
+    update_option('chama_ops_sample_guest_access_version', $target_version, false);
+}
+add_action('admin_init', 'chama_ops_backfill_sample_guest_access_once');
 
 /**
  * Clear all seeded sample data records.
