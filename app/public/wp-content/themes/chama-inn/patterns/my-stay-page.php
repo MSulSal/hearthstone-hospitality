@@ -10,67 +10,67 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center">This page is the guest's personal stay center. Keep details current and easy to scan on mobile.</p>
+<p class="has-text-align-center">Use this page as your control panel for the rest of your visit.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"52px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"1040px"}} -->
-<div class="wp-block-group alignfull has-background" style="background-color:#f7f4ee;padding-top:52px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"20px"}}}} -->
-<div class="wp-block-columns"><!-- wp:column {"width":"55%"} -->
-<div class="wp-block-column" style="flex-basis:55%"><!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
+<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"42px","bottom":"56px","left":"20px","right":"20px"}},"color":{"background":"#f7f4ee"}},"layout":{"type":"constrained","contentSize":"1040px"}} -->
+<div class="wp-block-group alignfull has-background" style="background-color:#f7f4ee;padding-top:42px;padding-right:20px;padding-bottom:56px;padding-left:20px"><!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"20px"}}}} -->
+<div class="wp-block-columns"><!-- wp:column -->
+<div class="wp-block-column"><!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
 <div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Stay Snapshot</h3>
+<h3 class="wp-block-heading">Stay essentials</h3>
 <!-- /wp:heading -->
 
 <!-- wp:list -->
-<ul><li>Room: <strong>Replace with room label</strong></li><li>Check-in: <strong>Replace with date/time</strong></li><li>Check-out: <strong>Replace with date/time</strong></li><li>Nights: <strong>Replace with computed stay nights</strong></li><li>Status: <strong>Booked / Checked-in / Checked-out</strong></li></ul>
+<ul><li>Check-in starts at 3:00 PM.</li><li>Checkout is at 11:00 AM.</li><li>Need early/late timing help? Message front desk in advance.</li><li>Need first-floor access support? Use the service request form.</li></ul>
 <!-- /wp:list --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
 <div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Guest Preferences</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Show preference notes that should be respected during this stay: room setup, amenity notes, service timing, and communication preferences.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
-<!-- /wp:column -->
-
-<!-- wp:column {"width":"45%"} -->
-<div class="wp-block-column" style="flex-basis:45%"><!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
-<div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Quick Actions</h3>
+<h3 class="wp-block-heading">Popular guest needs</h3>
 <!-- /wp:heading -->
 
 <!-- wp:buttons {"layout":{"type":"flex","orientation":"vertical"}} -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-outline"} -->
-<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Order from restaurant</a></div>
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="/dining/">Order room service</a></div>
 <!-- /wp:button -->
 
 <!-- wp:button {"className":"is-style-outline"} -->
-<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Open gift shop</a></div>
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="/gift-shop/">Open gift shop</a></div>
 <!-- /wp:button -->
 
 <!-- wp:button {"className":"is-style-outline"} -->
-<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Submit service request</a></div>
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="/service-requests/">Request towels or amenities</a></div>
 <!-- /wp:button -->
 
-<!-- wp:button -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Contact front desk</a></div>
+<!-- wp:button {"style":{"color":{"background":"#6f8680","text":"#f7f4ee"}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/contact/" style="color:#f7f4ee;background-color:#6f8680">Contact front desk</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
+<!-- /wp:group --></div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column"><!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
+<div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Stay tips</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list -->
+<ul><li>Fireplace rooms are limited and usually book first.</li><li>If stairs are difficult, request a first-floor room.</li><li>The depot is directly across from the inn, so train-day departures are easy.</li><li>Most central Chama stops are walkable from the inn.</li></ul>
+<!-- /wp:list --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
 <div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Departure Checklist</h3>
+<h3 class="wp-block-heading">Need something else?</h3>
 <!-- /wp:heading -->
 
-<!-- wp:list -->
-<ul><li>Checkout time reminder</li><li>Outstanding orders or charges</li><li>Front desk key/lock instructions</li><li>Optional feedback request</li></ul>
-<!-- /wp:list --></div>
+<!-- wp:paragraph -->
+<p>Use <a href="/service-requests/">Service Requests</a> for non-urgent help and <a href="/contact/">Front Desk Contact</a> for urgent assistance.</p>
+<!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>

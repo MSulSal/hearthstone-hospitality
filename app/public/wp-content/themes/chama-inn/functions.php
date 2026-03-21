@@ -357,16 +357,10 @@ function chama_inn_get_core_page_blueprint(): array
             "pattern" => "patterns/service-requests-page.php",
         ],
         [
-            "title"   => __("Explore Chama", "chama-inn"),
+            "title"   => __("During Your Stay", "chama-inn"),
             "slug"    => "explore-chama",
-            "excerpt" => __("Quick local guide for train guests and walkable stops.", "chama-inn"),
+            "excerpt" => __("What to do at the inn and in Chama during your current stay.", "chama-inn"),
             "pattern" => "patterns/explore-chama-page.php",
-        ],
-        [
-            "title"   => __("Stay / Rooms", "chama-inn"),
-            "slug"    => "stay-rooms",
-            "excerpt" => __("Room options for prospective guests and direct booking conversations.", "chama-inn"),
-            "pattern" => "patterns/stay-rooms-page.php",
         ],
         [
             "title"   => __("Front Desk / Contact", "chama-inn"),
@@ -428,6 +422,23 @@ function chama_inn_menu_has_page(int $menu_id, int $page_id): bool
     return false;
 }
 
+function chama_inn_get_menu_item_id_for_page(int $menu_id, int $page_id): int
+{
+    $items = wp_get_nav_menu_items($menu_id);
+
+    if (!is_array($items)) {
+        return 0;
+    }
+
+    foreach ($items as $item) {
+        if ((int) $item->object_id === $page_id) {
+            return (int) $item->ID;
+        }
+    }
+
+    return 0;
+}
+
 function chama_inn_set_default_nav_menu(array $pages_by_slug): void
 {
     $menu_id = chama_inn_get_or_create_nav_menu(__("Primary Menu", "chama-inn"));
@@ -444,9 +455,39 @@ function chama_inn_set_default_nav_menu(array $pages_by_slug): void
         "gift-shop",
         "service-requests",
         "explore-chama",
-        "stay-rooms",
         "contact",
     ];
+
+    $legacy_slugs_to_remove = ["weddings-events", "stay-rooms"];
+    $menu_items = wp_get_nav_menu_items($menu_id);
+
+    if (is_array($menu_items)) {
+        foreach ($menu_items as $menu_item) {
+            if (!$menu_item instanceof WP_Post || $menu_item->object !== "page") {
+                continue;
+            }
+
+            $object_id = (int) $menu_item->object_id;
+
+            if ($object_id <= 0) {
+                continue;
+            }
+
+            $linked_page = get_post($object_id);
+
+            if (!($linked_page instanceof WP_Post) || $linked_page->post_type !== "page") {
+                continue;
+            }
+
+            $linked_slug = sanitize_title((string) $linked_page->post_name);
+
+            if (in_array($linked_slug, $legacy_slugs_to_remove, true)) {
+                wp_delete_post((int) $menu_item->ID, true);
+            }
+        }
+    }
+
+    $menu_position = 1;
 
     foreach ($menu_order as $slug) {
         if (!isset($pages_by_slug[$slug])) {
@@ -455,7 +496,17 @@ function chama_inn_set_default_nav_menu(array $pages_by_slug): void
 
         $page_id = (int) $pages_by_slug[$slug];
 
-        if ($page_id <= 0 || chama_inn_menu_has_page($menu_id, $page_id)) {
+        if ($page_id <= 0) {
+            continue;
+        }
+
+        $existing_menu_item_id = chama_inn_get_menu_item_id_for_page($menu_id, $page_id);
+
+        if ($existing_menu_item_id > 0) {
+            wp_update_nav_menu_item($menu_id, $existing_menu_item_id, [
+                "menu-item-position" => $menu_position,
+            ]);
+            $menu_position++;
             continue;
         }
 
@@ -464,7 +515,9 @@ function chama_inn_set_default_nav_menu(array $pages_by_slug): void
             "menu-item-object"    => "page",
             "menu-item-type"      => "post_type",
             "menu-item-status"    => "publish",
+            "menu-item-position"  => $menu_position,
         ]);
+        $menu_position++;
     }
 
     $locations            = get_nav_menu_locations();
@@ -580,7 +633,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 12;
+    $target_version = 13;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -608,10 +661,6 @@ function chama_inn_migrate_seeded_copy(): void
         "Lead with the railroad experience, then curate a short set of nearby outdoor and local-town highlights." => "Start with the historic railroad, then explore nearby trails, local shops, and mountain-town views at your own pace.",
         "Keep this final section simple: one booking action, one inquiry action, and clear contact details." => "Planning a train weekend, event trip, or quiet getaway? Our team can help you choose the right room and dates.",
         "Dining that supports the stay" => "Restaurant and dining",
-        "Weddings and events" => "Gift shop highlights",
-        "Position this for intimate weddings, rehearsal dinners, and private gatherings with a warm, romantic, New Mexico setting." => "Feature locally inspired goods, railroad memorabilia, and practical travel essentials guests can purchase on-site or online.",
-        "Start event inquiry" => "Browse gift ideas",
-        "Intimate celebrations in a calm Chama setting" => "Optional private gatherings in a calm Chama setting",
         "Review themes consistently mention clean rooms, friendly hospitality, and easy train-station convenience." => "Recent five-star reviews repeatedly call out clean rooms, friendly service, and easy train access.",
         ];
 
@@ -619,11 +668,9 @@ function chama_inn_migrate_seeded_copy(): void
         "home",
         "guest-hub",
         "my-stay",
-        "stay-rooms",
         "dining",
         "gift-shop",
         "service-requests",
-        "weddings-events",
         "explore-chama",
         "about-our-story",
         "contact",
@@ -670,6 +717,10 @@ function chama_inn_migrate_seeded_copy(): void
                 }
             }
 
+            if (strpos($updated_content, "[chama_guest_action_grid]") === false) {
+                $should_refresh_home = true;
+            }
+
             if ($should_refresh_home) {
                 $fresh_home_pattern = chama_inn_load_pattern_content("patterns/inn-conversion-page.php");
 
@@ -709,7 +760,9 @@ function chama_inn_migrate_seeded_copy(): void
 
         if ($slug === "explore-chama") {
             $should_refresh_explore = strpos($updated_content, "Keep this page curated and concise. Lead with the railroad experience, then add local highlights.") !== false
-                || strpos($updated_content, "Need help planning?") !== false;
+                || strpos($updated_content, "Need help planning?") !== false
+                || strpos($updated_content, "Explore Chama") !== false
+                || strpos($updated_content, "Railroad heritage, mountain air, and local discovery") !== false;
 
             if ($should_refresh_explore) {
                 $fresh_explore_pattern = chama_inn_load_pattern_content("patterns/explore-chama-page.php");
@@ -730,6 +783,50 @@ function chama_inn_migrate_seeded_copy(): void
 
                 if ($fresh_dining_pattern !== "") {
                     $updated_content = $fresh_dining_pattern;
+                }
+            }
+        }
+
+        if ($slug === "guest-hub") {
+            $should_refresh_guest_hub = strpos($updated_content, "This page is designed for guests already at the inn") !== false
+                || strpos($updated_content, "Open my stay") !== false
+                || strpos($updated_content, "See local guide") !== false
+                || strpos($updated_content, "[chama_guest_action_grid]") === false;
+
+            if ($should_refresh_guest_hub) {
+                $fresh_guest_hub_pattern = chama_inn_load_pattern_content("patterns/guest-hub-page.php");
+
+                if ($fresh_guest_hub_pattern !== "") {
+                    $updated_content = $fresh_guest_hub_pattern;
+                }
+            }
+        }
+
+        if ($slug === "my-stay") {
+            $should_refresh_my_stay = strpos($updated_content, "Replace with room label") !== false
+                || strpos($updated_content, "Guest Preferences") !== false
+                || strpos($updated_content, "Departure Checklist") !== false
+                || strpos($updated_content, "Stay essentials") === false;
+
+            if ($should_refresh_my_stay) {
+                $fresh_my_stay_pattern = chama_inn_load_pattern_content("patterns/my-stay-page.php");
+
+                if ($fresh_my_stay_pattern !== "") {
+                    $updated_content = $fresh_my_stay_pattern;
+                }
+            }
+        }
+
+        if ($slug === "service-requests") {
+            $should_refresh_service_requests = strpos($updated_content, "Guests should be able to ask for help in less than a minute.") !== false
+                || strpos($updated_content, "Implementation note:") !== false
+                || strpos($updated_content, "[chama_service_request_app]") === false;
+
+            if ($should_refresh_service_requests) {
+                $fresh_service_requests_pattern = chama_inn_load_pattern_content("patterns/service-requests-page.php");
+
+                if ($fresh_service_requests_pattern !== "") {
+                    $updated_content = $fresh_service_requests_pattern;
                 }
             }
         }
@@ -843,8 +940,8 @@ function chama_inn_register_block_patterns(): void
         ],
         "explore-chama-page" => [
             "file"        => "patterns/explore-chama-page.php",
-            "title"       => __("Interior: Explore Chama", "chama-inn"),
-            "description" => __("Quick local guide for active guests during their stay.", "chama-inn"),
+            "title"       => __("Interior: During Your Stay", "chama-inn"),
+            "description" => __("What to do at the inn and in Chama during your current stay.", "chama-inn"),
         ],
         "about-story-page" => [
             "file"        => "patterns/about-story-page.php",
