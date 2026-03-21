@@ -543,16 +543,21 @@ iframe {
 }
 
 .home-shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   padding: 0;
 }
 
 .home .site-main {
+  background: transparent;
   padding-top: 0;
+  padding-bottom: 0;
 }
 
 .home-hero {
   position: relative;
+  min-height: 100svh;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -1293,7 +1298,8 @@ iframe {
 
 @media (min-width: 1440px) {
   .home-hero {
-    min-height: 70vh;
+    min-height: 100svh;
+    min-height: 100vh;
   }
 
   .home-content__inner {
