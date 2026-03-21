@@ -1115,20 +1115,32 @@ body.admin-bar .guest-auth-shell__backdrop {
 }
 
 .guest-mobile-nav__item a {
-  display: block;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
   border: 1px solid transparent;
-  padding: 0.43rem 0.45rem;
+  min-height: 2.3rem;
+  padding: 0.36rem 0.45rem;
   text-decoration: none;
   color: var(--chama-nav-ink);
-  font-size: 0.82rem;
-  font-weight: 600;
+}
+
+.guest-mobile-nav__icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  opacity: 0.92;
 }
 
 .guest-mobile-nav__item.is-active a {
   border-color: rgba(248, 239, 228, 0.4);
   background: rgba(248, 239, 228, 0.12);
+}
+
+.guest-mobile-nav__item.is-active .guest-mobile-nav__icon {
+  opacity: 1;
 }
 
 .chama-service-app__layout {
@@ -1499,7 +1511,7 @@ body.admin-bar .guest-auth-shell__backdrop {
 
 @media (max-width: 768px) {
   .admin-bar .site-header {
-    top: 46px;
+    top: 0;
   }
 
   body.admin-bar .guest-auth-shell__backdrop {

@@ -187,21 +187,25 @@ function chama_inn_get_guest_mobile_nav_items(): array
         [
             "slug"  => "home",
             "label" => __("Home", "chama-inn"),
+            "icon"  => "dashicons-admin-home",
             "url"   => home_url("/"),
         ],
         [
             "slug"  => "my-stay",
             "label" => __("Orders", "chama-inn"),
+            "icon"  => "dashicons-cart",
             "url"   => home_url("/my-stay/"),
         ],
         [
             "slug"  => "explore-chama",
             "label" => __("Explore", "chama-inn"),
+            "icon"  => "dashicons-location-alt",
             "url"   => home_url("/explore-chama/"),
         ],
         [
             "slug"  => "help",
             "label" => __("Help", "chama-inn"),
+            "icon"  => "dashicons-phone",
             "url"   => home_url("/help/"),
         ],
     ];
@@ -228,11 +232,12 @@ function chama_inn_render_guest_mobile_nav(): void
         <ul class="guest-mobile-nav__list">
             <?php foreach ($items as $item) : ?>
                 <?php
-                if (!is_array($item) || !isset($item["slug"], $item["label"], $item["url"])) {
+                if (!is_array($item) || !isset($item["slug"], $item["label"], $item["url"], $item["icon"])) {
                     continue;
                 }
 
                 $slug = sanitize_title((string) $item["slug"]);
+                $icon_class = sanitize_html_class((string) $item["icon"]);
                 $active = is_front_page() && $slug === "home";
 
                 if (!$active && is_page($slug)) {
@@ -240,8 +245,9 @@ function chama_inn_render_guest_mobile_nav(): void
                 }
                 ?>
                 <li class="guest-mobile-nav__item<?php echo $active ? " is-active" : ""; ?>">
-                    <a href="<?php echo esc_url((string) $item["url"]); ?>">
-                        <?php echo esc_html((string) $item["label"]); ?>
+                    <a href="<?php echo esc_url((string) $item["url"]); ?>" aria-label="<?php echo esc_attr((string) $item["label"]); ?>" title="<?php echo esc_attr((string) $item["label"]); ?>">
+                        <span class="guest-mobile-nav__icon dashicons <?php echo esc_attr($icon_class); ?>" aria-hidden="true"></span>
+                        <span class="screen-reader-text"><?php echo esc_html((string) $item["label"]); ?></span>
                     </a>
                 </li>
             <?php endforeach; ?>
@@ -263,6 +269,8 @@ add_filter("body_class", "chama_inn_add_guest_session_body_class");
 function chama_inn_enqueue_assets(): void
 {
     $theme_version = (string) wp_get_theme()->get("Version");
+
+    wp_enqueue_style("dashicons");
 
     wp_enqueue_style(
         "chama-inn-style",
