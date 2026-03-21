@@ -191,10 +191,10 @@ function chama_inn_get_guest_mobile_nav_items(): array
             "url"   => home_url("/"),
         ],
         [
-            "slug"  => "my-stay",
-            "label" => __("Orders", "chama-inn"),
-            "icon"  => "dashicons-cart",
-            "url"   => home_url("/my-stay/"),
+            "slug"  => "dining",
+            "label" => __("Restaurant", "chama-inn"),
+            "icon"  => "dashicons-food",
+            "url"   => home_url("/dining/"),
         ],
         [
             "slug"  => "explore-chama",
@@ -205,7 +205,7 @@ function chama_inn_get_guest_mobile_nav_items(): array
         [
             "slug"  => "help",
             "label" => __("Help", "chama-inn"),
-            "icon"  => "dashicons-phone",
+            "icon"  => "dashicons-bell",
             "url"   => home_url("/help/"),
         ],
     ];
