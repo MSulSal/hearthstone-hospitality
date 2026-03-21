@@ -35,7 +35,6 @@ function chama_inn_should_hide_page_hero(int $post_id): bool
         "dining",
         "gift-shop",
         "service-requests",
-        "my-stay",
     ];
 
     return in_array($slug, $hero_free_slugs, true);
@@ -48,11 +47,6 @@ function chama_inn_get_primary_nav_items(): array
             "slug" => "home",
             "label" => __("Home", "chama-inn"),
             "fallback_path" => "/",
-        ],
-        [
-            "slug" => "my-stay",
-            "label" => __("My Stay", "chama-inn"),
-            "fallback_path" => "/my-stay/",
         ],
         [
             "slug" => "dining",
@@ -300,7 +294,7 @@ function chama_inn_get_header_cta_url(): string
         }
     }
 
-    $fallback_paths = ["home", "my-stay", "dining", "contact", "book", "inquire"];
+    $fallback_paths = ["home", "dining", "gift-shop", "service-requests", "contact", "book", "inquire"];
 
     foreach ($fallback_paths as $path) {
         $page = get_page_by_path($path);
@@ -357,7 +351,7 @@ add_action("admin_init", "chama_inn_migrate_header_cta_label");
 
 function chama_inn_redirect_legacy_guest_hub(): void
 {
-    if (!is_page("guest-hub")) {
+    if (!is_page("guest-hub") && !is_page("my-stay")) {
         return;
     }
 
@@ -502,12 +496,6 @@ function chama_inn_get_core_page_blueprint(): array
             "slug"    => "home",
             "excerpt" => __("Guest-facing stay app for restaurant orders, gift shop checkout, service requests, and front desk help.", "chama-inn"),
             "pattern" => "patterns/inn-conversion-page.php",
-        ],
-        [
-            "title"   => __("My Stay", "chama-inn"),
-            "slug"    => "my-stay",
-            "excerpt" => __("Stay details, check-in/out guidance, and guest preferences.", "chama-inn"),
-            "pattern" => "patterns/my-stay-page.php",
         ],
         [
             "title"   => __("Restaurant Orders", "chama-inn"),
@@ -842,13 +830,42 @@ function chama_inn_created_pages_notice(): void
 }
 add_action("admin_notices", "chama_inn_created_pages_notice");
 
+function chama_inn_clear_home_excerpt_once(): void
+{
+    if (!is_admin() || !current_user_can("manage_options")) {
+        return;
+    }
+
+    $migration_version = (int) get_option("chama_inn_home_excerpt_version", 0);
+
+    if ($migration_version >= 1) {
+        return;
+    }
+
+    $home_page = get_page_by_path("home", OBJECT, "page");
+
+    if ($home_page instanceof WP_Post) {
+        $excerpt = trim((string) $home_page->post_excerpt);
+
+        if ($excerpt !== "") {
+            wp_update_post([
+                "ID" => (int) $home_page->ID,
+                "post_excerpt" => "",
+            ]);
+        }
+    }
+
+    update_option("chama_inn_home_excerpt_version", 1, false);
+}
+add_action("admin_init", "chama_inn_clear_home_excerpt_once");
+
 function chama_inn_migrate_seeded_copy(): void
 {
     if (!is_admin() || !current_user_can("manage_options")) {
         return;
     }
 
-    $target_version = 13;
+    $target_version = 14;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -881,7 +898,6 @@ function chama_inn_migrate_seeded_copy(): void
 
     $slugs_to_scan = [
         "home",
-        "my-stay",
         "dining",
         "gift-shop",
         "service-requests",
@@ -921,6 +937,9 @@ function chama_inn_migrate_seeded_copy(): void
                 "csi-32.jpg",
                 "csi-30.jpg",
                 "Review themes consistently mention clean rooms, friendly hospitality, and easy train-station convenience.",
+                "Welcome to your stay app",
+                "Use this app to place orders, request service, and get help from the front desk while you are at the inn.",
+                "Open My Stay",
             ];
             $should_refresh_home = false;
 
@@ -997,21 +1016,6 @@ function chama_inn_migrate_seeded_copy(): void
 
                 if ($fresh_dining_pattern !== "") {
                     $updated_content = $fresh_dining_pattern;
-                }
-            }
-        }
-
-        if ($slug === "my-stay") {
-            $should_refresh_my_stay = strpos($updated_content, "Replace with room label") !== false
-                || strpos($updated_content, "Guest Preferences") !== false
-                || strpos($updated_content, "Departure Checklist") !== false
-                || strpos($updated_content, "Stay essentials") === false;
-
-            if ($should_refresh_my_stay) {
-                $fresh_my_stay_pattern = chama_inn_load_pattern_content("patterns/my-stay-page.php");
-
-                if ($fresh_my_stay_pattern !== "") {
-                    $updated_content = $fresh_my_stay_pattern;
                 }
             }
         }
@@ -1106,11 +1110,6 @@ function chama_inn_register_block_patterns(): void
             "file"        => "patterns/inn-conversion-page.php",
             "title"       => __("Guest App Home (QR Entry)", "chama-inn"),
             "description" => __("Guest-first homepage for in-stay actions opened from room QR codes.", "chama-inn"),
-        ],
-        "my-stay-page" => [
-            "file"        => "patterns/my-stay-page.php",
-            "title"       => __("Interior: My Stay", "chama-inn"),
-            "description" => __("Guest-facing stay summary, timing, and preference context.", "chama-inn"),
         ],
         "stay-rooms-page" => [
             "file"        => "patterns/stay-rooms-page.php",

@@ -37,9 +37,6 @@ get_header();
                             <h1 class="home-hero__title"><?php echo esc_html(get_bloginfo('name')); ?></h1>
                         <?php endif; ?>
 
-                        <?php if (has_excerpt()) : ?>
-                            <p class="home-hero__subtitle"><?php echo esc_html(get_the_excerpt()); ?></p>
-                        <?php endif; ?>
                     </div>
                 </section>
 

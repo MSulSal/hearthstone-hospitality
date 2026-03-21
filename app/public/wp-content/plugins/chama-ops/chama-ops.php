@@ -2093,7 +2093,6 @@ function chama_ops_get_overview_action_links(): array
     $guest_list_url = admin_url('edit.php?post_type=guest');
     $stay_list_url  = admin_url('edit.php?post_type=stay');
     $home_page      = get_page_by_path('home');
-    $my_stay_page   = get_page_by_path('my-stay');
     $dining_page    = get_page_by_path('dining');
     $gift_shop_page = get_page_by_path('gift-shop');
     $service_page   = get_page_by_path('service-requests');
@@ -2101,9 +2100,6 @@ function chama_ops_get_overview_action_links(): array
     $app_home_url = $home_page instanceof WP_Post
         ? (string) get_permalink($home_page)
         : (string) home_url('/home/');
-    $my_stay_url = $my_stay_page instanceof WP_Post
-        ? (string) get_permalink($my_stay_page)
-        : (string) home_url('/my-stay/');
     $dining_url = $dining_page instanceof WP_Post
         ? (string) get_permalink($dining_page)
         : (string) home_url('/dining/');
@@ -2167,7 +2163,6 @@ function chama_ops_get_overview_action_links(): array
         'quality_stay_invalid_dates'      => add_query_arg('chama_stay_quality', 'invalid_date_range', $stay_list_url),
         'quality_stay_missing_revenue'    => add_query_arg('chama_stay_quality', 'missing_revenue', $stay_list_url),
         'app_home'         => $app_home_url,
-        'my_stay'          => $my_stay_url,
         'dining_pos'       => $dining_url,
         'gift_shop_pos'    => $gift_shop_url,
         'service_requests' => $service_requests_url,
@@ -5769,38 +5764,27 @@ function chama_ops_render_guest_action_grid_shortcode(): string
 {
     $actions = [
         [
-            'title' => __('My Stay', 'chama-ops'),
-            'description' => __('See stay essentials and quick links for this visit.', 'chama-ops'),
-            'url' => chama_ops_get_guest_page_url('my-stay', '/my-stay/'),
-            'label' => __('Open my stay', 'chama-ops'),
-        ],
-        [
             'title' => __('Restaurant Orders', 'chama-ops'),
-            'description' => __('Place room-service orders and submit notes from your phone.', 'chama-ops'),
             'url' => chama_ops_get_guest_page_url('dining', '/dining/'),
             'label' => __('Order room service', 'chama-ops'),
         ],
         [
             'title' => __('Gift Shop', 'chama-ops'),
-            'description' => __('Browse local goods and request pickup or room drop-off.', 'chama-ops'),
             'url' => chama_ops_get_guest_page_url('gift-shop', '/gift-shop/'),
             'label' => __('Open gift shop', 'chama-ops'),
         ],
         [
             'title' => __('Service Requests', 'chama-ops'),
-            'description' => __('Request towels, amenities, housekeeping, or support.', 'chama-ops'),
             'url' => chama_ops_get_guest_page_url('service-requests', '/service-requests/'),
             'label' => __('Submit a request', 'chama-ops'),
         ],
         [
             'title' => __('During Your Stay', 'chama-ops'),
-            'description' => __('Quick tips for train-day timing and local walkable plans.', 'chama-ops'),
             'url' => chama_ops_get_guest_page_url('explore-chama', '/explore-chama/'),
             'label' => __('See stay tips', 'chama-ops'),
         ],
         [
             'title' => __('Front Desk Help', 'chama-ops'),
-            'description' => __('Use this for urgent and non-urgent support paths.', 'chama-ops'),
             'url' => chama_ops_get_guest_page_url('contact', '/contact/'),
             'label' => __('Contact front desk', 'chama-ops'),
         ],
@@ -5812,7 +5796,6 @@ function chama_ops_render_guest_action_grid_shortcode(): string
         <?php foreach ($actions as $action) : ?>
             <article class="chama-order-card">
                 <h3><?php echo esc_html($action['title']); ?></h3>
-                <p class="chama-order-meta"><?php echo esc_html($action['description']); ?></p>
                 <div class="chama-order-actions wp-block-buttons">
                     <div class="wp-block-button">
                         <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($action['url']); ?>">

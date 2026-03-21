@@ -5,17 +5,18 @@ if (!defined("ABSPATH")) {
 
 return <<<'HTML'
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"52px","bottom":"52px","left":"20px","right":"20px"}},"color":{"background":"#e8ddcc"}},"layout":{"type":"constrained","contentSize":"980px"}} -->
-<div class="wp-block-group alignfull has-background" style="background-color:#e8ddcc;padding-top:52px;padding-right:20px;padding-bottom:52px;padding-left:20px"><!-- wp:heading {"textAlign":"center"} -->
-<h2 class="wp-block-heading has-text-align-center">Welcome to your stay app</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center">Use this app to place orders, request service, and get help from the front desk while you are at the inn.</p>
-<!-- /wp:paragraph -->
-
+<div class="wp-block-group alignfull has-background" style="background-color:#e8ddcc;padding-top:52px;padding-right:20px;padding-bottom:52px;padding-left:20px">
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 <div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#6f8680","text":"#f7f4ee"},"border":{"radius":"999px"}}} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/my-stay/" style="border-radius:999px;color:#f7f4ee;background-color:#6f8680">Open My Stay</a></div>
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/dining/" style="border-radius:999px;color:#f7f4ee;background-color:#6f8680">Restaurant Orders</a></div>
+<!-- /wp:button -->
+
+<!-- wp:button {"style":{"color":{"background":"#6f8680","text":"#f7f4ee"},"border":{"radius":"999px"}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/gift-shop/" style="border-radius:999px;color:#f7f4ee;background-color:#6f8680">Gift Shop</a></div>
+<!-- /wp:button -->
+
+<!-- wp:button {"className":"is-style-outline","style":{"border":{"radius":"999px"}}} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="/service-requests/" style="border-radius:999px">Service Requests</a></div>
 <!-- /wp:button -->
 
 <!-- wp:button {"className":"is-style-outline","style":{"border":{"radius":"999px"}}} -->
