@@ -300,7 +300,7 @@ function chama_inn_get_home_hero_gallery_uris(): array
 {
     $relative_paths = [
         // Home hero fixed image.
-        "assets/images/csi-assets/csi-36.jpg",
+        "assets/images/csi-assets/csi-1.jpg",
     ];
 
     $uris = [];
