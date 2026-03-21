@@ -10,7 +10,7 @@ return <<<'HTML'
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center">This page is designed for guests already at the inn. Keep each action short, clear, and mobile-first.</p>
+<p class="has-text-align-center">This page is designed for guests already at the inn and acts as the guest-facing POS launcher. Keep each action short, clear, and mobile-first.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 

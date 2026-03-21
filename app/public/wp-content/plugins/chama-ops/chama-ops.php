@@ -1705,6 +1705,27 @@ function chama_ops_get_overview_action_links(): array
 {
     $guest_list_url = admin_url('edit.php?post_type=guest');
     $stay_list_url  = admin_url('edit.php?post_type=stay');
+    $guest_hub_page = get_page_by_path('guest-hub');
+    $my_stay_page   = get_page_by_path('my-stay');
+    $dining_page    = get_page_by_path('dining');
+    $gift_shop_page = get_page_by_path('gift-shop');
+    $service_page   = get_page_by_path('service-requests');
+
+    $guest_hub_url = $guest_hub_page instanceof WP_Post
+        ? (string) get_permalink($guest_hub_page)
+        : (string) home_url('/guest-hub/');
+    $my_stay_url = $my_stay_page instanceof WP_Post
+        ? (string) get_permalink($my_stay_page)
+        : (string) home_url('/my-stay/');
+    $dining_url = $dining_page instanceof WP_Post
+        ? (string) get_permalink($dining_page)
+        : (string) home_url('/dining/');
+    $gift_shop_url = $gift_shop_page instanceof WP_Post
+        ? (string) get_permalink($gift_shop_page)
+        : (string) home_url('/gift-shop/');
+    $service_requests_url = $service_page instanceof WP_Post
+        ? (string) get_permalink($service_page)
+        : (string) home_url('/service-requests/');
 
     return [
         'add_guest'        => admin_url('post-new.php?post_type=guest'),
@@ -1758,6 +1779,11 @@ function chama_ops_get_overview_action_links(): array
         'quality_stay_missing_dates'      => add_query_arg('chama_stay_quality', 'missing_dates', $stay_list_url),
         'quality_stay_invalid_dates'      => add_query_arg('chama_stay_quality', 'invalid_date_range', $stay_list_url),
         'quality_stay_missing_revenue'    => add_query_arg('chama_stay_quality', 'missing_revenue', $stay_list_url),
+        'guest_hub'        => $guest_hub_url,
+        'my_stay'          => $my_stay_url,
+        'dining_pos'       => $dining_url,
+        'gift_shop_pos'    => $gift_shop_url,
+        'service_requests' => $service_requests_url,
     ];
 }
 
@@ -2023,6 +2049,8 @@ function chama_ops_render_overview_page(): void
     $quality_issue_total    = array_sum($data_quality_metrics);
     $average_revenue        = $rollup_metrics['average_revenue'];
     $average_revenue_night  = $rollup_metrics['average_revenue_per_night'];
+    $checked_in_total       = (int) ($stay_status_summary['checked_in'] ?? 0);
+    $booked_total           = (int) ($stay_status_summary['booked'] ?? 0);
     $sample_data_counts     = chama_ops_get_sample_data_counts();
     $persistent_guest_count = max(0, $guest_total - (int) $sample_data_counts['guest']);
     $persistent_stay_count  = max(0, $stay_total - (int) $sample_data_counts['stay']);
@@ -2260,6 +2288,39 @@ function chama_ops_render_overview_page(): void
             );
             ?>
         </p>
+
+        <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
+            <h2 style="margin-top:0;"><?php esc_html_e('Guest POS Command Center', 'chama-ops'); ?></h2>
+            <p style="margin-top:0;"><?php esc_html_e('This dashboard also acts as POS control: launch guest-facing pages, watch in-house demand, and drive same-day fulfillment.', 'chama-ops'); ?></p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Guest Hub Entry', 'chama-ops'); ?></strong><br>
+                    <?php esc_html_e('QR landing surface for active guests.', 'chama-ops'); ?><br>
+                    <a href="<?php echo esc_url($action_links['guest_hub']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Open Guest Hub', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Restaurant POS', 'chama-ops'); ?></strong><br>
+                    <?php esc_html_e('Sample signature dish included: Filet Mignon.', 'chama-ops'); ?><br>
+                    <a href="<?php echo esc_url($action_links['dining_pos']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Open Restaurant Orders Page', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Gift Shop POS', 'chama-ops'); ?></strong><br>
+                    <?php esc_html_e('Guest-side catalog and pickup flow controls.', 'chama-ops'); ?><br>
+                    <a href="<?php echo esc_url($action_links['gift_shop_pos']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Open Gift Shop Page', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Live Fulfillment Load', 'chama-ops'); ?></strong><br>
+                    <?php
+                    printf(
+                        esc_html__('%1$d checked-in / %2$d booked stays', 'chama-ops'),
+                        $checked_in_total,
+                        $booked_total
+                    );
+                    ?><br>
+                    <a href="<?php echo esc_url($action_links['checked_in_stays']); ?>"><?php esc_html_e('Open checked-in queue', 'chama-ops'); ?></a>
+                </div>
+            </div>
+        </div>
 
         <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
             <h2 style="margin-top:0;"><?php esc_html_e('Record Origin Snapshot', 'chama-ops'); ?></h2>

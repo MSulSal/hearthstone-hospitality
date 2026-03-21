@@ -322,13 +322,13 @@ function chama_inn_get_core_page_blueprint(): array
         [
             "title"   => __("Home", "chama-inn"),
             "slug"    => "home",
-            "excerpt" => __("Guest-first stay app for restaurant orders, gift shop, service requests, and front desk help.", "chama-inn"),
+            "excerpt" => __("Guest-facing POS app for restaurant orders, gift shop checkout, service requests, and front desk help.", "chama-inn"),
             "pattern" => "patterns/inn-conversion-page.php",
         ],
         [
             "title"   => __("Guest Hub", "chama-inn"),
             "slug"    => "guest-hub",
-            "excerpt" => __("Primary in-stay hub opened from room QR codes.", "chama-inn"),
+            "excerpt" => __("Primary guest POS hub opened from room QR codes.", "chama-inn"),
             "pattern" => "patterns/guest-hub-page.php",
         ],
         [
@@ -579,7 +579,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 9;
+    $target_version = 10;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -715,6 +715,34 @@ function chama_inn_migrate_seeded_copy(): void
 
                 if ($fresh_explore_pattern !== "") {
                     $updated_content = $fresh_explore_pattern;
+                }
+            }
+        }
+
+        if ($slug === "dining") {
+            $should_refresh_dining = strpos($updated_content, "Service hours") !== false
+                || strpos($updated_content, "Planned expansions") !== false
+                || strpos($updated_content, "Filet Mignon") === false;
+
+            if ($should_refresh_dining) {
+                $fresh_dining_pattern = chama_inn_load_pattern_content("patterns/dining-page.php");
+
+                if ($fresh_dining_pattern !== "") {
+                    $updated_content = $fresh_dining_pattern;
+                }
+            }
+        }
+
+        if ($slug === "gift-shop") {
+            $should_refresh_gift_shop = strpos($updated_content, "Featured categories") !== false
+                || strpos($updated_content, "Operations readiness") !== false
+                || strpos($updated_content, "Chama Rail Mug") === false;
+
+            if ($should_refresh_gift_shop) {
+                $fresh_gift_shop_pattern = chama_inn_load_pattern_content("patterns/gift-shop-page.php");
+
+                if ($fresh_gift_shop_pattern !== "") {
+                    $updated_content = $fresh_gift_shop_pattern;
                 }
             }
         }

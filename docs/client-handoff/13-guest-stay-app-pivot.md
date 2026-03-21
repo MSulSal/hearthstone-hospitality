@@ -1,4 +1,4 @@
-# Guest-Stay App Pivot (QR-First)
+# Guest-Stay App Pivot (QR-First POS)
 
 ## Why this pivot happened
 The product direction is now explicit: this is **not** a brochure-first website.
@@ -7,12 +7,12 @@ Primary usage is:
 1. Guest arrives at the inn.
 2. Guest scans a QR code.
 3. Guest opens the app on phone.
-4. Guest uses in-stay actions (restaurant, gift shop, requests, support).
+4. Guest uses in-stay POS actions (restaurant, gift shop, requests, support).
 
 Prospective-guest pages still exist, but they are secondary.
 
 ## What changed in this commit
-- Homepage copy direction now frames the experience as an in-stay app.
+- Homepage copy direction now frames the experience as an in-stay guest POS app.
 - Core auto-created pages now prioritize:
   - Guest Hub
   - My Stay
@@ -30,12 +30,12 @@ Prospective-guest pages still exist, but they are secondary.
 ## What this means for client demos
 Demo flow should now start with:
 1. "Guest scans QR and opens Guest Hub."
-2. "Guest places restaurant order."
+2. "Guest places restaurant POS order."
 3. "Guest browses gift shop."
 4. "Guest submits a service request."
 5. "Front desk/ops side handles the request in WordPress admin."
 
-This tells a stronger operational story than a generic hospitality brochure.
+This tells a stronger operational story than a generic hospitality brochure and aligns with point-of-sale workflows.
 
 ## Immediate next steps
 1. Bind each guest action button to live pages/routes.

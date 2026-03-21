@@ -1,6 +1,6 @@
-# Client Handoff Packet: Chama Station Inn Operations PWA Prototype
+# Client Handoff Packet: Chama Station Inn Guest-Facing POS App Prototype
 
-This packet is written for Chama Station Inn stakeholders reviewing why the current prototype should become the inn's operations PWA.
+This packet is written for Chama Station Inn stakeholders reviewing why the current prototype should become the guest-facing side of the inn's POS app (with WordPress powering admin dashboards and operations).
 
 ## Context captured from current public site
 - Current public page: https://chamastationinn.com/
@@ -8,6 +8,8 @@ This packet is written for Chama Station Inn stakeholders reviewing why the curr
 - Live page content is still in a "Coming Soon" state.
 
 This gap is exactly the opportunity: pair the spa-like guest-facing brand refresh with an equally polished back-of-house operations system.
+
+> Note: some older files still use the earlier "PWA" phrasing; current product direction is guest-facing POS app + WordPress operations dashboards.
 
 ## How to use this packet
 1. Review the business case in `01-product-intent-and-ops-value.md`.
@@ -26,7 +28,7 @@ This gap is exactly the opportunity: pair the spa-like guest-facing brand refres
 
 ## Files
 - `00-term-mapping-workbook.md` - replaces prototype language with inn-specific wording.
-- `01-product-intent-and-ops-value.md` - why this should be Chama Station Inn's operations PWA.
+- `01-product-intent-and-ops-value.md` - why this should become Chama Station Inn's guest-facing POS app + operations system.
 - `02-architecture-and-data-model.md` - practical architecture, data model, and security posture.
 - `03-demo-walkthrough-and-acceptance.md` - stakeholder demo flow and acceptance checklist.
 - `04-delivery-plan-and-next-phases.md` - staged implementation from prototype to production.
