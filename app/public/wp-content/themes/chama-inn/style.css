@@ -21,6 +21,7 @@ Text Domain: chama-inn
   --chama-text-soft: #302a27;
   --chama-text-inverse: #f9f3ea;
   --chama-muted: #6f8074;
+  --chama-nav-ink: #6f8680;
   --chama-accent: #5f7a73;
   --chama-accent-soft: #7f9389;
   --chama-accent-strong: #4c665f;
@@ -326,7 +327,7 @@ iframe {
   font-family: "Fraunces", Georgia, "Times New Roman", serif;
   font-size: clamp(1.03rem, 0.98rem + 0.2vw, 1.14rem);
   font-weight: 600;
-  color: var(--chama-accent-strong);
+  color: var(--chama-nav-ink);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -396,7 +397,7 @@ iframe {
 }
 
 .site-header__nav a {
-  color: var(--chama-accent-strong);
+  color: var(--chama-nav-ink);
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 600;
@@ -413,8 +414,9 @@ iframe {
 .site-header__nav a:focus-visible,
 .site-header__nav .current-menu-item > a,
 .site-header__nav .current_page_item > a {
-  color: var(--chama-highlight-strong);
-  border-bottom-color: var(--chama-highlight-strong);
+  color: var(--chama-nav-ink);
+  border-bottom-color: color-mix(in srgb, var(--chama-nav-ink) 90%, #ffffff 10%);
+  opacity: 0.9;
 }
 
 .home .site-header {
@@ -432,20 +434,6 @@ iframe {
 
 .home .site-header::before {
   opacity: 0.06;
-}
-
-.home .site-header__nav a,
-.home .site-header__title {
-  color: var(--chama-accent-strong);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22);
-}
-
-.home .site-header__nav a:hover,
-.home .site-header__nav a:focus-visible,
-.home .site-header__nav .current-menu-item > a,
-.home .site-header__nav .current_page_item > a {
-  color: var(--chama-highlight-strong);
-  border-bottom-color: var(--chama-highlight-strong);
 }
 
 .home.admin-bar .site-header {
@@ -1230,21 +1218,22 @@ iframe {
   }
 
   .site-header__nav a {
-    border: 1px solid rgba(111, 134, 128, 0.25);
+    border: 1px solid color-mix(in srgb, var(--chama-nav-ink) 35%, #ffffff 65%);
     background: rgba(247, 241, 231, 0.52);
     border-radius: 999px;
     padding: 0.44rem 0.72rem;
     font-size: 0.85rem;
     line-height: 1.2;
-    color: var(--chama-text);
+    color: var(--chama-nav-ink);
     text-shadow: none;
+    opacity: 1;
   }
 
   .site-header__nav .current-menu-item > a,
   .site-header__nav .current_page_item > a {
-    background: rgba(111, 134, 128, 0.2);
-    border-color: rgba(111, 134, 128, 0.34);
-    color: var(--chama-accent-strong);
+    background: color-mix(in srgb, var(--chama-nav-ink) 18%, #f7f1e7 82%);
+    border-color: color-mix(in srgb, var(--chama-nav-ink) 50%, #ffffff 50%);
+    color: var(--chama-nav-ink);
   }
 
   body {
