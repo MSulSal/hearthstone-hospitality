@@ -103,13 +103,13 @@ function chama_inn_customize_register(WP_Customize_Manager $wp_customize): void
 
     $wp_customize->add_control("chama_inn_header_cta_page", [
         "label"       => __("Header CTA Page", "chama-inn"),
-        "description" => __("Choose which page the Book Your Stay button opens.", "chama-inn"),
+        "description" => __("Choose which page the Open Guest Hub button opens.", "chama-inn"),
         "section"     => "chama_inn_design",
         "type"        => "dropdown-pages",
     ]);
 
     $wp_customize->add_setting("chama_inn_header_cta_label", [
-        "default"           => "Book Your Stay",
+        "default"           => "Open Guest Hub",
         "sanitize_callback" => "sanitize_text_field",
         "type"              => "theme_mod",
     ]);
@@ -145,7 +145,7 @@ function chama_inn_get_header_cta_url(): string
         }
     }
 
-    $fallback_paths = ["contact", "book", "inquire"];
+    $fallback_paths = ["guest-hub", "my-stay", "contact", "book", "inquire"];
 
     foreach ($fallback_paths as $path) {
         $page = get_page_by_path($path);
@@ -164,15 +164,37 @@ function chama_inn_get_header_cta_url(): string
 
 function chama_inn_get_header_cta_label(): string
 {
-    $label = (string) get_theme_mod("chama_inn_header_cta_label", "Book Your Stay");
+    $label = (string) get_theme_mod("chama_inn_header_cta_label", "Open Guest Hub");
     $label = trim($label);
 
     if ($label === "") {
-        return __("Book Your Stay", "chama-inn");
+        return __("Open Guest Hub", "chama-inn");
     }
 
     return $label;
 }
+
+function chama_inn_migrate_header_cta_label(): void
+{
+    if (!is_admin() || !current_user_can("manage_options")) {
+        return;
+    }
+
+    $migration_version = (int) get_option("chama_inn_header_cta_migration_version", 0);
+
+    if ($migration_version >= 1) {
+        return;
+    }
+
+    $existing_label = trim((string) get_theme_mod("chama_inn_header_cta_label", ""));
+
+    if ($existing_label === "" || strcasecmp($existing_label, "Book Your Stay") === 0) {
+        set_theme_mod("chama_inn_header_cta_label", "Open Guest Hub");
+    }
+
+    update_option("chama_inn_header_cta_migration_version", 1, false);
+}
+add_action("admin_init", "chama_inn_migrate_header_cta_label");
 
 function chama_inn_get_packaged_logo_uri(): string
 {
@@ -195,12 +217,71 @@ function chama_inn_get_packaged_logo_uri(): string
     return "";
 }
 
+function chama_inn_get_logo_variant_uri(string $context = "default"): string
+{
+    $context = sanitize_key($context);
+
+    $context_paths = [
+        "header"    => [
+            "assets/images/chama_logo_color_spectrum/soft_charcoal.png",
+            "assets/images/chama_logo_color_spectrum/iron_brown.png",
+        ],
+        "footer"    => [
+            "assets/images/chama_logo_color_spectrum/soft_charcoal.png",
+            "assets/images/chama_logo_color_spectrum/iron_brown.png",
+        ],
+        "hero"      => [
+            "assets/images/chama_logo_color_spectrum/dusty_sage.png",
+            "assets/images/chama_logo_color_spectrum/golden_adobe.png",
+            "assets/images/chama_logo_color_spectrum/honey_oak.png",
+        ],
+        "admin-bar" => [
+            "assets/images/chama_logo_color_spectrum/golden_adobe.png",
+            "assets/images/chama_logo_color_spectrum/honey_oak.png",
+            "assets/images/chama_logo_color_spectrum/trim_blue_green.png",
+        ],
+        "login"     => [
+            "assets/images/chama_logo_color_spectrum/soft_charcoal.png",
+            "assets/images/chama_logo_color_spectrum/iron_brown.png",
+        ],
+    ];
+
+    $paths = $context_paths[$context] ?? [];
+
+    $paths = array_merge($paths, [
+        "assets/images/client-logo.webp",
+        "assets/images/client-logo.png",
+        "assets/images/client-logo.jpg",
+        "assets/images/client-logo.jpeg",
+        "assets/images/client-logo.svg",
+    ]);
+
+    foreach ($paths as $relative_path) {
+        $absolute_path = get_theme_file_path($relative_path);
+
+        if (file_exists($absolute_path)) {
+            return get_theme_file_uri($relative_path);
+        }
+    }
+
+    return "";
+}
+
 function chama_inn_print_branding_styles(): void
 {
-    $logo_uri = chama_inn_get_packaged_logo_uri();
+    $admin_logo_uri = chama_inn_get_logo_variant_uri("admin-bar");
+    $login_logo_uri = chama_inn_get_logo_variant_uri("login");
 
-    if ($logo_uri === "") {
+    if ($admin_logo_uri === "" && $login_logo_uri === "") {
         return;
+    }
+
+    if ($admin_logo_uri === "") {
+        $admin_logo_uri = $login_logo_uri;
+    }
+
+    if ($login_logo_uri === "") {
+        $login_logo_uri = $admin_logo_uri;
     }
 
     ?>
@@ -211,7 +292,7 @@ function chama_inn_print_branding_styles(): void
             width: 18px;
             height: 18px;
             margin-top: 7px;
-            background-image: url('<?php echo esc_url($logo_uri); ?>');
+            background-image: url('<?php echo esc_url($admin_logo_uri); ?>');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
@@ -223,7 +304,7 @@ function chama_inn_print_branding_styles(): void
         }
 
         body.login h1 a {
-            background-image: url('<?php echo esc_url($logo_uri); ?>');
+            background-image: url('<?php echo esc_url($login_logo_uri); ?>');
             background-size: contain;
             background-position: center;
             width: 280px;
@@ -241,49 +322,55 @@ function chama_inn_get_core_page_blueprint(): array
         [
             "title"   => __("Home", "chama-inn"),
             "slug"    => "home",
-            "excerpt" => __("A calm, premium Chama stay with railroad-town character and welcoming hospitality.", "chama-inn"),
+            "excerpt" => __("Guest-first stay app for restaurant orders, gift shop, service requests, and front desk help.", "chama-inn"),
             "pattern" => "patterns/inn-conversion-page.php",
         ],
         [
-            "title"   => __("Stay / Rooms", "chama-inn"),
-            "slug"    => "stay-rooms",
-            "excerpt" => __("Room options and amenities for a comfortable Chama stay.", "chama-inn"),
-            "pattern" => "patterns/stay-rooms-page.php",
+            "title"   => __("Guest Hub", "chama-inn"),
+            "slug"    => "guest-hub",
+            "excerpt" => __("Primary in-stay hub opened from room QR codes.", "chama-inn"),
+            "pattern" => "patterns/guest-hub-page.php",
         ],
         [
-            "title"   => __("Restaurant", "chama-inn"),
+            "title"   => __("My Stay", "chama-inn"),
+            "slug"    => "my-stay",
+            "excerpt" => __("Stay details, check-in/out guidance, and guest preferences.", "chama-inn"),
+            "pattern" => "patterns/my-stay-page.php",
+        ],
+        [
+            "title"   => __("Restaurant Orders", "chama-inn"),
             "slug"    => "dining",
-            "excerpt" => __("Current restaurant details, hours, and guest dining options.", "chama-inn"),
+            "excerpt" => __("Order flow, timing, and service windows during your stay.", "chama-inn"),
             "pattern" => "patterns/dining-page.php",
         ],
         [
             "title"   => __("Gift Shop", "chama-inn"),
             "slug"    => "gift-shop",
-            "excerpt" => __("Curated goods, local finds, and rail-town keepsakes.", "chama-inn"),
+            "excerpt" => __("Guest-side catalog and pickup-ready purchase flow.", "chama-inn"),
             "pattern" => "patterns/gift-shop-page.php",
         ],
         [
-            "title"   => __("Weddings & Events", "chama-inn"),
-            "slug"    => "weddings-events",
-            "excerpt" => __("Optional private gatherings and celebration inquiries.", "chama-inn"),
-            "pattern" => "patterns/weddings-events-page.php",
+            "title"   => __("Service Requests", "chama-inn"),
+            "slug"    => "service-requests",
+            "excerpt" => __("Request housekeeping, amenities, and front-desk support.", "chama-inn"),
+            "pattern" => "patterns/service-requests-page.php",
         ],
         [
             "title"   => __("Explore Chama", "chama-inn"),
             "slug"    => "explore-chama",
-            "excerpt" => __("Railroad-first local recommendations for your visit.", "chama-inn"),
+            "excerpt" => __("Quick local guide for train guests and walkable stops.", "chama-inn"),
             "pattern" => "patterns/explore-chama-page.php",
         ],
         [
-            "title"   => __("About / Our Story", "chama-inn"),
-            "slug"    => "about-our-story",
-            "excerpt" => __("Inn story, values, and place-based identity.", "chama-inn"),
-            "pattern" => "patterns/about-story-page.php",
+            "title"   => __("Stay / Rooms", "chama-inn"),
+            "slug"    => "stay-rooms",
+            "excerpt" => __("Room options for prospective guests and direct booking conversations.", "chama-inn"),
+            "pattern" => "patterns/stay-rooms-page.php",
         ],
         [
-            "title"   => __("Contact / Book / Inquire", "chama-inn"),
+            "title"   => __("Front Desk / Contact", "chama-inn"),
             "slug"    => "contact",
-            "excerpt" => __("Book your stay or send an inquiry.", "chama-inn"),
+            "excerpt" => __("Direct contact, urgent help path, and stay support details.", "chama-inn"),
             "pattern" => "patterns/contact-inquiry-page.php",
         ],
     ];
@@ -350,12 +437,13 @@ function chama_inn_set_default_nav_menu(array $pages_by_slug): void
 
     $menu_order = [
         "home",
-        "stay-rooms",
+        "guest-hub",
+        "my-stay",
         "dining",
         "gift-shop",
+        "service-requests",
         "explore-chama",
-        "about-our-story",
-        "weddings-events",
+        "stay-rooms",
         "contact",
     ];
 
@@ -491,7 +579,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 8;
+    $target_version = 9;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -528,9 +616,12 @@ function chama_inn_migrate_seeded_copy(): void
 
     $slugs_to_scan = [
         "home",
+        "guest-hub",
+        "my-stay",
         "stay-rooms",
         "dining",
         "gift-shop",
+        "service-requests",
         "weddings-events",
         "explore-chama",
         "about-our-story",
@@ -551,6 +642,9 @@ function chama_inn_migrate_seeded_copy(): void
 
         if ($slug === "home") {
             $legacy_markers = [
+                "Stay / Rooms",
+                "Book your stay or send an inquiry",
+                "Planning a train weekend, event trip, or quiet getaway?",
                 "A calm mountain stay, supported by modern inn operations",
                 "Spa style comfort in historic Chama, New Mexico",
                 "Use this section for your primary promise.",
@@ -684,43 +778,53 @@ function chama_inn_register_block_patterns(): void
     $pattern_registry = [
         "inn-conversion-page" => [
             "file"        => "patterns/inn-conversion-page.php",
-            "title"       => __("Inn Conversion Page (Light)", "chama-inn"),
-            "description" => __("Editable homepage layout for a premium inn landing page and operations pitch.", "chama-inn"),
+            "title"       => __("Guest App Home (QR Entry)", "chama-inn"),
+            "description" => __("Guest-first homepage for in-stay actions opened from room QR codes.", "chama-inn"),
+        ],
+        "guest-hub-page" => [
+            "file"        => "patterns/guest-hub-page.php",
+            "title"       => __("Interior: Guest Hub", "chama-inn"),
+            "description" => __("Primary in-stay app surface with fast action links for guests.", "chama-inn"),
+        ],
+        "my-stay-page" => [
+            "file"        => "patterns/my-stay-page.php",
+            "title"       => __("Interior: My Stay", "chama-inn"),
+            "description" => __("Guest-facing stay summary, timing, and preference context.", "chama-inn"),
         ],
         "stay-rooms-page" => [
             "file"        => "patterns/stay-rooms-page.php",
-            "title"       => __("Interior: Stay and Rooms", "chama-inn"),
-            "description" => __("Starter layout for room categories, amenities, and booking CTA.", "chama-inn"),
+            "title"       => __("Interior: Rooms and Booking", "chama-inn"),
+            "description" => __("Prospective-guest room browse page kept as secondary to in-stay flows.", "chama-inn"),
         ],
         "dining-page" => [
             "file"        => "patterns/dining-page.php",
-            "title"       => __("Interior: Restaurant", "chama-inn"),
-            "description" => __("Starter layout for restaurant details, hours, and menu direction.", "chama-inn"),
+            "title"       => __("Interior: Restaurant Orders", "chama-inn"),
+            "description" => __("Guest-side restaurant ordering and timing communication surface.", "chama-inn"),
         ],
         "gift-shop-page" => [
             "file"        => "patterns/gift-shop-page.php",
             "title"       => __("Interior: Gift Shop", "chama-inn"),
-            "description" => __("Starter layout for gift catalog, purchase flow, and fulfillment notes.", "chama-inn"),
+            "description" => __("Guest-side catalog and pickup flow for gift shop items.", "chama-inn"),
         ],
-        "weddings-events-page" => [
-            "file"        => "patterns/weddings-events-page.php",
-            "title"       => __("Interior: Weddings and Events", "chama-inn"),
-            "description" => __("Starter layout for intimate wedding and private event inquiries.", "chama-inn"),
+        "service-requests-page" => [
+            "file"        => "patterns/service-requests-page.php",
+            "title"       => __("Interior: Service Requests", "chama-inn"),
+            "description" => __("Housekeeping and support request surface for active guests.", "chama-inn"),
         ],
         "explore-chama-page" => [
             "file"        => "patterns/explore-chama-page.php",
             "title"       => __("Interior: Explore Chama", "chama-inn"),
-            "description" => __("Starter layout for railroad-first local exploration highlights.", "chama-inn"),
+            "description" => __("Quick local guide for active guests during their stay.", "chama-inn"),
         ],
         "about-story-page" => [
             "file"        => "patterns/about-story-page.php",
             "title"       => __("Interior: About and Story", "chama-inn"),
-            "description" => __("Starter layout for inn story, community role, and guest-first values.", "chama-inn"),
+            "description" => __("Optional brand-story page kept secondary to in-stay app flows.", "chama-inn"),
         ],
         "contact-inquiry-page" => [
             "file"        => "patterns/contact-inquiry-page.php",
-            "title"       => __("Interior: Contact and Inquiry", "chama-inn"),
-            "description" => __("Starter layout for direct contact details, map info, and inquiry CTA.", "chama-inn"),
+            "title"       => __("Interior: Front Desk and Contact", "chama-inn"),
+            "description" => __("Direct support contact page for guests who need quick assistance.", "chama-inn"),
         ],
     ];
 

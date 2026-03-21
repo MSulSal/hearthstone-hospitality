@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 ?>
 <footer class="site-footer">
     <?php
-    $footer_logo = function_exists('chama_inn_get_packaged_logo_uri') ? chama_inn_get_packaged_logo_uri() : '';
+    $footer_logo = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri('footer') : '';
     ?>
     <div class="site-footer__inner">
         <div class="site-footer__brand">

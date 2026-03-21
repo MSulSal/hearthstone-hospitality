@@ -10,7 +10,7 @@ get_header();
     <?php if (have_posts()) : ?>
         <?php while (have_posts()) : the_post(); ?>
             <?php
-            $packaged_logo_uri = function_exists('chama_inn_get_packaged_logo_uri') ? chama_inn_get_packaged_logo_uri() : '';
+            $hero_logo_uri = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri('hero') : '';
             $hero_image_url = get_the_post_thumbnail_url(get_the_ID(), 'full');
             if ($hero_image_url === false) {
                 $hero_image_url = get_theme_file_uri('assets/images/csi-assets/csi-31.jpg');
@@ -23,9 +23,9 @@ get_header();
                 <section class="home-hero"<?php echo $hero_style; ?>>
                     <div class="home-hero__overlay"></div>
                     <div class="home-hero__content">
-                        <?php if ($packaged_logo_uri !== '') : ?>
+                        <?php if ($hero_logo_uri !== '') : ?>
                             <div class="home-hero__logo-wrap">
-                                <img class="home-hero__brand-image" src="<?php echo esc_url($packaged_logo_uri); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+                                <img class="home-hero__brand-image" src="<?php echo esc_url($hero_logo_uri); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
                             </div>
                             <h1 class="screen-reader-text"><?php echo esc_html(get_bloginfo('name')); ?></h1>
                         <?php elseif (function_exists('the_custom_logo') && has_custom_logo()) : ?>
