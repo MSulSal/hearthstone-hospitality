@@ -652,6 +652,13 @@ iframe {
   display: block;
 }
 
+.home-hero[style*="background-image"] {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-color: rgba(20, 18, 16, 0.92);
+}
+
 .home-hero[style*="background-image"] .home-hero__overlay::before {
   background: rgba(199, 154, 99, 0.2);
   mix-blend-mode: color;
