@@ -791,6 +791,98 @@ iframe {
   background: rgba(247, 244, 238, 0.9);
 }
 
+.chama-item-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.78rem;
+}
+
+.chama-step-btn,
+.chama-step-clear {
+  border: 1px solid var(--chama-border);
+  background: var(--chama-surface);
+  color: var(--chama-text);
+  border-radius: 10px;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.chama-step-btn:hover,
+.chama-step-clear:hover {
+  background: var(--chama-bg-soft);
+}
+
+.chama-step-qty {
+  min-width: 1.4rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--chama-accent-strong);
+}
+
+.chama-step-clear {
+  margin-left: auto;
+  color: #8a4c49;
+}
+
+.chama-cart-summary {
+  border: 1px solid var(--chama-border);
+  border-radius: 12px;
+  padding: 0.65rem 0.7rem;
+  background: rgba(247, 244, 238, 0.72);
+}
+
+.chama-cart-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.chama-cart-line {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.chama-cart-line__info {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.chama-cart-line__info span {
+  color: var(--chama-text-soft);
+  font-size: 0.84rem;
+}
+
+.chama-cart-remove {
+  border: 1px solid var(--chama-border);
+  border-radius: 8px;
+  width: 1.8rem;
+  height: 1.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--chama-surface);
+  color: #8a4c49;
+  cursor: pointer;
+}
+
+.chama-cart-remove:hover {
+  background: var(--chama-bg-soft);
+}
+
+.chama-cart-total {
+  margin: 0.72rem 0 0.9rem;
+  color: var(--chama-text);
+}
+
 .chama-order-panel {
   position: sticky;
   top: 92px;
@@ -829,6 +921,24 @@ iframe {
 
 .chama-order-submit {
   width: 100%;
+  border: 0;
+  border-radius: 999px;
+  background: var(--chama-accent-strong);
+  color: var(--chama-text-inverse);
+  font-weight: 700;
+  padding: 0.7rem 0.95rem;
+  cursor: pointer;
+}
+
+.chama-order-submit:hover,
+.chama-order-submit:focus-visible {
+  background: var(--chama-accent);
+}
+
+.chama-order-submit:disabled {
+  background: #b7b1aa;
+  color: #f1efeb;
+  cursor: not-allowed;
 }
 
 .chama-order-actions {

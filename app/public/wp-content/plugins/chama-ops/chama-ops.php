@@ -3,7 +3,7 @@
  * Plugin Name: Chama Ops
  * Plugin URI: https://chamastationinn.com
  * Description: Hospitality operations data models and workflows for Chama Station Inn.
- * Version: 1.25.0
+ * Version: 1.26.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
  */
@@ -5284,6 +5284,208 @@ function chama_ops_get_available_room_service_items(): array
 }
 
 /**
+ * Resolve room context for guest submissions.
+ */
+function chama_ops_get_guest_room_context(): string
+{
+    $query_room = isset($_GET['room']) ? sanitize_text_field((string) wp_unslash($_GET['room'])) : '';
+
+    if ($query_room !== '') {
+        return $query_room;
+    }
+
+    if (is_user_logged_in()) {
+        $user_id = get_current_user_id();
+
+        if ($user_id > 0) {
+            $meta_candidates = [
+                'chama_room_number',
+                '_chama_room_number',
+                'room_number',
+            ];
+
+            foreach ($meta_candidates as $meta_key) {
+                $value = trim((string) get_user_meta($user_id, $meta_key, true));
+
+                if ($value !== '') {
+                    return $value;
+                }
+            }
+        }
+    }
+
+    return 'Auto';
+}
+
+/**
+ * Print cart interaction script one time per response.
+ */
+function chama_ops_print_guest_cart_script_once(): void
+{
+    static $printed = false;
+
+    if ($printed) {
+        return;
+    }
+
+    $printed = true;
+    ?>
+    <script>
+    (function () {
+        var roots = document.querySelectorAll('[data-cart-app]');
+
+        if (!roots.length) {
+            return;
+        }
+
+        var trashSvg = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>';
+
+        roots.forEach(function (root) {
+            var cards = root.querySelectorAll('[data-cart-item]');
+            var cartInput = root.querySelector('[data-cart-input]');
+            var summary = root.querySelector('[data-cart-summary]');
+            var totalNode = root.querySelector('[data-cart-total]');
+            var submitButton = root.querySelector('[data-cart-submit]');
+
+            if (!cards.length || !cartInput || !summary || !totalNode || !submitButton) {
+                return;
+            }
+
+            var cart = {};
+
+            var setQtyOnCard = function (card, qty) {
+                var qtyNode = card.querySelector('[data-qty]');
+                var clearBtn = card.querySelector('[data-action="clear"]');
+
+                if (qtyNode) {
+                    qtyNode.textContent = String(qty);
+                }
+
+                if (clearBtn) {
+                    clearBtn.hidden = qty <= 0;
+                }
+            };
+
+            var getItemData = function (card) {
+                return {
+                    id: String(card.getAttribute('data-item-id') || ''),
+                    title: String(card.getAttribute('data-item-title') || ''),
+                    price: parseFloat(String(card.getAttribute('data-item-price') || '0')) || 0
+                };
+            };
+
+            var escapeHtml = function (value) {
+                return String(value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            };
+
+            var recalculate = function () {
+                var lines = [];
+                var total = 0;
+
+                cards.forEach(function (card) {
+                    var item = getItemData(card);
+                    var qty = parseInt(String(cart[item.id] || 0), 10);
+
+                    if (!item.id || qty <= 0) {
+                        setQtyOnCard(card, 0);
+                        return;
+                    }
+
+                    setQtyOnCard(card, qty);
+                    total += item.price * qty;
+                    lines.push({
+                        id: item.id,
+                        title: item.title,
+                        qty: qty,
+                        subtotal: item.price * qty
+                    });
+                });
+
+                if (!lines.length) {
+                    summary.innerHTML = '<p class="chama-order-meta">No items selected yet.</p>';
+                    submitButton.disabled = true;
+                    cartInput.value = '{}';
+                    totalNode.textContent = '$0.00';
+                    return;
+                }
+
+                submitButton.disabled = false;
+                cartInput.value = JSON.stringify(cart);
+                totalNode.textContent = '$' + total.toFixed(2);
+
+                var html = '<ul class="chama-cart-lines">';
+
+                lines.forEach(function (line) {
+                    html += '<li class="chama-cart-line">';
+                    html += '<div class="chama-cart-line__info"><strong>' + escapeHtml(line.title) + '</strong><span>x' + line.qty + ' - $' + line.subtotal.toFixed(2) + '</span></div>';
+                    html += '<button type="button" class="chama-cart-remove" data-remove-id="' + line.id + '" aria-label="Remove item">' + trashSvg + '</button>';
+                    html += '</li>';
+                });
+
+                html += '</ul>';
+                summary.innerHTML = html;
+            };
+
+            cards.forEach(function (card) {
+                var item = getItemData(card);
+
+                if (!item.id) {
+                    return;
+                }
+
+                cart[item.id] = 0;
+                setQtyOnCard(card, 0);
+
+                card.addEventListener('click', function (event) {
+                    var trigger = event.target.closest('button[data-action]');
+
+                    if (!trigger) {
+                        return;
+                    }
+
+                    var action = trigger.getAttribute('data-action');
+                    var currentQty = parseInt(String(cart[item.id] || 0), 10);
+
+                    if (action === 'increment') {
+                        cart[item.id] = currentQty + 1;
+                    } else if (action === 'decrement') {
+                        cart[item.id] = Math.max(0, currentQty - 1);
+                    } else if (action === 'clear') {
+                        cart[item.id] = 0;
+                    }
+
+                    recalculate();
+                });
+            });
+
+            summary.addEventListener('click', function (event) {
+                var removeButton = event.target.closest('[data-remove-id]');
+
+                if (!removeButton) {
+                    return;
+                }
+
+                var removeId = String(removeButton.getAttribute('data-remove-id') || '');
+
+                if (removeId && Object.prototype.hasOwnProperty.call(cart, removeId)) {
+                    cart[removeId] = 0;
+                    recalculate();
+                }
+            });
+
+            recalculate();
+        });
+    }());
+    </script>
+    <?php
+}
+
+/**
  * Render guest room-service app shortcode.
  *
  * Usage: [chama_room_service_app]
@@ -5298,7 +5500,7 @@ function chama_ops_render_room_service_app_shortcode(): string
 
     ob_start();
     ?>
-    <section class="chama-room-service-app chama-service-app" style="margin:0 auto;max-width:1160px;">
+    <section class="chama-room-service-app chama-service-app" data-cart-app="room-service" style="margin:0 auto;max-width:1160px;">
         <?php if ($notice_key === 'submitted' && $order_ref > 0) : ?>
             <div class="chama-app-notice chama-app-notice--success">
                 <?php
@@ -5311,10 +5513,6 @@ function chama_ops_render_room_service_app_shortcode(): string
         <?php elseif ($notice_key === 'invalid_item') : ?>
             <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('That menu item is currently unavailable. Please choose another item.', 'chama-ops'); ?>
-            </div>
-        <?php elseif ($notice_key === 'missing_room') : ?>
-            <div class="chama-app-notice chama-app-notice--error">
-                <?php esc_html_e('Please add a room number before submitting your order.', 'chama-ops'); ?>
             </div>
         <?php endif; ?>
 
@@ -5369,6 +5567,20 @@ function chama_ops_render_room_service_app_shortcode(): string
                                         </p>
                                     <?php endif; ?>
                                 </div>
+                                <div
+                                    class="chama-item-stepper"
+                                    data-cart-item
+                                    data-item-id="<?php echo esc_attr((string) $item_id); ?>"
+                                    data-item-title="<?php echo esc_attr((string) $item->post_title); ?>"
+                                    data-item-price="<?php echo esc_attr($price !== '' ? (string) ((float) $price) : '0'); ?>"
+                                >
+                                    <button type="button" class="chama-step-btn" data-action="decrement" aria-label="<?php esc_attr_e('Decrease quantity', 'chama-ops'); ?>">-</button>
+                                    <span class="chama-step-qty" data-qty>0</span>
+                                    <button type="button" class="chama-step-btn" data-action="increment" aria-label="<?php esc_attr_e('Increase quantity', 'chama-ops'); ?>">+</button>
+                                    <button type="button" class="chama-step-clear" data-action="clear" hidden aria-label="<?php esc_attr_e('Remove item', 'chama-ops'); ?>">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>
+                                    </button>
+                                </div>
                             </article>
                         <?php endforeach; ?>
                     </div>
@@ -5377,63 +5589,26 @@ function chama_ops_render_room_service_app_shortcode(): string
                 <aside class="chama-service-app__panel">
                     <div class="chama-card chama-order-panel">
                         <h3 class="chama-service-app__heading"><?php esc_html_e('Place your order', 'chama-ops'); ?></h3>
-                        <p class="chama-order-meta"><?php esc_html_e('Choose an item, set quantity, add notes, then submit once.', 'chama-ops'); ?></p>
+                        <p class="chama-order-meta"><?php esc_html_e('Adjust item quantities and submit when ready.', 'chama-ops'); ?></p>
 
                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
                             <?php wp_nonce_field('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce'); ?>
                             <input type="hidden" name="action" value="chama_ops_submit_room_service_order">
+                            <input type="hidden" name="chama_room_service_cart" value="{}" data-cart-input>
 
-                            <p class="chama-form-field">
-                                <label for="chama_room_service_item_id"><?php esc_html_e('Menu item', 'chama-ops'); ?></label>
-                                <select id="chama_room_service_item_id" name="chama_room_service_item_id" required>
-                                    <option value=""><?php esc_html_e('Choose an item', 'chama-ops'); ?></option>
-                                    <?php foreach ($items as $item) : ?>
-                                        <?php
-                                        $item_id      = (int) $item->ID;
-                                        $price        = (string) get_post_meta($item_id, '_chama_room_service_price', true);
-                                        $prep_minutes = (int) get_post_meta($item_id, '_chama_room_service_prep_minutes', true);
-                                        $option_label = (string) $item->post_title;
+                            <div class="chama-cart-summary" data-cart-summary>
+                                <p class="chama-order-meta"><?php esc_html_e('No items selected yet.', 'chama-ops'); ?></p>
+                            </div>
+                            <p class="chama-cart-total"><strong><?php esc_html_e('Total', 'chama-ops'); ?>:</strong> <span data-cart-total>$0.00</span></p>
 
-                                        if ($price !== '') {
-                                            $option_label .= ' - $' . number_format((float) $price, 2);
-                                        }
-
-                                        if ($prep_minutes > 0) {
-                                            $option_label .= ' - ' . $prep_minutes . ' min';
-                                        }
-                                        ?>
-                                        <option value="<?php echo esc_attr((string) $item_id); ?>"><?php echo esc_html($option_label); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </p>
-
-                            <p class="chama-form-field">
-                                <label for="chama_room_service_room"><?php esc_html_e('Room', 'chama-ops'); ?></label>
-                                <input id="chama_room_service_room" type="text" name="chama_room_service_room" required>
-                            </p>
-                            <p class="chama-form-field">
-                                <label for="chama_room_service_qty"><?php esc_html_e('Qty', 'chama-ops'); ?></label>
-                                <input id="chama_room_service_qty" type="number" name="chama_room_service_qty" min="1" step="1" value="1" required>
-                            </p>
-                            <p class="chama-form-field">
-                                <label for="chama_room_service_guest_name"><?php esc_html_e('Name (optional)', 'chama-ops'); ?></label>
-                                <input id="chama_room_service_guest_name" type="text" name="chama_room_service_guest_name">
-                            </p>
-                            <p class="chama-form-field">
-                                <label for="chama_room_service_guest_phone"><?php esc_html_e('Phone (optional)', 'chama-ops'); ?></label>
-                                <input id="chama_room_service_guest_phone" type="text" name="chama_room_service_guest_phone">
-                            </p>
-                            <p class="chama-form-field">
-                                <label for="chama_room_service_notes"><?php esc_html_e('Notes (optional)', 'chama-ops'); ?></label>
-                                <textarea id="chama_room_service_notes" name="chama_room_service_notes" rows="3"></textarea>
-                            </p>
-                            <button type="submit" class="wp-element-button chama-order-submit"><?php esc_html_e('Submit order', 'chama-ops'); ?></button>
+                            <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled><?php esc_html_e('Submit order', 'chama-ops'); ?></button>
                         </form>
                     </div>
                 </aside>
             </div>
         <?php endif; ?>
     </section>
+    <?php chama_ops_print_guest_cart_script_once(); ?>
     <?php
     return (string) ob_get_clean();
 }
@@ -5446,12 +5621,7 @@ function chama_ops_submit_room_service_order(): void
 {
     check_admin_referer('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce');
 
-    $item_id = isset($_POST['chama_room_service_item_id']) ? absint(wp_unslash($_POST['chama_room_service_item_id'])) : 0;
-    $room    = isset($_POST['chama_room_service_room']) ? sanitize_text_field(wp_unslash($_POST['chama_room_service_room'])) : '';
-    $qty     = isset($_POST['chama_room_service_qty']) ? max(1, absint(wp_unslash($_POST['chama_room_service_qty']))) : 1;
-    $name    = isset($_POST['chama_room_service_guest_name']) ? sanitize_text_field(wp_unslash($_POST['chama_room_service_guest_name'])) : '';
-    $phone   = isset($_POST['chama_room_service_guest_phone']) ? sanitize_text_field(wp_unslash($_POST['chama_room_service_guest_phone'])) : '';
-    $notes   = isset($_POST['chama_room_service_notes']) ? sanitize_textarea_field(wp_unslash($_POST['chama_room_service_notes'])) : '';
+    $cart_payload = isset($_POST['chama_room_service_cart']) ? (string) wp_unslash($_POST['chama_room_service_cart']) : '';
 
     $redirect_url = wp_get_referer();
 
@@ -5459,55 +5629,89 @@ function chama_ops_submit_room_service_order(): void
         $redirect_url = (string) home_url('/');
     }
 
-    if ($room === '') {
-        wp_safe_redirect(add_query_arg('chama_room_service', 'missing_room', $redirect_url));
-        exit;
+    $cart = [];
+
+    if ($cart_payload !== '') {
+        $decoded_cart = json_decode($cart_payload, true);
+
+        if (is_array($decoded_cart)) {
+            foreach ($decoded_cart as $raw_item_id => $raw_qty) {
+                $item_id = absint((string) $raw_item_id);
+                $qty = max(0, absint($raw_qty));
+
+                if ($item_id > 0 && $qty > 0) {
+                    $cart[$item_id] = $qty;
+                }
+            }
+        }
     }
 
-    $item_post = get_post($item_id);
+    if (empty($cart)) {
+        $legacy_item_id = isset($_POST['chama_room_service_item_id']) ? absint(wp_unslash($_POST['chama_room_service_item_id'])) : 0;
+        $legacy_qty = isset($_POST['chama_room_service_qty']) ? max(1, absint(wp_unslash($_POST['chama_room_service_qty']))) : 0;
 
-    if (!$item_post instanceof WP_Post || $item_post->post_type !== 'room_service_item') {
+        if ($legacy_item_id > 0 && $legacy_qty > 0) {
+            $cart[$legacy_item_id] = $legacy_qty;
+        }
+    }
+
+    if (empty($cart)) {
         wp_safe_redirect(add_query_arg('chama_room_service', 'invalid_item', $redirect_url));
         exit;
     }
 
-    $is_available = (string) get_post_meta($item_id, '_chama_room_service_available', true) === '1';
+    $validated_cart = [];
+    $order_total = 0.0;
+    $total_qty = 0;
+    $order_lines = [];
 
-    if (!$is_available) {
+    foreach ($cart as $item_id => $qty) {
+        $item_post = get_post($item_id);
+
+        if (!$item_post instanceof WP_Post || $item_post->post_type !== 'room_service_item') {
+            continue;
+        }
+
+        $is_available = (string) get_post_meta($item_id, '_chama_room_service_available', true) === '1';
+
+        if (!$is_available) {
+            continue;
+        }
+
+        $price_raw = (string) get_post_meta($item_id, '_chama_room_service_price', true);
+        $price = $price_raw !== '' ? (float) $price_raw : 0.0;
+        $line_total = $price * $qty;
+
+        $validated_cart[$item_id] = $qty;
+        $order_total += $line_total;
+        $total_qty += $qty;
+        $order_lines[] = sprintf(
+            __('%1$s x%2$d - $%3$s', 'chama-ops'),
+            (string) $item_post->post_title,
+            $qty,
+            number_format($line_total, 2)
+        );
+    }
+
+    if (empty($validated_cart)) {
         wp_safe_redirect(add_query_arg('chama_room_service', 'invalid_item', $redirect_url));
         exit;
     }
 
-    $price_raw = (string) get_post_meta($item_id, '_chama_room_service_price', true);
-    $price     = $price_raw !== '' ? (float) $price_raw : 0.0;
-    $total     = number_format($price * $qty, 2, '.', '');
-    $order_note_lines = [];
+    $room = chama_ops_get_guest_room_context();
+    $order_note_lines = $order_lines;
 
-    if ($name !== '') {
-        $order_note_lines[] = sprintf(__('Guest Name: %s', 'chama-ops'), $name);
-    }
-
-    if ($phone !== '') {
-        $order_note_lines[] = sprintf(__('Guest Phone: %s', 'chama-ops'), $phone);
-    }
-
-    if ($notes !== '') {
-        $order_note_lines[] = sprintf(__('Notes: %s', 'chama-ops'), $notes);
-    }
-
-    $order_content = implode("\n", $order_note_lines);
-    $order_title   = sprintf(
-        __('Room %1$s - %2$s x%3$d', 'chama-ops'),
+    $order_title = sprintf(
+        __('Room %1$s - %2$d item(s)', 'chama-ops'),
         $room,
-        (string) $item_post->post_title,
-        $qty
+        count($validated_cart)
     );
 
     $order_id = wp_insert_post([
         'post_type'    => 'room_service_order',
         'post_status'  => 'publish',
         'post_title'   => $order_title,
-        'post_content' => $order_content,
+        'post_content' => implode("\n", $order_note_lines),
     ], true);
 
     if (is_wp_error($order_id) || (int) $order_id <= 0) {
@@ -5515,12 +5719,15 @@ function chama_ops_submit_room_service_order(): void
         exit;
     }
 
-    update_post_meta((int) $order_id, '_chama_order_item_id', $item_id);
-    update_post_meta((int) $order_id, '_chama_order_quantity', $qty);
+    $first_item_id = (int) array_key_first($validated_cart);
+
+    update_post_meta((int) $order_id, '_chama_order_item_id', $first_item_id);
+    update_post_meta((int) $order_id, '_chama_order_quantity', $total_qty);
+    update_post_meta((int) $order_id, '_chama_order_items_json', wp_json_encode($validated_cart));
     update_post_meta((int) $order_id, '_chama_order_room_number', $room);
-    update_post_meta((int) $order_id, '_chama_order_guest_name', $name);
-    update_post_meta((int) $order_id, '_chama_order_guest_phone', $phone);
-    update_post_meta((int) $order_id, '_chama_order_total', $total);
+    update_post_meta((int) $order_id, '_chama_order_guest_name', '');
+    update_post_meta((int) $order_id, '_chama_order_guest_phone', '');
+    update_post_meta((int) $order_id, '_chama_order_total', number_format($order_total, 2, '.', ''));
     update_post_meta((int) $order_id, '_chama_order_status', 'submitted');
 
     wp_safe_redirect(add_query_arg([
@@ -5702,7 +5909,7 @@ function chama_ops_render_gift_shop_app_shortcode(): string
 
     ob_start();
     ?>
-    <section class="chama-gift-shop-app chama-service-app" style="margin:0 auto;max-width:1160px;">
+    <section class="chama-gift-shop-app chama-service-app" data-cart-app="gift-shop" style="margin:0 auto;max-width:1160px;">
         <?php if ($notice_key === 'submitted' && $order_ref > 0) : ?>
             <div class="chama-app-notice chama-app-notice--success">
                 <?php
@@ -5716,10 +5923,6 @@ function chama_ops_render_gift_shop_app_shortcode(): string
             <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('That catalog item is unavailable right now. Please choose another item.', 'chama-ops'); ?>
             </div>
-        <?php elseif ($notice_key === 'missing_room') : ?>
-            <div class="chama-app-notice chama-app-notice--error">
-                <?php esc_html_e('Please add your room number before submitting.', 'chama-ops'); ?>
-            </div>
         <?php endif; ?>
 
         <div class="chama-service-app__layout">
@@ -5729,7 +5932,7 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                 <?php foreach ($grouped_catalog as $category_label => $group_items) : ?>
                     <h4 class="chama-service-app__section-title"><?php echo esc_html($category_label); ?></h4>
                     <div class="chama-order-grid">
-                        <?php foreach ($group_items as $item) : ?>
+                        <?php foreach ($group_items as $item_key => $item) : ?>
                             <?php
                             $item_label = isset($item['label']) ? (string) $item['label'] : '';
                             $item_description = isset($item['description']) ? (string) $item['description'] : '';
@@ -5753,6 +5956,20 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                                     <p class="chama-order-price"><?php echo esc_html('$' . number_format($item_price, 2)); ?></p>
                                     <p class="chama-order-chip"><?php esc_html_e('Pickup or drop-off', 'chama-ops'); ?></p>
                                 </div>
+                                <div
+                                    class="chama-item-stepper"
+                                    data-cart-item
+                                    data-item-id="<?php echo esc_attr((string) $item_key); ?>"
+                                    data-item-title="<?php echo esc_attr($item_label); ?>"
+                                    data-item-price="<?php echo esc_attr((string) $item_price); ?>"
+                                >
+                                    <button type="button" class="chama-step-btn" data-action="decrement" aria-label="<?php esc_attr_e('Decrease quantity', 'chama-ops'); ?>">-</button>
+                                    <span class="chama-step-qty" data-qty>0</span>
+                                    <button type="button" class="chama-step-btn" data-action="increment" aria-label="<?php esc_attr_e('Increase quantity', 'chama-ops'); ?>">+</button>
+                                    <button type="button" class="chama-step-clear" data-action="clear" hidden aria-label="<?php esc_attr_e('Remove item', 'chama-ops'); ?>">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>
+                                    </button>
+                                </div>
                             </article>
                         <?php endforeach; ?>
                     </div>
@@ -5762,53 +5979,25 @@ function chama_ops_render_gift_shop_app_shortcode(): string
             <aside class="chama-service-app__panel">
                 <div class="chama-card chama-order-panel">
                     <h3 class="chama-service-app__heading"><?php esc_html_e('Checkout', 'chama-ops'); ?></h3>
-                    <p class="chama-order-meta"><?php esc_html_e('Select an item, quantity, and delivery preference, then submit once.', 'chama-ops'); ?></p>
+                    <p class="chama-order-meta"><?php esc_html_e('Adjust quantities and submit once when ready.', 'chama-ops'); ?></p>
 
                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
                         <?php wp_nonce_field('chama_ops_submit_gift_shop_order_action', 'chama_ops_submit_gift_shop_order_nonce'); ?>
                         <input type="hidden" name="action" value="chama_ops_submit_gift_shop_order">
+                        <input type="hidden" name="chama_gift_cart" value="{}" data-cart-input>
 
-                        <p class="chama-form-field">
-                            <label for="chama_gift_item_key"><?php esc_html_e('Item', 'chama-ops'); ?></label>
-                            <select id="chama_gift_item_key" name="chama_gift_item_key" required>
-                                <option value=""><?php esc_html_e('Choose an item', 'chama-ops'); ?></option>
-                                <?php foreach ($catalog as $item_key => $item) : ?>
-                                    <?php
-                                    $item_label = isset($item['label']) ? (string) $item['label'] : '';
-                                    $item_price = isset($item['price']) ? (float) $item['price'] : 0.0;
-                                    $option_label = $item_label . ' - $' . number_format($item_price, 2);
-                                    ?>
-                                    <option value="<?php echo esc_attr($item_key); ?>"><?php echo esc_html($option_label); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </p>
+                        <div class="chama-cart-summary" data-cart-summary>
+                            <p class="chama-order-meta"><?php esc_html_e('No items selected yet.', 'chama-ops'); ?></p>
+                        </div>
+                        <p class="chama-cart-total"><strong><?php esc_html_e('Total', 'chama-ops'); ?>:</strong> <span data-cart-total>$0.00</span></p>
 
-                        <p class="chama-form-field">
-                            <label for="chama_gift_room_number"><?php esc_html_e('Room', 'chama-ops'); ?></label>
-                            <input id="chama_gift_room_number" type="text" name="chama_gift_room_number" required>
-                        </p>
-                        <p class="chama-form-field">
-                            <label for="chama_gift_quantity"><?php esc_html_e('Qty', 'chama-ops'); ?></label>
-                            <input id="chama_gift_quantity" type="number" name="chama_gift_quantity" min="1" step="1" value="1" required>
-                        </p>
-                        <p class="chama-form-field">
-                            <label for="chama_gift_guest_name"><?php esc_html_e('Name (optional)', 'chama-ops'); ?></label>
-                            <input id="chama_gift_guest_name" type="text" name="chama_gift_guest_name">
-                        </p>
-                        <p class="chama-form-field">
-                            <label for="chama_gift_guest_phone"><?php esc_html_e('Phone (optional)', 'chama-ops'); ?></label>
-                            <input id="chama_gift_guest_phone" type="text" name="chama_gift_guest_phone">
-                        </p>
-                        <p class="chama-form-field">
-                            <label for="chama_gift_order_notes"><?php esc_html_e('Pickup note (optional)', 'chama-ops'); ?></label>
-                            <textarea id="chama_gift_order_notes" name="chama_gift_order_notes" rows="3"></textarea>
-                        </p>
-                        <button type="submit" class="wp-element-button chama-order-submit"><?php esc_html_e('Submit gift order', 'chama-ops'); ?></button>
+                        <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled><?php esc_html_e('Submit gift order', 'chama-ops'); ?></button>
                     </form>
                 </div>
             </aside>
         </div>
     </section>
+    <?php chama_ops_print_guest_cart_script_once(); ?>
     <?php
 
     return (string) ob_get_clean();
@@ -5823,12 +6012,7 @@ function chama_ops_submit_gift_shop_order(): void
     check_admin_referer('chama_ops_submit_gift_shop_order_action', 'chama_ops_submit_gift_shop_order_nonce');
 
     $catalog = chama_ops_get_gift_shop_catalog();
-    $item_key = isset($_POST['chama_gift_item_key']) ? sanitize_key((string) wp_unslash($_POST['chama_gift_item_key'])) : '';
-    $room     = isset($_POST['chama_gift_room_number']) ? sanitize_text_field(wp_unslash($_POST['chama_gift_room_number'])) : '';
-    $qty      = isset($_POST['chama_gift_quantity']) ? max(1, absint(wp_unslash($_POST['chama_gift_quantity']))) : 1;
-    $name     = isset($_POST['chama_gift_guest_name']) ? sanitize_text_field(wp_unslash($_POST['chama_gift_guest_name'])) : '';
-    $phone    = isset($_POST['chama_gift_guest_phone']) ? sanitize_text_field(wp_unslash($_POST['chama_gift_guest_phone'])) : '';
-    $notes    = isset($_POST['chama_gift_order_notes']) ? sanitize_textarea_field(wp_unslash($_POST['chama_gift_order_notes'])) : '';
+    $cart_payload = isset($_POST['chama_gift_cart']) ? (string) wp_unslash($_POST['chama_gift_cart']) : '';
 
     $redirect_url = wp_get_referer();
 
@@ -5836,39 +6020,72 @@ function chama_ops_submit_gift_shop_order(): void
         $redirect_url = (string) home_url('/gift-shop/');
     }
 
-    if ($room === '') {
-        wp_safe_redirect(add_query_arg('chama_gift_shop', 'missing_room', $redirect_url));
-        exit;
+    $cart = [];
+
+    if ($cart_payload !== '') {
+        $decoded_cart = json_decode($cart_payload, true);
+
+        if (is_array($decoded_cart)) {
+            foreach ($decoded_cart as $raw_item_key => $raw_qty) {
+                $item_key = sanitize_key((string) $raw_item_key);
+                $qty = max(0, absint($raw_qty));
+
+                if ($item_key !== '' && $qty > 0) {
+                    $cart[$item_key] = $qty;
+                }
+            }
+        }
     }
 
-    if (!isset($catalog[$item_key])) {
+    if (empty($cart)) {
+        $legacy_item_key = isset($_POST['chama_gift_item_key']) ? sanitize_key((string) wp_unslash($_POST['chama_gift_item_key'])) : '';
+        $legacy_qty = isset($_POST['chama_gift_quantity']) ? max(1, absint(wp_unslash($_POST['chama_gift_quantity']))) : 0;
+
+        if ($legacy_item_key !== '' && $legacy_qty > 0) {
+            $cart[$legacy_item_key] = $legacy_qty;
+        }
+    }
+
+    if (empty($cart)) {
         wp_safe_redirect(add_query_arg('chama_gift_shop', 'invalid_item', $redirect_url));
         exit;
     }
 
-    $item_label = (string) $catalog[$item_key]['label'];
-    $unit_price = (float) $catalog[$item_key]['price'];
-    $order_total = number_format($unit_price * $qty, 2, '.', '');
-
+    $validated_cart = [];
+    $order_total = 0.0;
+    $total_qty = 0;
     $order_note_lines = [];
 
-    if ($name !== '') {
-        $order_note_lines[] = sprintf(__('Guest Name: %s', 'chama-ops'), $name);
+    foreach ($cart as $item_key => $qty) {
+        if (!isset($catalog[$item_key])) {
+            continue;
+        }
+
+        $item_label = isset($catalog[$item_key]['label']) ? (string) $catalog[$item_key]['label'] : $item_key;
+        $unit_price = isset($catalog[$item_key]['price']) ? (float) $catalog[$item_key]['price'] : 0.0;
+        $line_total = $unit_price * $qty;
+
+        $validated_cart[$item_key] = $qty;
+        $order_total += $line_total;
+        $total_qty += $qty;
+        $order_note_lines[] = sprintf(
+            __('%1$s x%2$d - $%3$s', 'chama-ops'),
+            $item_label,
+            $qty,
+            number_format($line_total, 2)
+        );
     }
 
-    if ($phone !== '') {
-        $order_note_lines[] = sprintf(__('Guest Phone: %s', 'chama-ops'), $phone);
+    if (empty($validated_cart)) {
+        wp_safe_redirect(add_query_arg('chama_gift_shop', 'invalid_item', $redirect_url));
+        exit;
     }
 
-    if ($notes !== '') {
-        $order_note_lines[] = sprintf(__('Notes: %s', 'chama-ops'), $notes);
-    }
-
+    $room = chama_ops_get_guest_room_context();
     $order_title = sprintf(
-        __('Room %1$s - %2$s x%3$d', 'chama-ops'),
+        __('Room %1$s - Gift Order (%2$d item(s))', 'chama-ops'),
         $room,
-        $item_label,
-        $qty
+        count($validated_cart)
     );
 
     $order_id = wp_insert_post([
@@ -5883,12 +6100,15 @@ function chama_ops_submit_gift_shop_order(): void
         exit;
     }
 
-    update_post_meta((int) $order_id, '_chama_gift_item_key', $item_key);
-    update_post_meta((int) $order_id, '_chama_gift_quantity', $qty);
+    $first_item_key = (string) array_key_first($validated_cart);
+
+    update_post_meta((int) $order_id, '_chama_gift_item_key', $first_item_key);
+    update_post_meta((int) $order_id, '_chama_gift_quantity', $total_qty);
+    update_post_meta((int) $order_id, '_chama_gift_items_json', wp_json_encode($validated_cart));
     update_post_meta((int) $order_id, '_chama_gift_room_number', $room);
-    update_post_meta((int) $order_id, '_chama_gift_guest_name', $name);
-    update_post_meta((int) $order_id, '_chama_gift_guest_phone', $phone);
-    update_post_meta((int) $order_id, '_chama_gift_total', $order_total);
+    update_post_meta((int) $order_id, '_chama_gift_guest_name', '');
+    update_post_meta((int) $order_id, '_chama_gift_guest_phone', '');
+    update_post_meta((int) $order_id, '_chama_gift_total', number_format($order_total, 2, '.', ''));
     update_post_meta((int) $order_id, '_chama_gift_order_status', 'submitted');
 
     wp_safe_redirect(add_query_arg([
