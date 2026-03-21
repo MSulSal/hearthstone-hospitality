@@ -542,7 +542,7 @@ function chama_inn_set_default_nav_menu(array $pages_by_slug): void
 
     $menu_order = chama_inn_get_primary_nav_slugs();
 
-    $legacy_slugs_to_remove = ["weddings-events", "stay-rooms", "guest-hub"];
+    $legacy_slugs_to_remove = ["weddings-events", "stay-rooms", "guest-hub", "about-our-story"];
     $menu_items = wp_get_nav_menu_items($menu_id);
 
     if (is_array($menu_items)) {
@@ -565,7 +565,10 @@ function chama_inn_set_default_nav_menu(array $pages_by_slug): void
 
             $linked_slug = sanitize_title((string) $linked_page->post_name);
 
-            if (in_array($linked_slug, $legacy_slugs_to_remove, true)) {
+            $is_legacy_item = in_array($linked_slug, $legacy_slugs_to_remove, true);
+            $is_non_core_item = !in_array($linked_slug, $menu_order, true);
+
+            if ($is_legacy_item || $is_non_core_item) {
                 wp_delete_post((int) $menu_item->ID, true);
             }
         }
