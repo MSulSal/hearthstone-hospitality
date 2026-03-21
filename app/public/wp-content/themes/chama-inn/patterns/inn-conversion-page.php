@@ -15,7 +15,7 @@ return <<<'HTML'
 
 <!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
 <div class="wp-block-buttons"><!-- wp:button {"style":{"color":{"background":"#6f8680","text":"#f7f4ee"},"border":{"radius":"999px"}}} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/guest-hub/" style="border-radius:999px;color:#f7f4ee;background-color:#6f8680">Open Guest Hub</a></div>
+<div class="wp-block-button"><a class="wp-block-button__link has-text-color has-background wp-element-button" href="/my-stay/" style="border-radius:999px;color:#f7f4ee;background-color:#6f8680">Open My Stay</a></div>
 <!-- /wp:button -->
 
 <!-- wp:button {"className":"is-style-outline","style":{"border":{"radius":"999px"}}} -->

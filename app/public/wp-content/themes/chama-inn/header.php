@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 }
 
 $header_cta_url   = function_exists('chama_inn_get_header_cta_url') ? chama_inn_get_header_cta_url() : home_url('/contact');
-$header_cta_label = function_exists('chama_inn_get_header_cta_label') ? chama_inn_get_header_cta_label() : __('Book Your Stay', 'chama-inn');
+$header_cta_label = function_exists('chama_inn_get_header_cta_label') ? chama_inn_get_header_cta_label() : __('Open App', 'chama-inn');
 $header_logo_uri = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri('header') : '';
 $site_name = get_bloginfo('name');
 $show_site_title = true;
@@ -60,7 +60,7 @@ $show_site_title = true;
                     'theme_location' => 'primary',
                     'menu_id'        => 'primary-menu',
                     'container'      => false,
-                    'fallback_cb'    => 'wp_page_menu',
+                    'fallback_cb'    => 'chama_inn_render_fallback_menu',
                 ]);
                 ?>
             </nav>

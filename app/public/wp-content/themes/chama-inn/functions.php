@@ -24,6 +24,66 @@ function chama_inn_setup(): void
 }
 add_action("after_setup_theme", "chama_inn_setup");
 
+function chama_inn_get_primary_nav_slugs(): array
+{
+    return [
+        "home",
+        "my-stay",
+        "dining",
+        "gift-shop",
+        "service-requests",
+        "explore-chama",
+        "contact",
+    ];
+}
+
+function chama_inn_render_fallback_menu($args = []): void
+{
+    $menu_id = "primary-menu";
+    $menu_class = "menu";
+
+    if (is_object($args)) {
+        if (!empty($args->menu_id)) {
+            $menu_id = (string) $args->menu_id;
+        }
+
+        if (!empty($args->menu_class)) {
+            $menu_class = (string) $args->menu_class;
+        }
+    } elseif (is_array($args)) {
+        if (!empty($args["menu_id"])) {
+            $menu_id = (string) $args["menu_id"];
+        }
+
+        if (!empty($args["menu_class"])) {
+            $menu_class = (string) $args["menu_class"];
+        }
+    }
+
+    echo '<ul id="' . esc_attr($menu_id) . '" class="' . esc_attr($menu_class) . '">';
+
+    foreach (chama_inn_get_primary_nav_slugs() as $slug) {
+        $page = get_page_by_path($slug, OBJECT, "page");
+
+        if (!($page instanceof WP_Post)) {
+            continue;
+        }
+
+        $item_classes = ["menu-item", "menu-item-type-post_type", "menu-item-object-page"];
+
+        if (is_page($slug)) {
+            $item_classes[] = "current-menu-item";
+            $item_classes[] = "current_page_item";
+        }
+
+        echo '<li class="' . esc_attr(implode(" ", $item_classes)) . '">';
+        echo '<a href="' . esc_url((string) get_permalink($page)) . '">' . esc_html((string) $page->post_title) . "</a>";
+        echo "</li>";
+    }
+
+    echo "</ul>";
+}
+
 function chama_inn_enqueue_assets(): void
 {
     wp_enqueue_style(
@@ -103,13 +163,13 @@ function chama_inn_customize_register(WP_Customize_Manager $wp_customize): void
 
     $wp_customize->add_control("chama_inn_header_cta_page", [
         "label"       => __("Header CTA Page", "chama-inn"),
-        "description" => __("Choose which page the Open Guest Hub button opens.", "chama-inn"),
+        "description" => __("Choose which page the Open App button opens.", "chama-inn"),
         "section"     => "chama_inn_design",
         "type"        => "dropdown-pages",
     ]);
 
     $wp_customize->add_setting("chama_inn_header_cta_label", [
-        "default"           => "Open Guest Hub",
+        "default"           => "Open App",
         "sanitize_callback" => "sanitize_text_field",
         "type"              => "theme_mod",
     ]);
@@ -145,7 +205,7 @@ function chama_inn_get_header_cta_url(): string
         }
     }
 
-    $fallback_paths = ["guest-hub", "my-stay", "contact", "book", "inquire"];
+    $fallback_paths = ["home", "my-stay", "dining", "contact", "book", "inquire"];
 
     foreach ($fallback_paths as $path) {
         $page = get_page_by_path($path);
@@ -164,11 +224,11 @@ function chama_inn_get_header_cta_url(): string
 
 function chama_inn_get_header_cta_label(): string
 {
-    $label = (string) get_theme_mod("chama_inn_header_cta_label", "Open Guest Hub");
+    $label = (string) get_theme_mod("chama_inn_header_cta_label", "Open App");
     $label = trim($label);
 
     if ($label === "") {
-        return __("Open Guest Hub", "chama-inn");
+        return __("Open App", "chama-inn");
     }
 
     return $label;
@@ -182,19 +242,41 @@ function chama_inn_migrate_header_cta_label(): void
 
     $migration_version = (int) get_option("chama_inn_header_cta_migration_version", 0);
 
-    if ($migration_version >= 1) {
+    if ($migration_version >= 2) {
         return;
     }
 
     $existing_label = trim((string) get_theme_mod("chama_inn_header_cta_label", ""));
 
-    if ($existing_label === "" || strcasecmp($existing_label, "Book Your Stay") === 0) {
-        set_theme_mod("chama_inn_header_cta_label", "Open Guest Hub");
+    if (
+        $existing_label === ""
+        || strcasecmp($existing_label, "Book Your Stay") === 0
+        || strcasecmp($existing_label, "Open Guest Hub") === 0
+    ) {
+        set_theme_mod("chama_inn_header_cta_label", "Open App");
     }
 
-    update_option("chama_inn_header_cta_migration_version", 1, false);
+    update_option("chama_inn_header_cta_migration_version", 2, false);
 }
 add_action("admin_init", "chama_inn_migrate_header_cta_label");
+
+function chama_inn_redirect_legacy_guest_hub(): void
+{
+    if (!is_page("guest-hub")) {
+        return;
+    }
+
+    $home_page = get_page_by_path("home", OBJECT, "page");
+    $target_url = $home_page instanceof WP_Post ? (string) get_permalink($home_page) : (string) home_url("/");
+
+    if ($target_url === "") {
+        $target_url = (string) home_url("/");
+    }
+
+    wp_safe_redirect($target_url, 301);
+    exit;
+}
+add_action("template_redirect", "chama_inn_redirect_legacy_guest_hub");
 
 function chama_inn_get_packaged_logo_uri(): string
 {
@@ -327,12 +409,6 @@ function chama_inn_get_core_page_blueprint(): array
             "pattern" => "patterns/inn-conversion-page.php",
         ],
         [
-            "title"   => __("Guest Hub", "chama-inn"),
-            "slug"    => "guest-hub",
-            "excerpt" => __("Primary guest stay hub opened from room QR codes.", "chama-inn"),
-            "pattern" => "patterns/guest-hub-page.php",
-        ],
-        [
             "title"   => __("My Stay", "chama-inn"),
             "slug"    => "my-stay",
             "excerpt" => __("Stay details, check-in/out guidance, and guest preferences.", "chama-inn"),
@@ -447,18 +523,9 @@ function chama_inn_set_default_nav_menu(array $pages_by_slug): void
         return;
     }
 
-    $menu_order = [
-        "home",
-        "guest-hub",
-        "my-stay",
-        "dining",
-        "gift-shop",
-        "service-requests",
-        "explore-chama",
-        "contact",
-    ];
+    $menu_order = chama_inn_get_primary_nav_slugs();
 
-    $legacy_slugs_to_remove = ["weddings-events", "stay-rooms"];
+    $legacy_slugs_to_remove = ["weddings-events", "stay-rooms", "guest-hub"];
     $menu_items = wp_get_nav_menu_items($menu_id);
 
     if (is_array($menu_items)) {
@@ -666,7 +733,6 @@ function chama_inn_migrate_seeded_copy(): void
 
     $slugs_to_scan = [
         "home",
-        "guest-hub",
         "my-stay",
         "dining",
         "gift-shop",
@@ -787,21 +853,6 @@ function chama_inn_migrate_seeded_copy(): void
             }
         }
 
-        if ($slug === "guest-hub") {
-            $should_refresh_guest_hub = strpos($updated_content, "This page is designed for guests already at the inn") !== false
-                || strpos($updated_content, "Open my stay") !== false
-                || strpos($updated_content, "See local guide") !== false
-                || strpos($updated_content, "[chama_guest_action_grid]") === false;
-
-            if ($should_refresh_guest_hub) {
-                $fresh_guest_hub_pattern = chama_inn_load_pattern_content("patterns/guest-hub-page.php");
-
-                if ($fresh_guest_hub_pattern !== "") {
-                    $updated_content = $fresh_guest_hub_pattern;
-                }
-            }
-        }
-
         if ($slug === "my-stay") {
             $should_refresh_my_stay = strpos($updated_content, "Replace with room label") !== false
                 || strpos($updated_content, "Guest Preferences") !== false
@@ -907,11 +958,6 @@ function chama_inn_register_block_patterns(): void
             "file"        => "patterns/inn-conversion-page.php",
             "title"       => __("Guest App Home (QR Entry)", "chama-inn"),
             "description" => __("Guest-first homepage for in-stay actions opened from room QR codes.", "chama-inn"),
-        ],
-        "guest-hub-page" => [
-            "file"        => "patterns/guest-hub-page.php",
-            "title"       => __("Interior: Guest Hub", "chama-inn"),
-            "description" => __("Primary in-stay app surface with fast action links for guests.", "chama-inn"),
         ],
         "my-stay-page" => [
             "file"        => "patterns/my-stay-page.php",

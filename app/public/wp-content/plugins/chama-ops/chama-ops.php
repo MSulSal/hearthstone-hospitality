@@ -2092,15 +2092,15 @@ function chama_ops_get_overview_action_links(): array
 {
     $guest_list_url = admin_url('edit.php?post_type=guest');
     $stay_list_url  = admin_url('edit.php?post_type=stay');
-    $guest_hub_page = get_page_by_path('guest-hub');
+    $home_page      = get_page_by_path('home');
     $my_stay_page   = get_page_by_path('my-stay');
     $dining_page    = get_page_by_path('dining');
     $gift_shop_page = get_page_by_path('gift-shop');
     $service_page   = get_page_by_path('service-requests');
 
-    $guest_hub_url = $guest_hub_page instanceof WP_Post
-        ? (string) get_permalink($guest_hub_page)
-        : (string) home_url('/guest-hub/');
+    $app_home_url = $home_page instanceof WP_Post
+        ? (string) get_permalink($home_page)
+        : (string) home_url('/home/');
     $my_stay_url = $my_stay_page instanceof WP_Post
         ? (string) get_permalink($my_stay_page)
         : (string) home_url('/my-stay/');
@@ -2166,7 +2166,7 @@ function chama_ops_get_overview_action_links(): array
         'quality_stay_missing_dates'      => add_query_arg('chama_stay_quality', 'missing_dates', $stay_list_url),
         'quality_stay_invalid_dates'      => add_query_arg('chama_stay_quality', 'invalid_date_range', $stay_list_url),
         'quality_stay_missing_revenue'    => add_query_arg('chama_stay_quality', 'missing_revenue', $stay_list_url),
-        'guest_hub'        => $guest_hub_url,
+        'app_home'         => $app_home_url,
         'my_stay'          => $my_stay_url,
         'dining_pos'       => $dining_url,
         'gift_shop_pos'    => $gift_shop_url,
@@ -2997,9 +2997,9 @@ function chama_ops_render_overview_page(): void
             <p style="margin-top:0;"><?php esc_html_e('Launch guest-facing pages, watch in-house demand, and drive same-day fulfillment from one place.', 'chama-ops'); ?></p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
-                    <strong><?php esc_html_e('Guest Hub Entry', 'chama-ops'); ?></strong><br>
-                    <?php esc_html_e('QR landing surface for active guests.', 'chama-ops'); ?><br>
-                    <a href="<?php echo esc_url($action_links['guest_hub']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Open Guest Hub', 'chama-ops'); ?></a>
+                    <strong><?php esc_html_e('Guest App Home', 'chama-ops'); ?></strong><br>
+                    <?php esc_html_e('Primary QR landing surface for active guests.', 'chama-ops'); ?><br>
+                    <a href="<?php echo esc_url($action_links['app_home']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Open App Home', 'chama-ops'); ?></a>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Restaurant Orders', 'chama-ops'); ?></strong><br>
