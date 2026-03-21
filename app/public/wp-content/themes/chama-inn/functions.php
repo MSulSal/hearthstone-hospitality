@@ -157,8 +157,11 @@ function chama_inn_render_fallback_menu($args = []): void
         $link_url = isset($nav_item["fallback_path"]) ? (string) home_url((string) $nav_item["fallback_path"]) : (string) home_url("/");
 
         if ($page instanceof WP_Post) {
-            $link_label = (string) $page->post_title;
-            $link_url = (string) get_permalink($page);
+            $page_permalink = (string) get_permalink($page);
+
+            if ($page_permalink !== "") {
+                $link_url = $page_permalink;
+            }
         }
 
         $item_classes = ["menu-item", "menu-item-type-post_type", "menu-item-object-page"];
