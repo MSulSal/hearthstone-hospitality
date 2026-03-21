@@ -11,20 +11,24 @@ get_header();
         <?php while (have_posts()) : the_post(); ?>
             <?php
             $hero_logo_uri = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri('hero') : '';
-            $hero_image_url = get_the_post_thumbnail_url(get_the_ID(), 'full');
-            if ($hero_image_url === false) {
-                $hero_image_url = get_theme_file_uri('assets/images/csi-assets/csi-31.jpg');
+            $hero_gallery_images = function_exists('chama_inn_get_home_hero_gallery_uris') ? chama_inn_get_home_hero_gallery_uris() : [];
+            $featured_image_url = get_the_post_thumbnail_url(get_the_ID(), 'full');
+
+            if (is_string($featured_image_url) && $featured_image_url !== '') {
+                array_unshift($hero_gallery_images, $featured_image_url);
+                $hero_gallery_images = array_values(array_unique($hero_gallery_images));
             }
+
+            $hero_image_url = $hero_gallery_images[0] ?? get_theme_file_uri('assets/images/csi-assets/csi-31.jpg');
             $hero_style     = $hero_image_url !== false
                 ? ' style="background-image:url(' . esc_url($hero_image_url) . ');"'
                 : '';
+            $hero_gallery_attr = count($hero_gallery_images) > 1
+                ? ' data-gallery="' . esc_attr(implode('|', $hero_gallery_images)) . '"'
+                : '';
             ?>
             <article id="post-<?php the_ID(); ?>" <?php post_class('home-page'); ?>>
-                <?php
-                $raw_content = (string) get_the_content();
-                $has_visual_content = trim(wp_strip_all_tags($raw_content)) !== '';
-                ?>
-                <section class="home-hero"<?php echo $hero_style; ?>>
+                <section class="home-hero"<?php echo $hero_style; ?><?php echo $hero_gallery_attr; ?>>
                     <div class="home-hero__overlay"></div>
                     <div class="home-hero__content">
                         <?php if ($hero_logo_uri !== '') : ?>
@@ -43,14 +47,6 @@ get_header();
 
                     </div>
                 </section>
-
-                <?php if ($has_visual_content) : ?>
-                    <section class="home-content">
-                        <div class="home-content__inner">
-                            <?php the_content(); ?>
-                        </div>
-                    </section>
-                <?php endif; ?>
             </article>
         <?php endwhile; ?>
     <?php else : ?>

@@ -296,6 +296,40 @@ function chama_inn_get_packaged_logo_uri(): string
     return "";
 }
 
+function chama_inn_get_home_hero_gallery_uris(): array
+{
+    $relative_paths = [
+        "assets/images/csi-assets/csin1.jpeg",
+        "assets/images/csi-assets/csin2.jpeg",
+        "assets/images/csi-assets/csin3.jpeg",
+        "assets/images/csi-assets/csi-21.jpg",
+        "assets/images/csi-assets/csi-20.jpg",
+        "assets/images/csi-assets/csi-7.jpg",
+    ];
+
+    $uris = [];
+
+    foreach ($relative_paths as $relative_path) {
+        $absolute_path = get_theme_file_path($relative_path);
+
+        if (!file_exists($absolute_path)) {
+            continue;
+        }
+
+        $uris[] = (string) get_theme_file_uri($relative_path);
+    }
+
+    if (empty($uris)) {
+        $fallback_path = "assets/images/csi-assets/csi-31.jpg";
+
+        if (file_exists(get_theme_file_path($fallback_path))) {
+            $uris[] = (string) get_theme_file_uri($fallback_path);
+        }
+    }
+
+    return array_values(array_unique($uris));
+}
+
 function chama_inn_get_logo_variant_uri(string $context = "default"): string
 {
     $context = sanitize_key($context);
