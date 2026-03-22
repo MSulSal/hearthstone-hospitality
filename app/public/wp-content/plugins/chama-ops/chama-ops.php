@@ -6887,24 +6887,6 @@ function chama_ops_render_guest_home_shell_shortcode(): string
     $stay_id = isset($session['stay_id']) ? (int) $session['stay_id'] : 0;
     $check_out = $stay_id > 0 ? (string) get_post_meta($stay_id, '_chama_stay_check_out', true) : '';
     $active_orders = chama_ops_get_guest_active_orders_for_room($room_number);
-    $actions = [
-        [
-            'title' => __('Dining', 'chama-ops'),
-            'url'   => chama_ops_get_guest_page_url('dining', '/dining/'),
-        ],
-        [
-            'title' => __('Gift Shop', 'chama-ops'),
-            'url'   => chama_ops_get_guest_page_url('gift-shop', '/gift-shop/'),
-        ],
-        [
-            'title' => __('My Stay', 'chama-ops'),
-            'url'   => chama_ops_get_guest_page_url('my-stay', '/my-stay/'),
-        ],
-        [
-            'title' => __('Help', 'chama-ops'),
-            'url'   => chama_ops_get_guest_page_url('help', '/help/'),
-        ],
-    ];
 
     ob_start();
     ?>
@@ -6932,21 +6914,6 @@ function chama_ops_render_guest_home_shell_shortcode(): string
                     <li><?php esc_html_e('Use My Stay for perks, local tips, and active order tracking.', 'chama-ops'); ?></li>
                 </ul>
             </article>
-        </div>
-
-        <div class="chama-order-grid">
-            <?php foreach ($actions as $action) : ?>
-                <article class="chama-order-card">
-                    <h3><?php echo esc_html($action['title']); ?></h3>
-                    <div class="chama-order-actions wp-block-buttons">
-                        <div class="wp-block-button">
-                            <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($action['url']); ?>">
-                                <?php esc_html_e('Open', 'chama-ops'); ?>
-                            </a>
-                        </div>
-                    </div>
-                </article>
-            <?php endforeach; ?>
         </div>
 
         <div class="chama-card chama-guest-home__orders">

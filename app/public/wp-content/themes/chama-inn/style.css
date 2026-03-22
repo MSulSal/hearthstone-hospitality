@@ -515,11 +515,9 @@ iframe {
 }
 
 .home .site-header {
-  position: fixed;
-  left: 0;
-  right: 0;
-  background: var(--chama-shell-glass-soft);
-  border-bottom-color: rgba(247, 244, 238, 0.26);
+  position: sticky;
+  background: var(--chama-shell-glass);
+  border-bottom-color: color-mix(in srgb, var(--chama-border) 45%, transparent 55%);
 }
 
 .home .site-header::before {
@@ -637,9 +635,8 @@ iframe {
 }
 
 .home .site-main {
-  background: transparent;
-  padding-top: 0;
-  padding-bottom: 0;
+  padding-top: clamp(1rem, 1.3vw, 1.4rem);
+  padding-bottom: clamp(1.4rem, 1.8vw, 2rem);
 }
 
 .home-hero {
@@ -649,7 +646,7 @@ iframe {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: calc(var(--chama-header-height, 84px) + var(--chama-space-lg)) var(--chama-space-sm) var(--chama-space-xl);
+  padding: var(--chama-space-lg) var(--chama-space-sm) var(--chama-space-xl);
   background-color: var(--chama-bg-soft);
   background-size: cover;
   background-position: center;
@@ -1716,7 +1713,7 @@ body.admin-bar .guest-auth-shell__backdrop {
     min-height: 100svh;
     min-height: 100vh;
     background-position: center top;
-    padding-top: calc(var(--chama-header-height, 74px) + clamp(1rem, 4vw, 1.8rem));
+    padding-top: clamp(1rem, 4vw, 1.8rem);
     padding-bottom: clamp(1.25rem, 5vw, 2.1rem);
   }
 
