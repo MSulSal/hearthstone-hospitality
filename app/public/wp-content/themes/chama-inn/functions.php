@@ -366,6 +366,46 @@ function chama_inn_enqueue_assets(): void
 }
 add_action("wp_enqueue_scripts", "chama_inn_enqueue_assets");
 
+function chama_inn_print_nav_runtime_overrides(): void
+{
+    if (is_admin()) {
+        return;
+    }
+    ?>
+    <style id="chama-nav-runtime-overrides">
+      @media (min-width: 769px) {
+        .site-header .site-header__brand {
+          justify-content: center !important;
+          justify-self: center !important;
+          width: auto !important;
+        }
+
+        .site-header .site-header__logo-image {
+          max-height: 110px !important;
+        }
+
+        .site-header .site-header__actions {
+          justify-self: center !important;
+        }
+
+        .site-header .site-header__logout,
+        .site-header .site-header__logout:hover,
+        .site-header .site-header__logout:focus-visible {
+          min-height: 2.55rem !important;
+          padding: 0.52rem 1.08rem !important;
+          font-size: 1.02rem !important;
+          color: color-mix(in srgb, var(--chama-nav-ink) 88%, var(--chama-accent-soft) 12%) !important;
+          background: color-mix(in srgb, var(--chama-shell-bg) 84%, #000 16%) !important;
+          border-color: color-mix(in srgb, var(--chama-border) 44%, transparent 56%) !important;
+          transform: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+    <?php
+}
+add_action("wp_head", "chama_inn_print_nav_runtime_overrides", 120);
+
 function chama_inn_enqueue_editor_assets(): void
 {
     add_editor_style("style.css");
