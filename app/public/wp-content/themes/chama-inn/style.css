@@ -313,8 +313,8 @@ iframe {
   position: sticky;
   top: 0;
   z-index: 70;
-  background: var(--chama-shell-glass);
-  backdrop-filter: blur(10px) saturate(1.02);
+  background: var(--chama-shell-bg);
+  backdrop-filter: none;
   border-bottom: 1px solid var(--chama-border);
   border-bottom: 1px solid color-mix(in srgb, var(--chama-border) 45%, transparent 55%);
   box-shadow: 0 3px 14px rgba(10, 8, 7, 0.34);
@@ -536,7 +536,7 @@ iframe {
 
 .home .site-header {
   position: sticky;
-  background: var(--chama-shell-glass);
+  background: var(--chama-shell-bg);
   border-bottom-color: color-mix(in srgb, var(--chama-border) 45%, transparent 55%);
 }
 
@@ -1154,9 +1154,9 @@ body.admin-bar .guest-auth-shell__backdrop {
   right: 0;
   bottom: 0;
   z-index: 80;
-  background: var(--chama-shell-glass);
+  background: var(--chama-shell-bg);
   border-top: 1px solid color-mix(in srgb, var(--chama-border) 45%, transparent 55%);
-  backdrop-filter: blur(10px) saturate(1.03);
+  backdrop-filter: none;
 }
 
 .guest-mobile-nav__list {
@@ -1172,10 +1172,12 @@ body.admin-bar .guest-auth-shell__backdrop {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  flex-direction: column;
+  gap: 0.18rem;
+  border-radius: 12px;
   border: 1px solid transparent;
-  min-height: 2.3rem;
-  padding: 0.36rem 0.45rem;
+  min-height: 3.1rem;
+  padding: 0.34rem 0.3rem;
   text-decoration: none;
   color: var(--chama-nav-ink);
 }
@@ -1185,12 +1187,21 @@ body.admin-bar .guest-auth-shell__backdrop {
   align-items: center;
   justify-content: center;
   position: relative;
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
   opacity: 0.92;
   color: currentColor;
+}
+
+.guest-mobile-nav__label {
+  font-size: 0.63rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .guest-mobile-nav__icon.chama-icon-shopping-bag::before {
@@ -1647,9 +1658,24 @@ body.admin-bar .guest-auth-shell__backdrop {
     padding: 0.45rem 0.55rem;
     border: 1px solid rgba(248, 239, 228, 0.24);
     border-radius: 12px;
-    background: var(--chama-shell-panel);
-    backdrop-filter: blur(8px) saturate(1.02);
+    background: var(--chama-shell-bg);
+    backdrop-filter: none;
     box-shadow: 0 10px 20px rgba(10, 8, 7, 0.22);
+  }
+
+  body.has-guest-mobile-nav .site-header__inner {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  body.has-guest-mobile-nav .site-header__brand {
+    justify-content: center;
+    width: 100%;
+  }
+
+  body.has-guest-mobile-nav .site-header__menu-toggle,
+  body.has-guest-mobile-nav .site-header__panel {
+    display: none !important;
   }
 
   .has-js .site-header__panel {

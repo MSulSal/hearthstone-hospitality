@@ -289,6 +289,7 @@ function chama_inn_render_guest_mobile_nav(): void
                 <li class="<?php echo esc_attr(implode(" ", $item_classes)); ?>">
                     <a href="<?php echo esc_url((string) $item["url"]); ?>" aria-label="<?php echo esc_attr((string) $item["label"]); ?>" title="<?php echo esc_attr((string) $item["label"]); ?>">
                         <span class="<?php echo esc_attr($icon_classes); ?>" aria-hidden="true"></span>
+                        <span class="guest-mobile-nav__label" aria-hidden="true"><?php echo esc_html((string) $item["label"]); ?></span>
                         <span class="screen-reader-text"><?php echo esc_html((string) $item["label"]); ?></span>
                     </a>
                 </li>
