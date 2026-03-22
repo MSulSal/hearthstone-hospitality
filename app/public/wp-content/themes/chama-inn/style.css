@@ -966,26 +966,12 @@ iframe {
 .guest-auth-shell__backdrop {
   position: relative;
   min-height: 100dvh;
-  background-size: min(92vw, 655px) auto;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: var(--chama-shell-bg);
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-}
-
-.guest-auth-shell__backdrop::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: inherit;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: saturate(0.96) brightness(0.52);
-  transform: scale(1.05);
-  z-index: 0;
+  background-color: var(--chama-shell-bg);
+  display: grid;
+  place-items: center;
 }
 
 body.admin-bar .guest-auth-shell__backdrop {
