@@ -168,14 +168,6 @@ function chama_inn_render_fallback_menu($args = []): void
         echo "</li>";
     }
 
-    $logout_url = chama_inn_get_guest_logout_url();
-
-    if ($logout_url !== "") {
-        echo '<li class="menu-item menu-item-type-custom menu-item--guest-logout">';
-        echo '<a href="' . esc_url($logout_url) . '">' . esc_html__("Log out", "chama-inn") . "</a>";
-        echo "</li>";
-    }
-
     echo "</ul>";
 }
 

@@ -5,6 +5,7 @@ if (!defined('ABSPATH')) {
 
 $header_logo_context = is_front_page() ? 'header-home' : 'header';
 $header_logo_uri = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri($header_logo_context) : '';
+$guest_logout_url = function_exists('chama_inn_get_guest_logout_url') ? chama_inn_get_guest_logout_url() : '';
 $site_name = get_bloginfo('name');
 $show_site_title = true;
 $hide_site_header = is_page('guest-access');
@@ -61,6 +62,14 @@ $hide_site_header = is_page('guest-access');
                         'menu_class' => 'menu',
                     ]); ?>
                 </nav>
+            </div>
+
+            <div class="site-header__actions">
+                <?php if ($guest_logout_url !== '') : ?>
+                    <a class="site-header__logout" href="<?php echo esc_url($guest_logout_url); ?>">
+                        <?php esc_html_e('Log out', 'chama-inn'); ?>
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
     </header>
