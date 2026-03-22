@@ -966,9 +966,10 @@ iframe {
 .guest-auth-shell__backdrop {
   position: relative;
   min-height: 100dvh;
-  background-size: cover;
+  background-size: min(92vw, 655px) auto;
   background-position: center;
   background-repeat: no-repeat;
+  background-color: var(--chama-shell-bg);
   display: grid;
   place-items: center;
 }
@@ -978,19 +979,7 @@ body.admin-bar .guest-auth-shell__backdrop {
 }
 
 .guest-auth-shell__overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(
-      circle at 18% 15%,
-      color-mix(in srgb, var(--chama-highlight) 34%, transparent 66%) 0%,
-      transparent 58%
-    ),
-    linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--chama-shell-bg) 58%, transparent 42%) 0%,
-      color-mix(in srgb, var(--chama-shell-bg-soft) 66%, transparent 34%) 100%
-    );
+  display: none;
 }
 
 .guest-auth-shell__inner {
