@@ -327,6 +327,13 @@ add_action("template_redirect", "chama_inn_redirect_legacy_guest_sections_to_my_
 function chama_inn_enqueue_assets(): void
 {
     $theme_version = (string) wp_get_theme()->get("Version");
+    $style_path = get_stylesheet_directory() . "/style.css";
+    $navigation_script_path = get_theme_file_path("assets/js/navigation.js");
+    $pwa_script_path = get_theme_file_path("assets/js/pwa-register.js");
+
+    $style_version = file_exists($style_path) ? (string) filemtime($style_path) : $theme_version;
+    $navigation_script_version = file_exists($navigation_script_path) ? (string) filemtime($navigation_script_path) : $theme_version;
+    $pwa_script_version = file_exists($pwa_script_path) ? (string) filemtime($pwa_script_path) : $theme_version;
 
     wp_enqueue_style("dashicons");
 
@@ -334,14 +341,14 @@ function chama_inn_enqueue_assets(): void
         "chama-inn-style",
         get_stylesheet_uri(),
         [],
-        $theme_version
+        $style_version
     );
 
     wp_enqueue_script(
         "chama-inn-navigation",
         get_theme_file_uri("assets/js/navigation.js"),
         [],
-        $theme_version,
+        $navigation_script_version,
         true
     );
 
@@ -349,7 +356,7 @@ function chama_inn_enqueue_assets(): void
         "chama-inn-pwa-register",
         get_theme_file_uri("assets/js/pwa-register.js"),
         [],
-        $theme_version,
+        $pwa_script_version,
         true
     );
 
