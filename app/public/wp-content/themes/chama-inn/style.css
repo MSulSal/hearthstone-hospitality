@@ -1162,29 +1162,6 @@ body.admin-bar .guest-auth-shell__backdrop {
   border-radius: 8px 8px 0 0;
 }
 
-.guest-mobile-nav__icon.chama-icon-plate-cutlery::before {
-  content: "";
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  border: 1.8px solid currentColor;
-  border-radius: 999px;
-}
-
-.guest-mobile-nav__icon.chama-icon-plate-cutlery::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(currentColor, currentColor) left 3px center / 1.8px 12px no-repeat,
-    linear-gradient(currentColor, currentColor) left 1px 5px / 1.1px 3px no-repeat,
-    linear-gradient(currentColor, currentColor) left 5px 5px / 1.1px 3px no-repeat,
-    linear-gradient(currentColor, currentColor) right 3px center / 1.8px 12px no-repeat;
-}
-
 .guest-mobile-nav__item.is-active a {
   border-color: rgba(248, 239, 228, 0.4);
   background: rgba(248, 239, 228, 0.12);
