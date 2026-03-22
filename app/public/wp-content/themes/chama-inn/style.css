@@ -970,8 +970,22 @@ iframe {
   background-position: center;
   background-repeat: no-repeat;
   background-color: var(--chama-shell-bg);
+  overflow: hidden;
   display: grid;
   place-items: center;
+}
+
+.guest-auth-shell__backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: inherit;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(18px) saturate(0.96) brightness(0.52);
+  transform: scale(1.05);
+  z-index: 0;
 }
 
 body.admin-bar .guest-auth-shell__backdrop {
