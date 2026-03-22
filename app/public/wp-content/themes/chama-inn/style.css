@@ -245,6 +245,11 @@ body.page-slug-guest-access {
   overflow: hidden;
 }
 
+body.home {
+  display: flex;
+  flex-direction: column;
+}
+
 a,
 a:visited {
   color: inherit;
@@ -671,7 +676,7 @@ iframe {
 
 .home .site-main {
   padding-top: clamp(1rem, 1.3vw, 1.4rem);
-  padding-bottom: clamp(1.4rem, 1.8vw, 2rem);
+  padding-bottom: 0;
 }
 
 .home-hero {
@@ -933,6 +938,10 @@ iframe {
 .home .home-content--app-shell,
 .home .home-content__inner--app-shell {
   min-height: 0;
+}
+
+.home .home-shell {
+  flex: 1 0 auto;
 }
 
 .home .home-content--app-shell {
@@ -1607,6 +1616,10 @@ body.admin-bar .guest-auth-shell__backdrop {
   padding: 16px;
   background: color-mix(in srgb, var(--chama-shell-bg-soft) 92%, #000 8%);
   border-top: 1px solid color-mix(in srgb, var(--chama-border) 38%, transparent 62%);
+}
+
+body.home .site-footer {
+  margin-top: auto;
 }
 
 .site-footer__inner {
