@@ -330,7 +330,8 @@ iframe {
 }
 
 .site-header__inner {
-  width: min(92rem, 100%);
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
   padding: 0.64rem var(--chama-space-sm);
   display: grid;

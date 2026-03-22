@@ -374,6 +374,12 @@ function chama_inn_print_nav_runtime_overrides(): void
     ?>
     <style id="chama-nav-runtime-overrides">
       @media (min-width: 769px) {
+        .site-header .site-header__inner {
+          width: 100% !important;
+          max-width: none !important;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 68rem) minmax(0, 1fr) !important;
+        }
+
         .site-header .site-header__brand {
           justify-content: center !important;
           justify-self: center !important;
