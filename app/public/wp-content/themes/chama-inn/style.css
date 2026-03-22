@@ -237,6 +237,14 @@ body {
   overflow-wrap: break-word;
 }
 
+body.home,
+body.page-template-page-guest-access,
+body.page-guest-access,
+body.page-slug-guest-access {
+  height: 100dvh;
+  overflow: hidden;
+}
+
 a,
 a:visited {
   color: inherit;
@@ -920,6 +928,19 @@ iframe {
   padding-bottom: clamp(1.3rem, 2vw, 2rem);
 }
 
+.home .home-shell,
+.home .home-page,
+.home .home-content--app-shell,
+.home .home-content__inner--app-shell {
+  min-height: 0;
+}
+
+.home .home-content--app-shell {
+  min-height: calc(100dvh - 8.25rem);
+  padding-top: 0.72rem;
+  padding-bottom: 0;
+}
+
 .home-content__inner--app-shell {
   width: min(68rem, calc(100% - (var(--chama-space-sm) * 2)));
   margin: 0 auto;
@@ -930,12 +951,12 @@ iframe {
 }
 
 .guest-auth-shell {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .guest-auth-shell__backdrop {
   position: relative;
-  min-height: 100vh;
+  min-height: 100dvh;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -951,8 +972,16 @@ body.admin-bar .guest-auth-shell__backdrop {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 18% 15%, rgba(236, 206, 145, 0.35) 0%, rgba(236, 206, 145, 0) 58%),
-    linear-gradient(165deg, rgba(25, 22, 19, 0.36) 0%, rgba(31, 26, 22, 0.42) 100%);
+    radial-gradient(
+      circle at 18% 15%,
+      color-mix(in srgb, var(--chama-highlight) 34%, transparent 66%) 0%,
+      transparent 58%
+    ),
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--chama-shell-bg) 58%, transparent 42%) 0%,
+      color-mix(in srgb, var(--chama-shell-bg-soft) 66%, transparent 34%) 100%
+    );
 }
 
 .guest-auth-shell__inner {
@@ -970,10 +999,10 @@ body.admin-bar .guest-auth-shell__backdrop {
   isolation: isolate;
   border: 1px solid color-mix(in srgb, var(--chama-border) 42%, transparent 58%);
   border-radius: 20px;
-  background: rgba(48, 50, 56, 0.36);
+  background: color-mix(in srgb, var(--chama-shell-panel) 88%, transparent 12%);
   box-shadow: 0 12px 30px rgba(10, 8, 7, 0.28);
-  backdrop-filter: blur(8px) saturate(1.01);
-  -webkit-backdrop-filter: blur(8px) saturate(1.01);
+  backdrop-filter: blur(8px) saturate(1.08);
+  -webkit-backdrop-filter: blur(8px) saturate(1.08);
   padding: clamp(1rem, 2.2vw, 1.5rem);
 }
 
@@ -998,14 +1027,14 @@ body.admin-bar .guest-auth-shell__backdrop {
 
 .chama-guest-auth-screen__card h1 {
   margin: 0 0 0.4rem;
-  color: #f7eee1;
+  color: var(--chama-nav-ink);
   text-align: center;
   font-size: clamp(1.15rem, 2.4vw, 1.4rem);
 }
 
 .chama-guest-auth-screen__card > p {
   margin: 0 0 0.8rem;
-  color: rgba(247, 238, 225, 0.9);
+  color: color-mix(in srgb, var(--chama-nav-ink) 88%, var(--chama-accent-soft) 12%);
   text-align: center;
 }
 
@@ -1014,13 +1043,13 @@ body.admin-bar .guest-auth-shell__backdrop {
 }
 
 .chama-guest-auth-screen .chama-form-field label {
-  color: #f8eee2;
+  color: color-mix(in srgb, var(--chama-nav-ink) 90%, var(--chama-accent-soft) 10%);
 }
 
 .chama-guest-auth-screen .chama-form-field input,
 .chama-guest-auth-screen .chama-form-field select,
 .chama-guest-auth-screen .chama-form-field textarea {
-  background: rgba(248, 241, 230, 0.93);
+  background: color-mix(in srgb, var(--chama-surface) 94%, #fff 6%);
 }
 
 .chama-guest-auth-screen__support {
@@ -1032,11 +1061,11 @@ body.admin-bar .guest-auth-shell__backdrop {
 
 .chama-guest-auth-screen__support p {
   margin: 0;
-  color: rgba(247, 238, 225, 0.88);
+  color: color-mix(in srgb, var(--chama-nav-ink) 84%, var(--chama-accent-soft) 16%);
 }
 
 .chama-guest-auth-screen__support a {
-  color: #f9f1e4;
+  color: var(--chama-nav-ink);
   text-decoration: none;
   font-weight: 600;
 }
@@ -1574,6 +1603,7 @@ body.admin-bar .guest-auth-shell__backdrop {
 }
 
 .site-footer {
+  margin: 0;
   padding: 16px;
   background: color-mix(in srgb, var(--chama-shell-bg-soft) 92%, #000 8%);
   border-top: 1px solid color-mix(in srgb, var(--chama-border) 38%, transparent 62%);
@@ -1751,6 +1781,10 @@ body.admin-bar .guest-auth-shell__backdrop {
 
   body.has-guest-mobile-nav {
     padding-bottom: 4.6rem;
+  }
+
+  body.home.has-guest-mobile-nav {
+    padding-bottom: 0;
   }
 
   .guest-mobile-nav {
