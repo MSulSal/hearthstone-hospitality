@@ -753,7 +753,15 @@ function chama_inn_serve_pwa_manifest(): void
 function chama_inn_serve_service_worker(): void
 {
     $theme_version = (string) wp_get_theme()->get("Version");
-    $cache_name = "chama-stay-v" . md5($theme_version . "|pwa");
+    $style_path = get_stylesheet_directory() . "/style.css";
+    $navigation_script_path = get_theme_file_path("assets/js/navigation.js");
+    $pwa_script_path = get_theme_file_path("assets/js/pwa-register.js");
+
+    $style_version = file_exists($style_path) ? (string) filemtime($style_path) : $theme_version;
+    $navigation_script_version = file_exists($navigation_script_path) ? (string) filemtime($navigation_script_path) : $theme_version;
+    $pwa_script_version = file_exists($pwa_script_path) ? (string) filemtime($pwa_script_path) : $theme_version;
+
+    $cache_name = "chama-stay-v" . md5($theme_version . "|" . $style_version . "|" . $navigation_script_version . "|" . $pwa_script_version . "|pwa");
 
     $precache_urls = array_values(array_unique([
         (string) home_url("/guest-access/"),
@@ -764,9 +772,9 @@ function chama_inn_serve_service_worker(): void
         (string) home_url("/explore-chama/"),
         (string) home_url("/help/"),
         (string) home_url("/my-stay/"),
-        (string) get_stylesheet_uri(),
-        (string) get_theme_file_uri("assets/js/navigation.js"),
-        (string) get_theme_file_uri("assets/js/pwa-register.js"),
+        (string) add_query_arg("ver", rawurlencode($style_version), get_stylesheet_uri()),
+        (string) add_query_arg("ver", rawurlencode($navigation_script_version), get_theme_file_uri("assets/js/navigation.js")),
+        (string) add_query_arg("ver", rawurlencode($pwa_script_version), get_theme_file_uri("assets/js/pwa-register.js")),
         (string) home_url("/?chama_pwa_manifest=1"),
     ]));
 
