@@ -8,7 +8,7 @@ Requires at least: 6.0
 Requires PHP: 8.1
 Text Domain: chama-inn
 */
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
   --chama-bg: #e4ce98;
@@ -231,7 +231,7 @@ body {
       color-mix(in srgb, var(--chama-shell-bg-soft) 78%, var(--chama-bg-soft) 22%) 100%
     );
   color: var(--chama-text);
-  font-family: "Inter", "Segoe UI", Tahoma, Arial, sans-serif;
+  font-family: "Manrope", "Segoe UI", Tahoma, Arial, sans-serif;
   line-height: 1.6;
   overflow-x: hidden;
   overflow-wrap: break-word;
@@ -249,9 +249,9 @@ h4,
 h5,
 h6,
 .wp-block-heading {
-  font-family: "Fraunces", Georgia, "Times New Roman", serif;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-family: "Manrope", "Segoe UI", Tahoma, Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.005em;
 }
 
 p,
@@ -260,7 +260,7 @@ input,
 select,
 textarea,
 button {
-  font-family: "Inter", "Segoe UI", Tahoma, Arial, sans-serif;
+  font-family: "Manrope", "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
 a {
@@ -371,9 +371,9 @@ iframe {
 }
 
 .site-header__title {
-  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-family: "Manrope", "Segoe UI", Tahoma, Arial, sans-serif;
   font-size: clamp(1.03rem, 0.98rem + 0.2vw, 1.14rem);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--chama-nav-ink);
   text-decoration: none;
   white-space: nowrap;
