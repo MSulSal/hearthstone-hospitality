@@ -1165,7 +1165,11 @@ body.admin-bar .guest-auth-shell__backdrop {
 .guest-mobile-nav__icon.chama-icon-plate-cutlery::before {
   content: "";
   position: absolute;
-  inset: 4px;
+  width: 10px;
+  height: 10px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   border: 1.8px solid currentColor;
   border-radius: 999px;
 }
@@ -1173,15 +1177,12 @@ body.admin-bar .guest-auth-shell__backdrop {
 .guest-mobile-nav__icon.chama-icon-plate-cutlery::after {
   content: "";
   position: absolute;
-  left: 2px;
-  right: 2px;
-  top: 3px;
-  bottom: 3px;
+  inset: 0;
   background:
-    linear-gradient(currentColor, currentColor) left 1px center / 1.6px 12px no-repeat,
-    linear-gradient(currentColor, currentColor) left 4px 5px / 1.1px 2.7px no-repeat,
-    linear-gradient(currentColor, currentColor) left 4px 9px / 1.1px 2.7px no-repeat,
-    linear-gradient(currentColor, currentColor) right 1px center / 1.6px 12px no-repeat;
+    linear-gradient(currentColor, currentColor) left 3px center / 1.8px 12px no-repeat,
+    linear-gradient(currentColor, currentColor) left 1px 5px / 1.1px 3px no-repeat,
+    linear-gradient(currentColor, currentColor) left 5px 5px / 1.1px 3px no-repeat,
+    linear-gradient(currentColor, currentColor) right 3px center / 1.8px 12px no-repeat;
 }
 
 .guest-mobile-nav__item.is-active a {
