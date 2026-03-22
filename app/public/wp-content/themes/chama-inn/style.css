@@ -344,11 +344,11 @@ iframe {
 .site-header__brand {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0.5rem;
   min-width: 0;
-  justify-self: start;
-  width: 100%;
+  justify-self: center;
+  width: auto;
 }
 
 .site-header__logo .custom-logo-link {
@@ -366,7 +366,7 @@ iframe {
 
 .site-header__logo-image {
   width: auto;
-  max-height: 94px;
+  max-height: 110px;
   filter: saturate(1.04) contrast(1.04);
 }
 
@@ -392,7 +392,7 @@ iframe {
 
 .site-header__actions {
   grid-column: 3 / 4;
-  justify-self: end;
+  justify-self: center;
   display: flex;
   align-items: center;
   min-width: 0;
@@ -402,26 +402,26 @@ iframe {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.15rem;
-  padding: 0.38rem 0.8rem;
+  min-height: 2.55rem;
+  padding: 0.52rem 1.08rem;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--chama-border) 44%, transparent 56%);
   background: color-mix(in srgb, var(--chama-shell-bg) 84%, #000 16%);
   color: color-mix(in srgb, var(--chama-nav-ink) 88%, var(--chama-accent-soft) 12%);
-  font-size: 0.9rem;
+  font-size: 1.02rem;
   font-weight: 600;
   text-decoration: none;
   letter-spacing: 0.01em;
   box-shadow: 0 2px 8px rgba(10, 8, 7, 0.2);
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition: none;
 }
 
 .site-header__logout:hover,
 .site-header__logout:focus-visible {
-  border-color: color-mix(in srgb, var(--chama-nav-ink) 30%, transparent 70%);
-  background: color-mix(in srgb, var(--chama-shell-bg) 78%, #000 22%);
-  color: var(--chama-nav-ink);
-  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--chama-border) 44%, transparent 56%);
+  background: color-mix(in srgb, var(--chama-shell-bg) 84%, #000 16%);
+  color: color-mix(in srgb, var(--chama-nav-ink) 88%, var(--chama-accent-soft) 12%);
+  transform: none;
 }
 
 .site-header__menu-toggle {
