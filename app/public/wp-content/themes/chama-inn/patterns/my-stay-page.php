@@ -10,11 +10,11 @@ return <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"level":1} -->
-<h1 class="wp-block-heading">Orders and session</h1>
+<h1 class="wp-block-heading">Stay hub</h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>See active orders, room context, and sign out when your stay is complete.</p>
+<p>Orders, perks, and local tips in one place.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:shortcode -->

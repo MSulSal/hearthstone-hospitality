@@ -6897,20 +6897,12 @@ function chama_ops_render_guest_home_shell_shortcode(): string
             'url'   => chama_ops_get_guest_page_url('gift-shop', '/gift-shop/'),
         ],
         [
-            'title' => __('Perks & Info', 'chama-ops'),
-            'url'   => chama_ops_get_guest_page_url('perks-info', '/perks-info/'),
-        ],
-        [
-            'title' => __('Explore Town', 'chama-ops'),
-            'url'   => chama_ops_get_guest_page_url('explore-chama', '/explore-chama/'),
+            'title' => __('My Stay', 'chama-ops'),
+            'url'   => chama_ops_get_guest_page_url('my-stay', '/my-stay/'),
         ],
         [
             'title' => __('Help', 'chama-ops'),
             'url'   => chama_ops_get_guest_page_url('help', '/help/'),
-        ],
-        [
-            'title' => __('My Stay', 'chama-ops'),
-            'url'   => chama_ops_get_guest_page_url('my-stay', '/my-stay/'),
         ],
     ];
 
@@ -6937,7 +6929,7 @@ function chama_ops_render_guest_home_shell_shortcode(): string
                 <ul class="chama-guest-home__bullet-list">
                     <li><?php esc_html_e('Room-service ordering is open for active guests.', 'chama-ops'); ?></li>
                     <li><?php esc_html_e('Front desk support is available from the Help tab.', 'chama-ops'); ?></li>
-                    <li><?php esc_html_e('Use Explore Town for train-day and walkable recommendations.', 'chama-ops'); ?></li>
+                    <li><?php esc_html_e('Use My Stay for perks, local tips, and active order tracking.', 'chama-ops'); ?></li>
                 </ul>
             </article>
         </div>
@@ -7039,6 +7031,36 @@ function chama_ops_render_guest_my_stay_shortcode(): string
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
+        </div>
+
+        <div style="margin-top:14px;">
+            <p class="chama-service-app__section-title"><?php esc_html_e('Perks and stay essentials', 'chama-ops'); ?></p>
+            <?php echo do_shortcode('[chama_guest_perks_info]'); ?>
+        </div>
+
+        <div class="chama-card" style="margin-top:14px;">
+            <p class="chama-service-app__section-title"><?php esc_html_e('During your stay', 'chama-ops'); ?></p>
+            <div class="chama-order-grid">
+                <article class="chama-order-card">
+                    <h3><?php esc_html_e('At the inn', 'chama-ops'); ?></h3>
+                    <ul class="chama-guest-home__bullet-list">
+                        <li><?php esc_html_e('Ask front desk if first-floor access is better for your stay.', 'chama-ops'); ?></li>
+                        <li><?php esc_html_e('Fireplace rooms are limited; request early when available.', 'chama-ops'); ?></li>
+                        <li><?php esc_html_e('Need towels, toiletries, or extra blankets? Submit a service request.', 'chama-ops'); ?></li>
+                    </ul>
+                </article>
+                <article class="chama-order-card">
+                    <h3><?php esc_html_e('In Chama', 'chama-ops'); ?></h3>
+                    <ul class="chama-guest-home__bullet-list">
+                        <li><?php esc_html_e('The Cumbres and Toltec depot is directly across from the inn.', 'chama-ops'); ?></li>
+                        <li><?php esc_html_e('Most downtown dining and shops are walkable from your room.', 'chama-ops'); ?></li>
+                        <li><?php esc_html_e('Message front desk for same-day recommendations and timing tips.', 'chama-ops'); ?></li>
+                    </ul>
+                </article>
+            </div>
+            <div class="chama-photo-frame" style="margin-top:14px;">
+                <img src="<?php echo esc_url(get_theme_file_uri('assets/images/nearby.png')); ?>" alt="<?php esc_attr_e('Map and nearby points around Chama Station Inn', 'chama-ops'); ?>">
+            </div>
         </div>
 
     </section>
@@ -7175,19 +7197,9 @@ function chama_ops_render_guest_action_grid_shortcode(): string
             'label' => __('Open help center', 'chama-ops'),
         ],
         [
-            'title' => __('Perks & Info', 'chama-ops'),
-            'url' => chama_ops_get_guest_page_url('perks-info', '/perks-info/'),
-            'label' => __('View perks', 'chama-ops'),
-        ],
-        [
-            'title' => __('During Your Stay', 'chama-ops'),
-            'url' => chama_ops_get_guest_page_url('explore-chama', '/explore-chama/'),
-            'label' => __('See stay tips', 'chama-ops'),
-        ],
-        [
             'title' => __('My Stay', 'chama-ops'),
             'url' => chama_ops_get_guest_page_url('my-stay', '/my-stay/'),
-            'label' => __('View orders and session', 'chama-ops'),
+            'label' => __('Open stay hub', 'chama-ops'),
         ],
     ];
 

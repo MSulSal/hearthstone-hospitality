@@ -62,16 +62,6 @@ function chama_inn_get_primary_nav_items(): array
             "fallback_path" => "/gift-shop/",
         ],
         [
-            "slug" => "perks-info",
-            "label" => __("Perks & Info", "chama-inn"),
-            "fallback_path" => "/perks-info/",
-        ],
-        [
-            "slug" => "explore-chama",
-            "label" => __("Explore Town", "chama-inn"),
-            "fallback_path" => "/explore-chama/",
-        ],
-        [
             "slug" => "help",
             "label" => __("Help", "chama-inn"),
             "fallback_path" => "/help/",
@@ -224,10 +214,10 @@ function chama_inn_get_guest_mobile_nav_items(): array
             "url"   => home_url("/gift-shop/"),
         ],
         [
-            "slug"  => "explore-chama",
-            "label" => __("Explore", "chama-inn"),
-            "icon"  => "dashicons-location-alt",
-            "url"   => home_url("/explore-chama/"),
+            "slug"  => "my-stay",
+            "label" => __("My Stay", "chama-inn"),
+            "icon"  => "dashicons-id-alt",
+            "url"   => home_url("/my-stay/"),
         ],
         [
             "slug"  => "help",
@@ -317,6 +307,29 @@ function chama_inn_add_guest_session_body_class(array $classes): array
     return $classes;
 }
 add_filter("body_class", "chama_inn_add_guest_session_body_class");
+
+function chama_inn_redirect_legacy_guest_sections_to_my_stay(): void
+{
+    if (is_admin()) {
+        return;
+    }
+
+    if (!is_page(["perks-info", "explore-chama"])) {
+        return;
+    }
+
+    $target_url = function_exists("chama_ops_get_guest_page_url")
+        ? chama_ops_get_guest_page_url("my-stay", "/my-stay/")
+        : home_url("/my-stay/");
+
+    if ($target_url === "") {
+        $target_url = home_url("/my-stay/");
+    }
+
+    wp_safe_redirect($target_url, 302);
+    exit;
+}
+add_action("template_redirect", "chama_inn_redirect_legacy_guest_sections_to_my_stay");
 
 function chama_inn_enqueue_assets(): void
 {
@@ -889,7 +902,7 @@ function chama_inn_get_core_page_blueprint(): array
         [
             "title"   => __("My Stay", "chama-inn"),
             "slug"    => "my-stay",
-            "excerpt" => __("Stay summary, active orders, and guest session controls.", "chama-inn"),
+            "excerpt" => __("Stay summary, active orders, perks, and local tips in one page.", "chama-inn"),
             "pattern" => "patterns/my-stay-page.php",
         ],
     ];
@@ -1230,7 +1243,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 17;
+    $target_version = 18;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -1416,7 +1429,9 @@ function chama_inn_migrate_seeded_copy(): void
         }
 
         if ($slug === "my-stay") {
-            $should_refresh_my_stay = strpos($updated_content, "[chama_guest_my_stay]") === false;
+            $should_refresh_my_stay = strpos($updated_content, "[chama_guest_my_stay]") === false
+                || strpos($updated_content, "Orders and session") !== false
+                || strpos($updated_content, "See active orders, room context, and sign out when your stay is complete.") !== false;
 
             if ($should_refresh_my_stay) {
                 $fresh_my_stay_pattern = chama_inn_load_pattern_content("patterns/my-stay-page.php");
@@ -1542,7 +1557,7 @@ function chama_inn_register_block_patterns(): void
         "my-stay-page" => [
             "file"        => "patterns/my-stay-page.php",
             "title"       => __("Interior: My Stay", "chama-inn"),
-            "description" => __("Stay summary, active orders, and session controls.", "chama-inn"),
+            "description" => __("Unified stay hub: orders, perks, and in-town tips.", "chama-inn"),
         ],
     ];
 
