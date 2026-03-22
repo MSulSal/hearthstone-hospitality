@@ -6,7 +6,10 @@ if (!defined("ABSPATH")) {
 get_header();
 
 $hero_gallery_images = function_exists('chama_inn_get_home_hero_gallery_uris') ? chama_inn_get_home_hero_gallery_uris() : [];
-$hero_image_url = $hero_gallery_images[0] ?? get_theme_file_uri('assets/images/csi-assets/csi-31.jpg');
+$login_background_path = 'assets/images/new-background.png';
+$hero_image_url = file_exists(get_theme_file_path($login_background_path))
+    ? get_theme_file_uri($login_background_path)
+    : ($hero_gallery_images[0] ?? get_theme_file_uri('assets/images/csi-assets/csi-31.jpg'));
 $hero_style = $hero_image_url !== false
     ? ' style="background-image:url(' . esc_url($hero_image_url) . ');"'
     : '';
