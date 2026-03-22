@@ -178,12 +178,33 @@ function chama_inn_render_fallback_menu($args = []): void
         echo "</li>";
     }
 
+    $logout_url = chama_inn_get_guest_logout_url();
+
+    if ($logout_url !== "") {
+        echo '<li class="menu-item menu-item-type-custom menu-item--guest-logout">';
+        echo '<a href="' . esc_url($logout_url) . '">' . esc_html__("Log out", "chama-inn") . "</a>";
+        echo "</li>";
+    }
+
     echo "</ul>";
+}
+
+function chama_inn_get_guest_logout_url(): string
+{
+    if (!chama_inn_has_active_guest_session()) {
+        return "";
+    }
+
+    return (string) wp_nonce_url(
+        admin_url("admin-post.php?action=chama_ops_guest_sign_out"),
+        "chama_ops_guest_sign_out_action",
+        "chama_ops_guest_sign_out_nonce"
+    );
 }
 
 function chama_inn_get_guest_mobile_nav_items(): array
 {
-    return [
+    $items = [
         [
             "slug"  => "home",
             "label" => __("Home", "chama-inn"),
@@ -215,6 +236,19 @@ function chama_inn_get_guest_mobile_nav_items(): array
             "url"   => home_url("/help/"),
         ],
     ];
+
+    $logout_url = chama_inn_get_guest_logout_url();
+
+    if ($logout_url !== "") {
+        $items[] = [
+            "slug"  => "guest-logout",
+            "label" => __("Log out", "chama-inn"),
+            "icon"  => "dashicons-exit",
+            "url"   => $logout_url,
+        ];
+    }
+
+    return $items;
 }
 
 function chama_inn_has_active_guest_session(): bool
@@ -251,8 +285,18 @@ function chama_inn_render_guest_mobile_nav(): void
                 if (!$active && is_page($slug)) {
                     $active = true;
                 }
+
+                $item_classes = ["guest-mobile-nav__item"];
+
+                if ($active) {
+                    $item_classes[] = "is-active";
+                }
+
+                if ($slug === "guest-logout") {
+                    $item_classes[] = "is-logout";
+                }
                 ?>
-                <li class="guest-mobile-nav__item<?php echo $active ? " is-active" : ""; ?>">
+                <li class="<?php echo esc_attr(implode(" ", $item_classes)); ?>">
                     <a href="<?php echo esc_url((string) $item["url"]); ?>" aria-label="<?php echo esc_attr((string) $item["label"]); ?>" title="<?php echo esc_attr((string) $item["label"]); ?>">
                         <span class="<?php echo esc_attr($icon_classes); ?>" aria-hidden="true"></span>
                         <span class="screen-reader-text"><?php echo esc_html((string) $item["label"]); ?></span>

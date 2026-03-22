@@ -15,8 +15,8 @@ Text Domain: chama-inn
   --chama-bg-soft: #f3ebdd;
   --chama-bg-deep: #d8c2a1;
   --chama-surface: #f9f4ea;
-  --chama-shell-bg: #221d1a;
-  --chama-shell-bg-soft: #2d2723;
+  --chama-shell-bg: #3a342f;
+  --chama-shell-bg-soft: #4a433b;
   --chama-text: #43372f;
   --chama-text-soft: #554941;
   --chama-text-inverse: #f8f3eb;
@@ -31,17 +31,17 @@ Text Domain: chama-inn
   --chama-border: #cab395;
   --chama-shell-glass: linear-gradient(
     135deg,
-    rgba(34, 29, 25, 0.76) 0%,
-    rgba(31, 26, 22, 0.72) 36%,
-    rgba(42, 35, 30, 0.76) 100%
+    rgba(58, 52, 47, 0.66) 0%,
+    rgba(52, 46, 41, 0.62) 36%,
+    rgba(74, 67, 59, 0.66) 100%
   );
   --chama-shell-glass-soft: linear-gradient(
     135deg,
-    rgba(34, 29, 25, 0.58) 0%,
-    rgba(31, 26, 22, 0.48) 36%,
-    rgba(42, 35, 30, 0.56) 100%
+    rgba(58, 52, 47, 0.48) 0%,
+    rgba(52, 46, 41, 0.42) 36%,
+    rgba(74, 67, 59, 0.46) 100%
   );
-  --chama-shell-panel: rgba(29, 25, 22, 0.58);
+  --chama-shell-panel: rgba(58, 52, 47, 0.56);
   --chama-card-surface: linear-gradient(
     165deg,
     color-mix(in srgb, var(--chama-surface) 94%, #fff 6%) 0%,
@@ -69,10 +69,10 @@ body.chama-scheme-sage-retreat {
   --chama-highlight: #b9895a;
   --chama-highlight-strong: #9a6a45;
   --chama-border: #d7c4aa;
-  --chama-shell-bg: #1f211d;
-  --chama-shell-bg-soft: #282b26;
+  --chama-shell-bg: #363a35;
+  --chama-shell-bg-soft: #454a44;
   --chama-nav-ink: #f5f1e8;
-  --chama-shell-panel: rgba(31, 34, 30, 0.6);
+  --chama-shell-panel: rgba(54, 58, 53, 0.56);
 }
 
 body.chama-scheme-rail-burgundy {
@@ -90,10 +90,10 @@ body.chama-scheme-rail-burgundy {
   --chama-highlight: #b9895a;
   --chama-highlight-strong: #9a6a45;
   --chama-border: #d5c1a5;
-  --chama-shell-bg: #211b1b;
-  --chama-shell-bg-soft: #2c2423;
+  --chama-shell-bg: #3a3332;
+  --chama-shell-bg-soft: #49403e;
   --chama-nav-ink: #f7efe6;
-  --chama-shell-panel: rgba(34, 28, 28, 0.6);
+  --chama-shell-panel: rgba(58, 51, 50, 0.56);
 }
 
 body.chama-scheme-desert-contrast {
@@ -111,10 +111,10 @@ body.chama-scheme-desert-contrast {
   --chama-highlight: #b9895a;
   --chama-highlight-strong: #9a6a45;
   --chama-border: #ceb89c;
-  --chama-shell-bg: #221c19;
-  --chama-shell-bg-soft: #2d2621;
+  --chama-shell-bg: #3c342e;
+  --chama-shell-bg-soft: #4b4239;
   --chama-nav-ink: #f7f1e7;
-  --chama-shell-panel: rgba(34, 28, 24, 0.6);
+  --chama-shell-panel: rgba(60, 52, 46, 0.56);
 }
 
 body.chama-scheme-moonstone-calm {
@@ -132,10 +132,10 @@ body.chama-scheme-moonstone-calm {
   --chama-highlight: #b9895a;
   --chama-highlight-strong: #9a6a45;
   --chama-border: #c9d5d2;
-  --chama-shell-bg: #1e2524;
-  --chama-shell-bg-soft: #273130;
+  --chama-shell-bg: #33403e;
+  --chama-shell-bg-soft: #42514f;
   --chama-nav-ink: #eef5f3;
-  --chama-shell-panel: rgba(31, 40, 39, 0.6);
+  --chama-shell-panel: rgba(51, 64, 62, 0.56);
 }
 
 body.chama-scheme-alpine-stillness {
@@ -153,10 +153,10 @@ body.chama-scheme-alpine-stillness {
   --chama-highlight: #b9895a;
   --chama-highlight-strong: #9a6a45;
   --chama-border: #c7d2cb;
-  --chama-shell-bg: #1f2521;
-  --chama-shell-bg-soft: #29312b;
+  --chama-shell-bg: #36403a;
+  --chama-shell-bg-soft: #455149;
   --chama-nav-ink: #edf4ef;
-  --chama-shell-panel: rgba(31, 39, 34, 0.6);
+  --chama-shell-panel: rgba(54, 64, 58, 0.56);
 }
 
 body.chama-scheme-terracotta-dawn {
@@ -174,10 +174,10 @@ body.chama-scheme-terracotta-dawn {
   --chama-highlight: #b9895a;
   --chama-highlight-strong: #9a6a45;
   --chama-border: #d6c0a0;
-  --chama-shell-bg: #251f1b;
-  --chama-shell-bg-soft: #302824;
+  --chama-shell-bg: #3f3731;
+  --chama-shell-bg-soft: #4e453d;
   --chama-nav-ink: #f9f1e8;
-  --chama-shell-panel: rgba(37, 30, 26, 0.6);
+  --chama-shell-panel: rgba(63, 55, 49, 0.56);
 }
 
 *,
@@ -202,15 +202,19 @@ body {
   background:
     radial-gradient(
       circle at 20% 0%,
-      color-mix(in srgb, var(--chama-highlight) 26%, transparent 74%) 0%,
-      transparent 40%
+      color-mix(in srgb, var(--chama-highlight) 18%, transparent 82%) 0%,
+      transparent 44%
     ),
     radial-gradient(
       circle at 80% 100%,
-      color-mix(in srgb, var(--chama-accent) 18%, transparent 82%) 0%,
-      transparent 44%
+      color-mix(in srgb, var(--chama-accent) 14%, transparent 86%) 0%,
+      transparent 48%
     ),
-    linear-gradient(165deg, var(--chama-shell-bg) 0%, var(--chama-shell-bg-soft) 100%);
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--chama-shell-bg) 84%, var(--chama-bg-soft) 16%) 0%,
+      color-mix(in srgb, var(--chama-shell-bg-soft) 88%, var(--chama-bg-soft) 12%) 100%
+    );
   color: var(--chama-text);
   font-family: "Inter", "Segoe UI", Tahoma, Arial, sans-serif;
   line-height: 1.6;
@@ -487,6 +491,25 @@ iframe {
   opacity: 1;
 }
 
+.site-header__nav .menu-item--guest-logout {
+  margin-left: 0.28rem;
+}
+
+.site-header__nav .menu-item--guest-logout a {
+  border-bottom-color: transparent;
+  border: 1px solid color-mix(in srgb, var(--chama-nav-ink) 38%, transparent 62%);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  color: var(--chama-nav-ink);
+  background: color-mix(in srgb, var(--chama-nav-ink) 10%, transparent 90%);
+}
+
+.site-header__nav .menu-item--guest-logout a:hover,
+.site-header__nav .menu-item--guest-logout a:focus-visible {
+  border-color: color-mix(in srgb, var(--chama-nav-ink) 58%, transparent 42%);
+  background: color-mix(in srgb, var(--chama-nav-ink) 16%, transparent 84%);
+}
+
 .home .site-header {
   position: fixed;
   left: 0;
@@ -504,13 +527,18 @@ iframe {
   background:
     radial-gradient(
       circle at 10% 0%,
-      color-mix(in srgb, var(--chama-highlight) 18%, transparent 82%) 0%,
-      transparent 36%
+      color-mix(in srgb, var(--chama-highlight) 14%, transparent 86%) 0%,
+      transparent 42%
     ),
     radial-gradient(
       circle at 90% 100%,
-      color-mix(in srgb, var(--chama-accent) 20%, transparent 80%) 0%,
-      transparent 38%
+      color-mix(in srgb, var(--chama-accent) 16%, transparent 84%) 0%,
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--chama-shell-bg) 82%, var(--chama-bg-soft) 18%) 0%,
+      color-mix(in srgb, var(--chama-shell-bg-soft) 88%, var(--chama-bg-soft) 12%) 100%
     );
   padding: clamp(1rem, 1.3vw, 1.4rem) 0 clamp(1.4rem, 1.8vw, 2rem);
 }
@@ -1143,7 +1171,7 @@ body.admin-bar .guest-auth-shell__backdrop {
   margin: 0;
   padding: 0.45rem 0.65rem;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.45rem;
 }
 
@@ -1202,6 +1230,10 @@ body.admin-bar .guest-auth-shell__backdrop {
 
 .guest-mobile-nav__item.is-active .guest-mobile-nav__icon {
   opacity: 1;
+}
+
+.guest-mobile-nav__item.is-logout a {
+  color: color-mix(in srgb, var(--chama-nav-ink) 76%, #f0d6b8 24%);
 }
 
 .chama-service-app__layout {
@@ -1678,6 +1710,14 @@ body.admin-bar .guest-auth-shell__backdrop {
     background: color-mix(in srgb, var(--chama-nav-ink) 11%, transparent 89%);
     border-bottom-color: color-mix(in srgb, var(--chama-nav-ink) 44%, transparent 56%);
     color: var(--chama-nav-ink);
+  }
+
+  .site-header__nav .menu-item--guest-logout a {
+    margin-top: 0.32rem;
+    border: 1px solid color-mix(in srgb, var(--chama-nav-ink) 34%, transparent 66%);
+    border-radius: 10px;
+    padding: 0.56rem 0.6rem;
+    background: color-mix(in srgb, var(--chama-nav-ink) 10%, transparent 90%);
   }
 
   body {

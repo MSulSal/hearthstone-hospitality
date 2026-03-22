@@ -7005,11 +7005,6 @@ function chama_ops_render_guest_my_stay_shortcode(): string
     $check_in = $stay_id > 0 ? (string) get_post_meta($stay_id, '_chama_stay_check_in', true) : '';
     $check_out = $stay_id > 0 ? (string) get_post_meta($stay_id, '_chama_stay_check_out', true) : '';
     $active_orders = chama_ops_get_guest_active_orders_for_room($room_number);
-    $logout_url = wp_nonce_url(
-        admin_url('admin-post.php?action=chama_ops_guest_sign_out'),
-        'chama_ops_guest_sign_out_action',
-        'chama_ops_guest_sign_out_nonce'
-    );
 
     ob_start();
     ?>
@@ -7046,13 +7041,6 @@ function chama_ops_render_guest_my_stay_shortcode(): string
             <?php endif; ?>
         </div>
 
-        <div class="chama-order-actions wp-block-buttons" style="margin-top:12px;">
-            <div class="wp-block-button is-style-outline">
-                <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($logout_url); ?>">
-                    <?php esc_html_e('Log out', 'chama-ops'); ?>
-                </a>
-            </div>
-        </div>
     </section>
     <?php
 
