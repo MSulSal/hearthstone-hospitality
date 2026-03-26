@@ -8261,6 +8261,66 @@ function chama_ops_render_room_service_queue_notice(): void
 add_action('admin_notices', 'chama_ops_render_room_service_queue_notice');
 
 /**
+ * Return normalized room-service line items for admin rendering.
+ *
+ * @return array<int, array{item_id:int, title:string, qty:int}>
+ */
+function chama_ops_get_room_service_order_line_items(int $order_id): array
+{
+    if ($order_id <= 0) {
+        return [];
+    }
+
+    $line_items = [];
+    $cart_json = (string) get_post_meta($order_id, '_chama_order_items_json', true);
+    $decoded_cart = json_decode($cart_json, true);
+
+    if (is_array($decoded_cart)) {
+        foreach ($decoded_cart as $item_id_raw => $qty_raw) {
+            $item_id = absint((string) $item_id_raw);
+            $qty = max(0, absint($qty_raw));
+
+            if ($item_id <= 0 || $qty <= 0) {
+                continue;
+            }
+
+            $item_post = get_post($item_id);
+            $title = $item_post instanceof WP_Post
+                ? (string) $item_post->post_title
+                : sprintf(__('Menu item #%d', 'chama-ops'), $item_id);
+
+            $line_items[] = [
+                'item_id' => $item_id,
+                'title'   => $title,
+                'qty'     => $qty,
+            ];
+        }
+    }
+
+    if (!empty($line_items)) {
+        return $line_items;
+    }
+
+    $fallback_item_id = (int) get_post_meta($order_id, '_chama_order_item_id', true);
+    $fallback_qty = max(1, (int) get_post_meta($order_id, '_chama_order_quantity', true));
+
+    if ($fallback_item_id <= 0) {
+        return [];
+    }
+
+    $fallback_post = get_post($fallback_item_id);
+    $fallback_title = $fallback_post instanceof WP_Post
+        ? (string) $fallback_post->post_title
+        : sprintf(__('Menu item #%d', 'chama-ops'), $fallback_item_id);
+
+    return [[
+        'item_id' => $fallback_item_id,
+        'title'   => $fallback_title,
+        'qty'     => $fallback_qty,
+    ]];
+}
+
+/**
  * Customize room-service order admin columns.
  *
  * @param array<string, string> $columns Existing columns.
@@ -8269,7 +8329,7 @@ add_action('admin_notices', 'chama_ops_render_room_service_queue_notice');
 function chama_ops_add_room_service_order_columns(array $columns): array
 {
     $columns['chama_order_room'] = __('Room', 'chama-ops');
-    $columns['chama_order_item'] = __('Menu Item', 'chama-ops');
+    $columns['chama_order_item'] = __('Menu Items', 'chama-ops');
     $columns['chama_order_qty'] = __('Qty', 'chama-ops');
     $columns['chama_order_total'] = __('Total', 'chama-ops');
     $columns['chama_order_status'] = __('Order Status', 'chama-ops');
@@ -8293,11 +8353,36 @@ function chama_ops_render_room_service_order_column(string $column, int $post_id
             break;
 
         case 'chama_order_item':
-            $item_id = (int) get_post_meta($post_id, '_chama_order_item_id', true);
-            $item = $item_id > 0 ? get_post($item_id) : null;
-            echo $item instanceof WP_Post
-                ? esc_html((string) $item->post_title)
-                : esc_html__('N/A', 'chama-ops');
+            $line_items = chama_ops_get_room_service_order_line_items($post_id);
+
+            if (empty($line_items)) {
+                echo esc_html__('N/A', 'chama-ops');
+                break;
+            }
+
+            $rendered_rows = [];
+            $max_rows = 2;
+            $visible_items = array_slice($line_items, 0, $max_rows);
+
+            foreach ($visible_items as $line_item) {
+                $rendered_rows[] = sprintf(
+                    /* translators: 1: menu item title, 2: quantity */
+                    __('%1$s x%2$d', 'chama-ops'),
+                    $line_item['title'],
+                    $line_item['qty']
+                );
+            }
+
+            if (count($line_items) > $max_rows) {
+                $remaining = count($line_items) - $max_rows;
+                $rendered_rows[] = sprintf(
+                    /* translators: %d: count of additional order line items */
+                    __('+%d more', 'chama-ops'),
+                    $remaining
+                );
+            }
+
+            echo esc_html(implode(' | ', $rendered_rows));
             break;
 
         case 'chama_order_qty':
