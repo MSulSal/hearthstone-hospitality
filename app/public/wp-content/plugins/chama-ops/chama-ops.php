@@ -6112,6 +6112,45 @@ function chama_ops_get_guest_editable_room_service_order(int $order_id, string $
 }
 
 /**
+ * Build guest-facing action controls for an editable dining order.
+ */
+function chama_ops_render_guest_room_service_order_actions(int $order_id, string $room_number): string
+{
+    $editable_order = chama_ops_get_guest_editable_room_service_order($order_id, $room_number);
+
+    if (!$editable_order instanceof WP_Post) {
+        return '';
+    }
+
+    $dining_url = chama_ops_get_guest_page_url('dining', '/dining/');
+    $edit_url = add_query_arg('chama_room_service_edit', $order_id, $dining_url);
+    $request_uri = isset($_SERVER['REQUEST_URI']) ? (string) wp_unslash($_SERVER['REQUEST_URI']) : '';
+    $return_url = $request_uri !== '' ? home_url($request_uri) : $dining_url;
+
+    ob_start();
+    ?>
+    <div class="chama-order-actions wp-block-buttons" style="margin-top:8px;gap:8px;">
+        <div class="wp-block-button">
+            <a class="wp-block-button__link wp-element-button" href="<?php echo esc_url($edit_url); ?>">
+                <?php esc_html_e('Edit order', 'chama-ops'); ?>
+            </a>
+        </div>
+        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline-block;margin:0;">
+            <?php wp_nonce_field('chama_ops_cancel_room_service_order_action', 'chama_ops_cancel_room_service_order_nonce'); ?>
+            <input type="hidden" name="action" value="chama_ops_cancel_room_service_order">
+            <input type="hidden" name="chama_room_service_order_id" value="<?php echo esc_attr((string) $order_id); ?>">
+            <input type="hidden" name="chama_guest_return" value="<?php echo esc_attr($return_url); ?>">
+            <button type="submit" class="wp-block-button__link wp-element-button" style="background:#8d4f4f;border-color:#8d4f4f;">
+                <?php esc_html_e('Cancel order', 'chama-ops'); ?>
+            </button>
+        </form>
+    </div>
+    <?php
+
+    return (string) ob_get_clean();
+}
+
+/**
  * Print cart interaction script one time per response.
  */
 function chama_ops_print_guest_cart_script_once(): void
@@ -6385,6 +6424,19 @@ function chama_ops_render_room_service_app_shortcode(): string
         <?php elseif ($notice_key === 'edit_locked') : ?>
             <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('This order cannot be edited anymore. Please contact front desk for changes.', 'chama-ops'); ?>
+            </div>
+        <?php elseif ($notice_key === 'cancelled' && $order_ref > 0) : ?>
+            <div class="chama-app-notice chama-app-notice--success">
+                <?php
+                printf(
+                    esc_html__('Order #%d cancelled.', 'chama-ops'),
+                    $order_ref
+                );
+                ?>
+            </div>
+        <?php elseif ($notice_key === 'cancel_locked') : ?>
+            <div class="chama-app-notice chama-app-notice--error">
+                <?php esc_html_e('This order can no longer be cancelled in the app. Please contact front desk.', 'chama-ops'); ?>
             </div>
         <?php elseif ($edit_locked) : ?>
             <div class="chama-app-notice chama-app-notice--error">
@@ -6715,6 +6767,45 @@ function chama_ops_submit_room_service_order(): void
 }
 add_action('admin_post_nopriv_chama_ops_submit_room_service_order', 'chama_ops_submit_room_service_order');
 add_action('admin_post_chama_ops_submit_room_service_order', 'chama_ops_submit_room_service_order');
+
+/**
+ * Cancel an editable room-service order from the guest app.
+ */
+function chama_ops_cancel_room_service_order(): void
+{
+    check_admin_referer('chama_ops_cancel_room_service_order_action', 'chama_ops_cancel_room_service_order_nonce');
+
+    if (!chama_ops_is_guest_authenticated()) {
+        wp_safe_redirect(add_query_arg('chama_guest_auth', 'expired', chama_ops_get_guest_page_url('guest-access', '/guest-access/')));
+        exit;
+    }
+
+    $order_id = isset($_POST['chama_room_service_order_id']) ? absint(wp_unslash($_POST['chama_room_service_order_id'])) : 0;
+    $raw_return = isset($_POST['chama_guest_return']) ? (string) wp_unslash($_POST['chama_guest_return']) : '';
+    $redirect_url = chama_ops_get_guest_redirect_target($raw_return);
+
+    if ($redirect_url === '') {
+        $redirect_url = chama_ops_get_guest_page_url('home', '/');
+    }
+
+    $room_number = chama_ops_get_guest_room_context();
+    $editable_order = chama_ops_get_guest_editable_room_service_order($order_id, $room_number);
+
+    if (!$editable_order instanceof WP_Post) {
+        wp_safe_redirect(add_query_arg('chama_room_service', 'cancel_locked', $redirect_url));
+        exit;
+    }
+
+    update_post_meta($order_id, '_chama_order_status', 'cancelled');
+
+    wp_safe_redirect(add_query_arg([
+        'chama_room_service'       => 'cancelled',
+        'chama_room_service_order' => $order_id,
+    ], $redirect_url));
+    exit;
+}
+add_action('admin_post_nopriv_chama_ops_cancel_room_service_order', 'chama_ops_cancel_room_service_order');
+add_action('admin_post_chama_ops_cancel_room_service_order', 'chama_ops_cancel_room_service_order');
 
 /**
  * Advance room-service order status from the admin queue.
@@ -7464,10 +7555,27 @@ function chama_ops_render_guest_home_shell_shortcode(): string
     $stay_id = isset($session['stay_id']) ? (int) $session['stay_id'] : 0;
     $check_out = $stay_id > 0 ? (string) get_post_meta($stay_id, '_chama_stay_check_out', true) : '';
     $active_orders = chama_ops_get_guest_active_orders_for_room($room_number);
+    $notice_key = isset($_GET['chama_room_service']) ? sanitize_key((string) wp_unslash($_GET['chama_room_service'])) : '';
+    $order_ref  = isset($_GET['chama_room_service_order']) ? absint($_GET['chama_room_service_order']) : 0;
 
     ob_start();
     ?>
     <section class="chama-guest-home">
+        <?php if ($notice_key === 'cancelled' && $order_ref > 0) : ?>
+            <div class="chama-app-notice chama-app-notice--success">
+                <?php
+                printf(
+                    esc_html__('Order #%d cancelled.', 'chama-ops'),
+                    $order_ref
+                );
+                ?>
+            </div>
+        <?php elseif ($notice_key === 'cancel_locked') : ?>
+            <div class="chama-app-notice chama-app-notice--error">
+                <?php esc_html_e('This order can no longer be cancelled in the app. Please contact front desk.', 'chama-ops'); ?>
+            </div>
+        <?php endif; ?>
+
         <div class="chama-guest-home__grid">
             <article class="chama-card">
                 <p class="chama-service-app__section-title"><?php esc_html_e('Stay', 'chama-ops'); ?></p>
@@ -7513,6 +7621,14 @@ function chama_ops_render_guest_home_shell_shortcode(): string
                             <div class="chama-cart-line__info">
                                 <strong><?php echo esc_html($type_label . ' - ' . (string) ($order['title'] ?? '')); ?></strong>
                                 <span><?php echo esc_html(implode(' • ', $meta_bits)); ?></span>
+                                <?php
+                                $order_id = isset($order['id']) ? (int) $order['id'] : 0;
+                                $order_type = isset($order['type']) ? (string) $order['type'] : '';
+
+                                if ($order_type === 'dining' && $order_id > 0) {
+                                    echo chama_ops_render_guest_room_service_order_actions($order_id, $room_number); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                                }
+                                ?>
                             </div>
                         </li>
                     <?php endforeach; ?>
@@ -7544,10 +7660,26 @@ function chama_ops_render_guest_my_stay_shortcode(): string
     $check_in = $stay_id > 0 ? (string) get_post_meta($stay_id, '_chama_stay_check_in', true) : '';
     $check_out = $stay_id > 0 ? (string) get_post_meta($stay_id, '_chama_stay_check_out', true) : '';
     $active_orders = chama_ops_get_guest_active_orders_for_room($room_number);
+    $notice_key = isset($_GET['chama_room_service']) ? sanitize_key((string) wp_unslash($_GET['chama_room_service'])) : '';
+    $order_ref  = isset($_GET['chama_room_service_order']) ? absint($_GET['chama_room_service_order']) : 0;
 
     ob_start();
     ?>
     <section class="chama-guest-my-stay">
+        <?php if ($notice_key === 'cancelled' && $order_ref > 0) : ?>
+            <div class="chama-app-notice chama-app-notice--success">
+                <?php
+                printf(
+                    esc_html__('Order #%d cancelled.', 'chama-ops'),
+                    $order_ref
+                );
+                ?>
+            </div>
+        <?php elseif ($notice_key === 'cancel_locked') : ?>
+            <div class="chama-app-notice chama-app-notice--error">
+                <?php esc_html_e('This order can no longer be cancelled in the app. Please contact front desk.', 'chama-ops'); ?>
+            </div>
+        <?php endif; ?>
         <div class="chama-card">
             <h2><?php esc_html_e('My Stay', 'chama-ops'); ?></h2>
             <p class="chama-order-meta">
@@ -7579,6 +7711,14 @@ function chama_ops_render_guest_my_stay_shortcode(): string
                             <div class="chama-cart-line__info">
                                 <strong><?php echo esc_html((string) ($order['title'] ?? '')); ?></strong>
                                 <span><?php echo esc_html(implode(' • ', $meta_bits)); ?></span>
+                                <?php
+                                $order_id = isset($order['id']) ? (int) $order['id'] : 0;
+                                $order_type = isset($order['type']) ? (string) $order['type'] : '';
+
+                                if ($order_type === 'dining' && $order_id > 0) {
+                                    echo chama_ops_render_guest_room_service_order_actions($order_id, $room_number); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                                }
+                                ?>
                             </div>
                         </li>
                     <?php endforeach; ?>
