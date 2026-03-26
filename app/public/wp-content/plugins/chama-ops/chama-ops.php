@@ -1464,6 +1464,11 @@ function chama_ops_save_room_service_order_meta(int $post_id): void
     $guest_phone = isset($_POST['chama_order_guest_phone']) ? sanitize_text_field(wp_unslash($_POST['chama_order_guest_phone'])) : '';
     $order_total = isset($_POST['chama_order_total']) ? chama_ops_sanitize_decimal_amount((string) wp_unslash($_POST['chama_order_total'])) : '';
     $order_state = isset($_POST['chama_order_status']) ? sanitize_key((string) wp_unslash($_POST['chama_order_status'])) : 'submitted';
+    $item_qty_map = [];
+
+    if (isset($_POST['chama_order_item_qty']) && is_array($_POST['chama_order_item_qty'])) {
+        $item_qty_map = (array) wp_unslash($_POST['chama_order_item_qty']);
+    }
 
     $allowed_states = ['submitted', 'confirmed', 'in_kitchen', 'ready', 'delivering', 'completed', 'cancelled'];
 
@@ -1471,18 +1476,73 @@ function chama_ops_save_room_service_order_meta(int $post_id): void
         $order_state = 'submitted';
     }
 
-    if (isset($_POST['chama_order_item_id'])) {
+    $did_update_line_items = false;
+    $recalculated_order_total = '';
+    $editable_states = ['submitted', 'confirmed'];
+
+    if (!empty($item_qty_map) && in_array($order_state, $editable_states, true)) {
+        $updated_cart = [];
+        $updated_subtotal = 0.0;
+        $updated_total_qty = 0;
+
+        foreach ($item_qty_map as $raw_item_id => $raw_qty) {
+            $item_id_for_cart = absint((string) $raw_item_id);
+            $qty_for_cart = max(0, absint($raw_qty));
+
+            if ($item_id_for_cart <= 0 || $qty_for_cart <= 0) {
+                continue;
+            }
+
+            $item_post = get_post($item_id_for_cart);
+
+            if (!$item_post instanceof WP_Post || $item_post->post_type !== 'room_service_item') {
+                continue;
+            }
+
+            $updated_cart[$item_id_for_cart] = $qty_for_cart;
+            $updated_total_qty += $qty_for_cart;
+
+            $item_price_raw = (string) get_post_meta($item_id_for_cart, '_chama_room_service_price', true);
+            $item_price = $item_price_raw !== '' ? (float) $item_price_raw : 0.0;
+            $updated_subtotal += ($item_price * $qty_for_cart);
+        }
+
+        if (!empty($updated_cart)) {
+            $tip_percent = (int) get_post_meta($post_id, '_chama_order_tip_percent', true);
+
+            if ($tip_percent < 0) {
+                $tip_percent = 0;
+            }
+
+            $updated_tip_amount = $updated_subtotal * ($tip_percent / 100);
+            $recalculated_order_total = number_format($updated_subtotal + $updated_tip_amount, 2, '.', '');
+
+            update_post_meta($post_id, '_chama_order_items_json', wp_json_encode($updated_cart));
+            update_post_meta($post_id, '_chama_order_item_id', (int) array_key_first($updated_cart));
+            update_post_meta($post_id, '_chama_order_quantity', $updated_total_qty);
+            update_post_meta($post_id, '_chama_order_subtotal', number_format($updated_subtotal, 2, '.', ''));
+            update_post_meta($post_id, '_chama_order_tip_amount', number_format($updated_tip_amount, 2, '.', ''));
+
+            $did_update_line_items = true;
+        }
+    }
+
+    if (!$did_update_line_items && isset($_POST['chama_order_item_id'])) {
         update_post_meta($post_id, '_chama_order_item_id', $item_id);
     }
 
-    if (isset($_POST['chama_order_quantity'])) {
+    if (!$did_update_line_items && isset($_POST['chama_order_quantity'])) {
         update_post_meta($post_id, '_chama_order_quantity', $quantity);
     }
 
     update_post_meta($post_id, '_chama_order_room_number', $room_number);
     update_post_meta($post_id, '_chama_order_guest_name', $guest_name);
     update_post_meta($post_id, '_chama_order_guest_phone', $guest_phone);
-    update_post_meta($post_id, '_chama_order_total', $order_total);
+    update_post_meta(
+        $post_id,
+        '_chama_order_total',
+        $did_update_line_items ? $recalculated_order_total : $order_total
+    );
     update_post_meta($post_id, '_chama_order_status', $order_state);
 }
 add_action('save_post', 'chama_ops_save_room_service_order_meta');
@@ -2366,59 +2426,98 @@ function chama_ops_render_room_service_order_meta_box(WP_Post $post): void
     $order_total = (string) get_post_meta($post->ID, '_chama_order_total', true);
     $order_state = (string) get_post_meta($post->ID, '_chama_order_status', true);
     $line_items  = chama_ops_get_room_service_order_line_items((int) $post->ID);
+    $editable_states = ['submitted', 'confirmed'];
+    $can_edit_line_items = in_array($order_state, $editable_states, true);
+    $line_item_quantities = [];
+    $item_options = get_posts([
+        'post_type'      => 'room_service_item',
+        'posts_per_page' => -1,
+        'post_status'    => ['publish', 'draft'],
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    ]);
 
     if ($quantity <= 0) {
         $quantity = 1;
+    }
+
+    foreach ($line_items as $line_item) {
+        $line_item_id = isset($line_item['item_id']) ? (int) $line_item['item_id'] : 0;
+        $line_item_qty = isset($line_item['qty']) ? max(0, (int) $line_item['qty']) : 0;
+
+        if ($line_item_id <= 0 || $line_item_qty <= 0) {
+            continue;
+        }
+
+        $line_item_quantities[$line_item_id] = $line_item_qty;
     }
     ?>
     <table class="form-table" role="presentation">
         <tbody>
             <?php if (!empty($line_items)) : ?>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Line Items', 'chama-ops'); ?></th>
-                    <td>
-                        <ul style="margin:0;padding-left:18px;">
-                            <?php foreach ($line_items as $line_item) : ?>
-                                <li>
-                                    <?php
-                                    echo esc_html(
-                                        sprintf(
-                                            /* translators: 1: menu item title, 2: quantity */
-                                            __('%1$s x%2$d', 'chama-ops'),
-                                            $line_item['title'],
-                                            $line_item['qty']
-                                        )
-                                    );
-                                    ?>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php esc_html_e('Quantity', 'chama-ops'); ?></th>
-                    <td>
-                        <?php
-                        $total_line_qty = 0;
-
-                        foreach ($line_items as $line_item) {
-                            $total_line_qty += (int) $line_item['qty'];
-                        }
-
-                        echo esc_html((string) $total_line_qty);
-                        ?>
-                    </td>
-                </tr>
+                <?php if ($can_edit_line_items) : ?>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Line Items', 'chama-ops'); ?></th>
+                        <td>
+                            <table style="width:100%;max-width:620px;border-collapse:collapse;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left;padding:8px 10px;border-bottom:1px solid #dcdcde;"><?php esc_html_e('Item', 'chama-ops'); ?></th>
+                                        <th style="text-align:right;padding:8px 10px;border-bottom:1px solid #dcdcde;"><?php esc_html_e('Qty', 'chama-ops'); ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($item_options as $item_post) : ?>
+                                        <?php
+                                        $option_item_id = (int) $item_post->ID;
+                                        $option_qty = isset($line_item_quantities[$option_item_id]) ? (int) $line_item_quantities[$option_item_id] : 0;
+                                        ?>
+                                        <tr>
+                                            <td style="padding:8px 10px;border-bottom:1px solid #f0f0f1;">
+                                                <?php echo esc_html((string) $item_post->post_title); ?>
+                                            </td>
+                                            <td style="padding:8px 10px;border-bottom:1px solid #f0f0f1;text-align:right;">
+                                                <input
+                                                    type="number"
+                                                    name="chama_order_item_qty[<?php echo esc_attr((string) $option_item_id); ?>]"
+                                                    min="0"
+                                                    step="1"
+                                                    value="<?php echo esc_attr((string) $option_qty); ?>"
+                                                    class="small-text"
+                                                >
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                            <p class="description"><?php esc_html_e('You can edit items while status is Submitted or Confirmed. Set quantity to 0 to remove an item.', 'chama-ops'); ?></p>
+                        </td>
+                    </tr>
+                <?php else : ?>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Line Items', 'chama-ops'); ?></th>
+                        <td>
+                            <ul style="margin:0;padding-left:18px;">
+                                <?php foreach ($line_items as $line_item) : ?>
+                                    <li>
+                                        <?php
+                                        echo esc_html(
+                                            sprintf(
+                                                /* translators: 1: menu item title, 2: quantity */
+                                                __('%1$s x%2$d', 'chama-ops'),
+                                                $line_item['title'],
+                                                $line_item['qty']
+                                            )
+                                        );
+                                        ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                            <p class="description"><?php esc_html_e('Line items lock once kitchen preparation starts.', 'chama-ops'); ?></p>
+                        </td>
+                    </tr>
+                <?php endif; ?>
             <?php else : ?>
-                <?php
-                $item_options = get_posts([
-                    'post_type'      => 'room_service_item',
-                    'posts_per_page' => -1,
-                    'post_status'    => ['publish', 'draft'],
-                    'orderby'        => 'title',
-                    'order'          => 'ASC',
-                ]);
-                ?>
                 <tr>
                     <th scope="row"><label for="chama_order_item_id"><?php esc_html_e('Menu Item', 'chama-ops'); ?></label></th>
                     <td>
@@ -5981,6 +6080,38 @@ function chama_ops_get_guest_room_context(): string
 }
 
 /**
+ * Resolve an editable room-service order for the current guest room.
+ */
+function chama_ops_get_guest_editable_room_service_order(int $order_id, string $room_number): ?WP_Post
+{
+    $normalized_room = strtoupper(trim($room_number));
+
+    if ($order_id <= 0 || $normalized_room === '') {
+        return null;
+    }
+
+    $order_post = get_post($order_id);
+
+    if (!$order_post instanceof WP_Post || $order_post->post_type !== 'room_service_order') {
+        return null;
+    }
+
+    $order_room = strtoupper(trim((string) get_post_meta($order_id, '_chama_order_room_number', true)));
+
+    if ($order_room === '' || $order_room !== $normalized_room) {
+        return null;
+    }
+
+    $order_status = sanitize_key((string) get_post_meta($order_id, '_chama_order_status', true));
+
+    if (!in_array($order_status, ['submitted', 'confirmed'], true)) {
+        return null;
+    }
+
+    return $order_post;
+}
+
+/**
  * Print cart interaction script one time per response.
  */
 function chama_ops_print_guest_cart_script_once(): void
@@ -6014,7 +6145,14 @@ function chama_ops_print_guest_cart_script_once(): void
                 return;
             }
 
+            var initialCart = {};
             var cart = {};
+
+            try {
+                initialCart = JSON.parse(String(cartInput.value || '{}')) || {};
+            } catch (error) {
+                initialCart = {};
+            }
 
             var setQtyOnCard = function (card, qty) {
                 var qtyNode = card.querySelector('[data-qty]');
@@ -6101,8 +6239,14 @@ function chama_ops_print_guest_cart_script_once(): void
                     return;
                 }
 
-                cart[item.id] = 0;
-                setQtyOnCard(card, 0);
+                var initialQty = parseInt(String(initialCart[item.id] || 0), 10);
+
+                if (isNaN(initialQty) || initialQty < 0) {
+                    initialQty = 0;
+                }
+
+                cart[item.id] = initialQty;
+                setQtyOnCard(card, initialQty);
 
                 card.addEventListener('click', function (event) {
                     var trigger = event.target.closest('button[data-action]');
@@ -6164,6 +6308,52 @@ function chama_ops_render_room_service_app_shortcode(): string
     $items = chama_ops_get_available_room_service_items();
     $notice_key = isset($_GET['chama_room_service']) ? sanitize_key((string) wp_unslash($_GET['chama_room_service'])) : '';
     $order_ref  = isset($_GET['chama_room_service_order']) ? absint($_GET['chama_room_service_order']) : 0;
+    $room_number = chama_ops_get_guest_room_context();
+    $edit_order_id = isset($_GET['chama_room_service_edit']) ? absint($_GET['chama_room_service_edit']) : 0;
+    $editable_order = chama_ops_get_guest_editable_room_service_order($edit_order_id, $room_number);
+    $editing_order_id = $editable_order instanceof WP_Post ? (int) $editable_order->ID : 0;
+    $edit_locked = $edit_order_id > 0 && $editing_order_id <= 0;
+    $dining_page_url = chama_ops_get_guest_page_url('dining', '/dining/');
+    $initial_cart_json = '{}';
+    $initial_delivery_method = 'room_delivery';
+    $initial_requested_time = '';
+    $initial_tip_percent = 0;
+    $initial_notes = '';
+
+    if ($editing_order_id > 0) {
+        $editable_line_items = chama_ops_get_room_service_order_line_items($editing_order_id);
+        $initial_cart = [];
+
+        foreach ($editable_line_items as $line_item) {
+            $line_item_id = isset($line_item['item_id']) ? (int) $line_item['item_id'] : 0;
+            $line_item_qty = isset($line_item['qty']) ? max(0, (int) $line_item['qty']) : 0;
+
+            if ($line_item_id <= 0 || $line_item_qty <= 0) {
+                continue;
+            }
+
+            $initial_cart[$line_item_id] = $line_item_qty;
+        }
+
+        if (!empty($initial_cart)) {
+            $initial_cart_json = (string) wp_json_encode($initial_cart);
+        }
+
+        $delivery_method_meta = sanitize_key((string) get_post_meta($editing_order_id, '_chama_order_delivery_method', true));
+
+        if (in_array($delivery_method_meta, ['room_delivery', 'pickup'], true)) {
+            $initial_delivery_method = $delivery_method_meta;
+        }
+
+        $initial_requested_time = sanitize_text_field((string) get_post_meta($editing_order_id, '_chama_order_requested_time', true));
+        $initial_tip_percent = (int) get_post_meta($editing_order_id, '_chama_order_tip_percent', true);
+
+        if (!in_array($initial_tip_percent, [0, 10, 15, 20], true)) {
+            $initial_tip_percent = 0;
+        }
+
+        $initial_notes = sanitize_textarea_field((string) get_post_meta($editing_order_id, '_chama_order_notes', true));
+    }
 
     ob_start();
     ?>
@@ -6176,10 +6366,29 @@ function chama_ops_render_room_service_app_shortcode(): string
                     $order_ref
                 );
                 ?>
+                <a href="<?php echo esc_url(add_query_arg('chama_room_service_edit', $order_ref, $dining_page_url)); ?>"><?php esc_html_e('Review or edit order', 'chama-ops'); ?></a>
+            </div>
+        <?php elseif ($notice_key === 'updated' && $order_ref > 0) : ?>
+            <div class="chama-app-notice chama-app-notice--success">
+                <?php
+                printf(
+                    esc_html__('Order #%d updated. Front desk has the latest version.', 'chama-ops'),
+                    $order_ref
+                );
+                ?>
+                <a href="<?php echo esc_url(add_query_arg('chama_room_service_edit', $order_ref, $dining_page_url)); ?>"><?php esc_html_e('Review order again', 'chama-ops'); ?></a>
             </div>
         <?php elseif ($notice_key === 'invalid_item') : ?>
             <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('That menu item is currently unavailable. Please choose another item.', 'chama-ops'); ?>
+            </div>
+        <?php elseif ($notice_key === 'edit_locked') : ?>
+            <div class="chama-app-notice chama-app-notice--error">
+                <?php esc_html_e('This order cannot be edited anymore. Please contact front desk for changes.', 'chama-ops'); ?>
+            </div>
+        <?php elseif ($edit_locked) : ?>
+            <div class="chama-app-notice chama-app-notice--error">
+                <?php esc_html_e('That order can no longer be edited in the app. Please contact front desk for changes.', 'chama-ops'); ?>
             </div>
         <?php endif; ?>
 
@@ -6256,11 +6465,25 @@ function chama_ops_render_room_service_app_shortcode(): string
                 <aside class="chama-service-app__panel">
                     <div class="chama-card chama-order-panel">
                         <h3 class="chama-service-app__heading"><?php esc_html_e('Order', 'chama-ops'); ?></h3>
+                        <?php if ($editing_order_id > 0) : ?>
+                            <p class="chama-order-meta">
+                                <?php
+                                printf(
+                                    esc_html__('Editing order #%d. ', 'chama-ops'),
+                                    $editing_order_id
+                                );
+                                ?>
+                                <a href="<?php echo esc_url($dining_page_url); ?>"><?php esc_html_e('Start a new order instead', 'chama-ops'); ?></a>
+                            </p>
+                        <?php endif; ?>
 
                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
                             <?php wp_nonce_field('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce'); ?>
                             <input type="hidden" name="action" value="chama_ops_submit_room_service_order">
-                            <input type="hidden" name="chama_room_service_cart" value="{}" data-cart-input>
+                            <input type="hidden" name="chama_room_service_cart" value="<?php echo esc_attr($initial_cart_json); ?>" data-cart-input>
+                            <?php if ($editing_order_id > 0) : ?>
+                                <input type="hidden" name="chama_room_service_order_id" value="<?php echo esc_attr((string) $editing_order_id); ?>">
+                            <?php endif; ?>
 
                             <div class="chama-cart-summary" data-cart-summary>
                                 <p class="chama-order-meta"><?php esc_html_e('No items selected yet.', 'chama-ops'); ?></p>
@@ -6270,32 +6493,34 @@ function chama_ops_render_room_service_app_shortcode(): string
                             <p class="chama-form-field">
                                 <label for="chama_order_delivery_method"><?php esc_html_e('Delivery method', 'chama-ops'); ?></label>
                                 <select id="chama_order_delivery_method" name="chama_order_delivery_method">
-                                    <option value="room_delivery"><?php esc_html_e('Room delivery', 'chama-ops'); ?></option>
-                                    <option value="pickup"><?php esc_html_e('Pickup', 'chama-ops'); ?></option>
+                                    <option value="room_delivery" <?php selected($initial_delivery_method, 'room_delivery'); ?>><?php esc_html_e('Room delivery', 'chama-ops'); ?></option>
+                                    <option value="pickup" <?php selected($initial_delivery_method, 'pickup'); ?>><?php esc_html_e('Pickup', 'chama-ops'); ?></option>
                                 </select>
                             </p>
 
                             <p class="chama-form-field">
                                 <label for="chama_order_requested_time"><?php esc_html_e('Requested time', 'chama-ops'); ?></label>
-                                <input type="time" id="chama_order_requested_time" name="chama_order_requested_time">
+                                <input type="time" id="chama_order_requested_time" name="chama_order_requested_time" value="<?php echo esc_attr($initial_requested_time); ?>">
                             </p>
 
                             <p class="chama-form-field">
                                 <label for="chama_order_tip_percent"><?php esc_html_e('Tip', 'chama-ops'); ?></label>
                                 <select id="chama_order_tip_percent" name="chama_order_tip_percent">
-                                    <option value="0"><?php esc_html_e('No tip', 'chama-ops'); ?></option>
-                                    <option value="10">10%</option>
-                                    <option value="15">15%</option>
-                                    <option value="20">20%</option>
+                                    <option value="0" <?php selected($initial_tip_percent, 0); ?>><?php esc_html_e('No tip', 'chama-ops'); ?></option>
+                                    <option value="10" <?php selected($initial_tip_percent, 10); ?>>10%</option>
+                                    <option value="15" <?php selected($initial_tip_percent, 15); ?>>15%</option>
+                                    <option value="20" <?php selected($initial_tip_percent, 20); ?>>20%</option>
                                 </select>
                             </p>
 
                             <p class="chama-form-field">
                                 <label for="chama_order_notes"><?php esc_html_e('Allergy / special notes', 'chama-ops'); ?></label>
-                                <textarea id="chama_order_notes" name="chama_order_notes" rows="3"></textarea>
+                                <textarea id="chama_order_notes" name="chama_order_notes" rows="3"><?php echo esc_textarea($initial_notes); ?></textarea>
                             </p>
 
-                            <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled><?php esc_html_e('Submit order', 'chama-ops'); ?></button>
+                            <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled>
+                                <?php echo esc_html($editing_order_id > 0 ? __('Update order', 'chama-ops') : __('Submit order', 'chama-ops')); ?>
+                            </button>
                         </form>
                     </div>
                 </aside>
@@ -6325,6 +6550,7 @@ function chama_ops_submit_room_service_order(): void
     $requested_time = isset($_POST['chama_order_requested_time']) ? sanitize_text_field((string) wp_unslash($_POST['chama_order_requested_time'])) : '';
     $tip_percent = isset($_POST['chama_order_tip_percent']) ? absint(wp_unslash($_POST['chama_order_tip_percent'])) : 0;
     $order_notes = isset($_POST['chama_order_notes']) ? sanitize_textarea_field((string) wp_unslash($_POST['chama_order_notes'])) : '';
+    $order_id_to_edit = isset($_POST['chama_room_service_order_id']) ? absint(wp_unslash($_POST['chama_room_service_order_id'])) : 0;
 
     if (!in_array($delivery_method, ['room_delivery', 'pickup'], true)) {
         $delivery_method = 'room_delivery';
@@ -6425,38 +6651,65 @@ function chama_ops_submit_room_service_order(): void
         count($validated_cart)
     );
 
-    $order_id = wp_insert_post([
-        'post_type'    => 'room_service_order',
-        'post_status'  => 'publish',
-        'post_title'   => $order_title,
-        'post_content' => implode("\n", $order_note_lines),
-    ], true);
+    $resolved_order_id = 0;
+    $is_update = false;
 
-    if (is_wp_error($order_id) || (int) $order_id <= 0) {
-        wp_safe_redirect(add_query_arg('chama_room_service', 'invalid_item', $redirect_url));
-        exit;
+    if ($order_id_to_edit > 0) {
+        $editable_order = chama_ops_get_guest_editable_room_service_order($order_id_to_edit, $room);
+
+        if (!$editable_order instanceof WP_Post) {
+            wp_safe_redirect(add_query_arg('chama_room_service', 'edit_locked', $redirect_url));
+            exit;
+        }
+
+        $update_result = wp_update_post([
+            'ID'           => (int) $editable_order->ID,
+            'post_title'   => $order_title,
+            'post_content' => implode("\n", $order_note_lines),
+        ], true);
+
+        if (!is_wp_error($update_result) && (int) $update_result > 0) {
+            $resolved_order_id = (int) $update_result;
+            $is_update = true;
+        }
+    }
+
+    if ($resolved_order_id <= 0) {
+        $inserted_order_id = wp_insert_post([
+            'post_type'    => 'room_service_order',
+            'post_status'  => 'publish',
+            'post_title'   => $order_title,
+            'post_content' => implode("\n", $order_note_lines),
+        ], true);
+
+        if (is_wp_error($inserted_order_id) || (int) $inserted_order_id <= 0) {
+            wp_safe_redirect(add_query_arg('chama_room_service', 'invalid_item', $redirect_url));
+            exit;
+        }
+
+        $resolved_order_id = (int) $inserted_order_id;
     }
 
     $first_item_id = (int) array_key_first($validated_cart);
 
-    update_post_meta((int) $order_id, '_chama_order_item_id', $first_item_id);
-    update_post_meta((int) $order_id, '_chama_order_quantity', $total_qty);
-    update_post_meta((int) $order_id, '_chama_order_items_json', wp_json_encode($validated_cart));
-    update_post_meta((int) $order_id, '_chama_order_room_number', $room);
-    update_post_meta((int) $order_id, '_chama_order_guest_name', '');
-    update_post_meta((int) $order_id, '_chama_order_guest_phone', '');
-    update_post_meta((int) $order_id, '_chama_order_delivery_method', $delivery_method);
-    update_post_meta((int) $order_id, '_chama_order_requested_time', $requested_time);
-    update_post_meta((int) $order_id, '_chama_order_tip_percent', $tip_percent);
-    update_post_meta((int) $order_id, '_chama_order_tip_amount', number_format($tip_amount, 2, '.', ''));
-    update_post_meta((int) $order_id, '_chama_order_subtotal', number_format($subtotal, 2, '.', ''));
-    update_post_meta((int) $order_id, '_chama_order_notes', $order_notes);
-    update_post_meta((int) $order_id, '_chama_order_total', number_format($order_total, 2, '.', ''));
-    update_post_meta((int) $order_id, '_chama_order_status', 'submitted');
+    update_post_meta($resolved_order_id, '_chama_order_item_id', $first_item_id);
+    update_post_meta($resolved_order_id, '_chama_order_quantity', $total_qty);
+    update_post_meta($resolved_order_id, '_chama_order_items_json', wp_json_encode($validated_cart));
+    update_post_meta($resolved_order_id, '_chama_order_room_number', $room);
+    update_post_meta($resolved_order_id, '_chama_order_guest_name', '');
+    update_post_meta($resolved_order_id, '_chama_order_guest_phone', '');
+    update_post_meta($resolved_order_id, '_chama_order_delivery_method', $delivery_method);
+    update_post_meta($resolved_order_id, '_chama_order_requested_time', $requested_time);
+    update_post_meta($resolved_order_id, '_chama_order_tip_percent', $tip_percent);
+    update_post_meta($resolved_order_id, '_chama_order_tip_amount', number_format($tip_amount, 2, '.', ''));
+    update_post_meta($resolved_order_id, '_chama_order_subtotal', number_format($subtotal, 2, '.', ''));
+    update_post_meta($resolved_order_id, '_chama_order_notes', $order_notes);
+    update_post_meta($resolved_order_id, '_chama_order_total', number_format($order_total, 2, '.', ''));
+    update_post_meta($resolved_order_id, '_chama_order_status', 'submitted');
 
     wp_safe_redirect(add_query_arg([
-        'chama_room_service'       => 'submitted',
-        'chama_room_service_order' => (int) $order_id,
+        'chama_room_service'       => $is_update ? 'updated' : 'submitted',
+        'chama_room_service_order' => $resolved_order_id,
     ], $redirect_url));
     exit;
 }
