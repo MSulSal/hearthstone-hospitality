@@ -6159,8 +6159,7 @@ function chama_ops_render_room_service_app_shortcode(): string
 
                 <aside class="chama-service-app__panel">
                     <div class="chama-card chama-order-panel">
-                        <h3 class="chama-service-app__heading"><?php esc_html_e('Place your order', 'chama-ops'); ?></h3>
-                        <p class="chama-order-meta"><?php esc_html_e('Adjust item quantities and submit when ready.', 'chama-ops'); ?></p>
+                        <h3 class="chama-service-app__heading"><?php esc_html_e('Order', 'chama-ops'); ?></h3>
 
                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
                             <?php wp_nonce_field('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce'); ?>
@@ -7214,6 +7213,20 @@ function chama_ops_get_gift_shop_catalog(): array
             'category' => __('Station Collection', 'chama-ops'),
             'image_url' => 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
+        'vintage_postcard_pack' => [
+            'label' => __('Vintage Postcard Pack', 'chama-ops'),
+            'description' => __('Set of 12 Chama-inspired postcards for keepsakes or mailing home.', 'chama-ops'),
+            'price' => 12.00,
+            'category' => __('Station Collection', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/1051075/pexels-photo-1051075.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        ],
+        'rail_keychain_brass' => [
+            'label' => __('Brass Rail Keychain', 'chama-ops'),
+            'description' => __('Engraved keychain inspired by historic rail details.', 'chama-ops'),
+            'price' => 9.00,
+            'category' => __('Station Collection', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/9428789/pexels-photo-9428789.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        ],
         'blue_corn_cookie_tin' => [
             'label' => __('Blue Corn Cookie Tin', 'chama-ops'),
             'description' => __('House favorite snack pack for your room or trip home.', 'chama-ops'),
@@ -7228,6 +7241,20 @@ function chama_ops_get_gift_shop_catalog(): array
             'category' => __('Pantry & Snacks', 'chama-ops'),
             'image_url' => 'https://images.pexels.com/photos/1638280/pexels-photo-1638280.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
+        'pinon_trail_mix' => [
+            'label' => __('Pinon Trail Mix', 'chama-ops'),
+            'description' => __('Savory-sweet snack blend for train rides and day hikes.', 'chama-ops'),
+            'price' => 11.00,
+            'category' => __('Pantry & Snacks', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/1028599/pexels-photo-1028599.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        ],
+        'artisan_hot_cocoa_kit' => [
+            'label' => __('Artisan Hot Cocoa Kit', 'chama-ops'),
+            'description' => __('Single-serve cocoa set with house spice blend.', 'chama-ops'),
+            'price' => 13.00,
+            'category' => __('Pantry & Snacks', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/14691929/pexels-photo-14691929.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        ],
         'travel_toiletry_kit' => [
             'label' => __('Emergency Toiletry Kit', 'chama-ops'),
             'description' => __('Travel-size basics in a compact pouch.', 'chama-ops'),
@@ -7241,6 +7268,34 @@ function chama_ops_get_gift_shop_catalog(): array
             'price' => 8.00,
             'category' => __('Stay Essentials', 'chama-ops'),
             'image_url' => 'https://images.pexels.com/photos/3764579/pexels-photo-3764579.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        ],
+        'charger_cable_kit' => [
+            'label' => __('Universal Charger Kit', 'chama-ops'),
+            'description' => __('Fast-charge brick with USB-C and Lightning cables.', 'chama-ops'),
+            'price' => 19.00,
+            'category' => __('Stay Essentials', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/5081398/pexels-photo-5081398.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        ],
+        'cozy_slipper_set' => [
+            'label' => __('Cozy Slipper Set', 'chama-ops'),
+            'description' => __('Soft in-room slippers for a warmer evening stay.', 'chama-ops'),
+            'price' => 15.00,
+            'category' => __('Stay Essentials', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/4210860/pexels-photo-4210860.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        ],
+        'sunset_courtyard_candle' => [
+            'label' => __('Sunset Courtyard Candle', 'chama-ops'),
+            'description' => __('Small-batch candle with cedar and warm amber notes.', 'chama-ops'),
+            'price' => 21.00,
+            'category' => __('Upgrades & Comfort', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/4273460/pexels-photo-4273460.jpeg?auto=compress&cs=tinysrgb&w=1400',
+        ],
+        'flower_welcome_bundle' => [
+            'label' => __('Welcome Flower Bundle', 'chama-ops'),
+            'description' => __('Fresh seasonal arrangement for your room on request.', 'chama-ops'),
+            'price' => 28.00,
+            'category' => __('Upgrades & Comfort', 'chama-ops'),
+            'image_url' => 'https://images.pexels.com/photos/931155/pexels-photo-931155.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
     ];
 }
