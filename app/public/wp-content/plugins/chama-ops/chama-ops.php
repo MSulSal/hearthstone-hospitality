@@ -1471,8 +1471,14 @@ function chama_ops_save_room_service_order_meta(int $post_id): void
         $order_state = 'submitted';
     }
 
-    update_post_meta($post_id, '_chama_order_item_id', $item_id);
-    update_post_meta($post_id, '_chama_order_quantity', $quantity);
+    if (isset($_POST['chama_order_item_id'])) {
+        update_post_meta($post_id, '_chama_order_item_id', $item_id);
+    }
+
+    if (isset($_POST['chama_order_quantity'])) {
+        update_post_meta($post_id, '_chama_order_quantity', $quantity);
+    }
+
     update_post_meta($post_id, '_chama_order_room_number', $room_number);
     update_post_meta($post_id, '_chama_order_guest_name', $guest_name);
     update_post_meta($post_id, '_chama_order_guest_phone', $guest_phone);
@@ -1522,8 +1528,14 @@ function chama_ops_save_gift_shop_order_meta(int $post_id): void
         $order_status = 'submitted';
     }
 
-    update_post_meta($post_id, '_chama_gift_item_key', $item_key);
-    update_post_meta($post_id, '_chama_gift_quantity', $quantity);
+    if (isset($_POST['chama_gift_item_key'])) {
+        update_post_meta($post_id, '_chama_gift_item_key', $item_key);
+    }
+
+    if (isset($_POST['chama_gift_quantity'])) {
+        update_post_meta($post_id, '_chama_gift_quantity', $quantity);
+    }
+
     update_post_meta($post_id, '_chama_gift_room_number', $room_number);
     update_post_meta($post_id, '_chama_gift_guest_name', $guest_name);
     update_post_meta($post_id, '_chama_gift_guest_phone', $guest_phone);
@@ -2353,38 +2365,79 @@ function chama_ops_render_room_service_order_meta_box(WP_Post $post): void
     $guest_phone = (string) get_post_meta($post->ID, '_chama_order_guest_phone', true);
     $order_total = (string) get_post_meta($post->ID, '_chama_order_total', true);
     $order_state = (string) get_post_meta($post->ID, '_chama_order_status', true);
+    $line_items  = chama_ops_get_room_service_order_line_items((int) $post->ID);
 
     if ($quantity <= 0) {
         $quantity = 1;
     }
-
-    $item_options = get_posts([
-        'post_type'      => 'room_service_item',
-        'posts_per_page' => -1,
-        'post_status'    => ['publish', 'draft'],
-        'orderby'        => 'title',
-        'order'          => 'ASC',
-    ]);
     ?>
     <table class="form-table" role="presentation">
         <tbody>
-            <tr>
-                <th scope="row"><label for="chama_order_item_id"><?php esc_html_e('Menu Item', 'chama-ops'); ?></label></th>
-                <td>
-                    <select id="chama_order_item_id" name="chama_order_item_id">
-                        <option value="0"><?php esc_html_e('Select item', 'chama-ops'); ?></option>
-                        <?php foreach ($item_options as $item_post) : ?>
-                            <option value="<?php echo esc_attr((string) $item_post->ID); ?>" <?php selected($item_id, (int) $item_post->ID); ?>>
-                                <?php echo esc_html($item_post->post_title); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row"><label for="chama_order_quantity"><?php esc_html_e('Quantity', 'chama-ops'); ?></label></th>
-                <td><input type="number" id="chama_order_quantity" name="chama_order_quantity" min="1" step="1" value="<?php echo esc_attr((string) $quantity); ?>" class="small-text"></td>
-            </tr>
+            <?php if (!empty($line_items)) : ?>
+                <tr>
+                    <th scope="row"><?php esc_html_e('Line Items', 'chama-ops'); ?></th>
+                    <td>
+                        <ul style="margin:0;padding-left:18px;">
+                            <?php foreach ($line_items as $line_item) : ?>
+                                <li>
+                                    <?php
+                                    echo esc_html(
+                                        sprintf(
+                                            /* translators: 1: menu item title, 2: quantity */
+                                            __('%1$s x%2$d', 'chama-ops'),
+                                            $line_item['title'],
+                                            $line_item['qty']
+                                        )
+                                    );
+                                    ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e('Quantity', 'chama-ops'); ?></th>
+                    <td>
+                        <?php
+                        $total_line_qty = 0;
+
+                        foreach ($line_items as $line_item) {
+                            $total_line_qty += (int) $line_item['qty'];
+                        }
+
+                        echo esc_html((string) $total_line_qty);
+                        ?>
+                    </td>
+                </tr>
+            <?php else : ?>
+                <?php
+                $item_options = get_posts([
+                    'post_type'      => 'room_service_item',
+                    'posts_per_page' => -1,
+                    'post_status'    => ['publish', 'draft'],
+                    'orderby'        => 'title',
+                    'order'          => 'ASC',
+                ]);
+                ?>
+                <tr>
+                    <th scope="row"><label for="chama_order_item_id"><?php esc_html_e('Menu Item', 'chama-ops'); ?></label></th>
+                    <td>
+                        <select id="chama_order_item_id" name="chama_order_item_id">
+                            <option value="0"><?php esc_html_e('Select item', 'chama-ops'); ?></option>
+                            <?php foreach ($item_options as $item_post) : ?>
+                                <option value="<?php echo esc_attr((string) $item_post->ID); ?>" <?php selected($item_id, (int) $item_post->ID); ?>>
+                                    <?php echo esc_html($item_post->post_title); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description"><?php esc_html_e('Legacy fallback: use only if this order has no line-item cart data.', 'chama-ops'); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="chama_order_quantity"><?php esc_html_e('Quantity', 'chama-ops'); ?></label></th>
+                    <td><input type="number" id="chama_order_quantity" name="chama_order_quantity" min="1" step="1" value="<?php echo esc_attr((string) $quantity); ?>" class="small-text"></td>
+                </tr>
+            <?php endif; ?>
             <tr>
                 <th scope="row"><label for="chama_order_room_number"><?php esc_html_e('Room Number', 'chama-ops'); ?></label></th>
                 <td><input type="text" id="chama_order_room_number" name="chama_order_room_number" value="<?php echo esc_attr($room_number); ?>" class="regular-text"></td>
@@ -2436,6 +2489,7 @@ function chama_ops_render_gift_shop_order_meta_box(WP_Post $post): void
     $guest_phone  = (string) get_post_meta($post->ID, '_chama_gift_guest_phone', true);
     $order_total  = (string) get_post_meta($post->ID, '_chama_gift_total', true);
     $order_status = (string) get_post_meta($post->ID, '_chama_gift_order_status', true);
+    $line_items   = chama_ops_get_gift_shop_order_line_items((int) $post->ID);
 
     if ($quantity <= 0) {
         $quantity = 1;
@@ -2443,14 +2497,55 @@ function chama_ops_render_gift_shop_order_meta_box(WP_Post $post): void
     ?>
     <table class="form-table" role="presentation">
         <tbody>
-            <tr>
-                <th scope="row"><label for="chama_gift_item_key"><?php esc_html_e('Catalog Item Key', 'chama-ops'); ?></label></th>
-                <td><input type="text" id="chama_gift_item_key" name="chama_gift_item_key" value="<?php echo esc_attr($item_key); ?>" class="regular-text"></td>
-            </tr>
-            <tr>
-                <th scope="row"><label for="chama_gift_quantity"><?php esc_html_e('Quantity', 'chama-ops'); ?></label></th>
-                <td><input type="number" id="chama_gift_quantity" name="chama_gift_quantity" min="1" step="1" value="<?php echo esc_attr((string) $quantity); ?>" class="small-text"></td>
-            </tr>
+            <?php if (!empty($line_items)) : ?>
+                <tr>
+                    <th scope="row"><?php esc_html_e('Line Items', 'chama-ops'); ?></th>
+                    <td>
+                        <ul style="margin:0;padding-left:18px;">
+                            <?php foreach ($line_items as $line_item) : ?>
+                                <li>
+                                    <?php
+                                    echo esc_html(
+                                        sprintf(
+                                            /* translators: 1: catalog item title, 2: quantity */
+                                            __('%1$s x%2$d', 'chama-ops'),
+                                            $line_item['label'],
+                                            $line_item['qty']
+                                        )
+                                    );
+                                    ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e('Quantity', 'chama-ops'); ?></th>
+                    <td>
+                        <?php
+                        $total_line_qty = 0;
+
+                        foreach ($line_items as $line_item) {
+                            $total_line_qty += (int) $line_item['qty'];
+                        }
+
+                        echo esc_html((string) $total_line_qty);
+                        ?>
+                    </td>
+                </tr>
+            <?php else : ?>
+                <tr>
+                    <th scope="row"><label for="chama_gift_item_key"><?php esc_html_e('Catalog Item Key', 'chama-ops'); ?></label></th>
+                    <td>
+                        <input type="text" id="chama_gift_item_key" name="chama_gift_item_key" value="<?php echo esc_attr($item_key); ?>" class="regular-text">
+                        <p class="description"><?php esc_html_e('Legacy fallback: use only if this order has no line-item cart data.', 'chama-ops'); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="chama_gift_quantity"><?php esc_html_e('Quantity', 'chama-ops'); ?></label></th>
+                    <td><input type="number" id="chama_gift_quantity" name="chama_gift_quantity" min="1" step="1" value="<?php echo esc_attr((string) $quantity); ?>" class="small-text"></td>
+                </tr>
+            <?php endif; ?>
             <tr>
                 <th scope="row"><label for="chama_gift_room_number"><?php esc_html_e('Room Number', 'chama-ops'); ?></label></th>
                 <td><input type="text" id="chama_gift_room_number" name="chama_gift_room_number" value="<?php echo esc_attr($room_number); ?>" class="regular-text"></td>
@@ -8321,6 +8416,57 @@ function chama_ops_get_room_service_order_line_items(int $order_id): array
 }
 
 /**
+ * Return normalized gift-shop line items for admin rendering.
+ *
+ * @return array<int, array{item_key:string, label:string, qty:int}>
+ */
+function chama_ops_get_gift_shop_order_line_items(int $order_id): array
+{
+    if ($order_id <= 0) {
+        return [];
+    }
+
+    $catalog = chama_ops_get_gift_shop_catalog();
+    $line_items = [];
+    $cart_json = (string) get_post_meta($order_id, '_chama_gift_items_json', true);
+    $decoded_cart = json_decode($cart_json, true);
+
+    if (is_array($decoded_cart)) {
+        foreach ($decoded_cart as $item_key_raw => $qty_raw) {
+            $item_key = sanitize_key((string) $item_key_raw);
+            $qty = max(0, absint($qty_raw));
+
+            if ($item_key === '' || $qty <= 0) {
+                continue;
+            }
+
+            $line_items[] = [
+                'item_key' => $item_key,
+                'label'    => isset($catalog[$item_key]['label']) ? (string) $catalog[$item_key]['label'] : $item_key,
+                'qty'      => $qty,
+            ];
+        }
+    }
+
+    if (!empty($line_items)) {
+        return $line_items;
+    }
+
+    $fallback_item_key = sanitize_key((string) get_post_meta($order_id, '_chama_gift_item_key', true));
+    $fallback_qty = max(1, (int) get_post_meta($order_id, '_chama_gift_quantity', true));
+
+    if ($fallback_item_key === '') {
+        return [];
+    }
+
+    return [[
+        'item_key' => $fallback_item_key,
+        'label'    => isset($catalog[$fallback_item_key]['label']) ? (string) $catalog[$fallback_item_key]['label'] : $fallback_item_key,
+        'qty'      => $fallback_qty,
+    ]];
+}
+
+/**
  * Customize room-service order admin columns.
  *
  * @param array<string, string> $columns Existing columns.
@@ -8437,7 +8583,7 @@ add_action('manage_room_service_order_posts_custom_column', 'chama_ops_render_ro
 function chama_ops_add_gift_shop_order_columns(array $columns): array
 {
     $columns['chama_gift_room'] = __('Room', 'chama-ops');
-    $columns['chama_gift_item'] = __('Item', 'chama-ops');
+    $columns['chama_gift_item'] = __('Items', 'chama-ops');
     $columns['chama_gift_qty'] = __('Qty', 'chama-ops');
     $columns['chama_gift_total'] = __('Total', 'chama-ops');
     $columns['chama_gift_status'] = __('Status', 'chama-ops');
@@ -8454,17 +8600,42 @@ add_filter('manage_gift_shop_order_posts_columns', 'chama_ops_add_gift_shop_orde
  */
 function chama_ops_render_gift_shop_order_column(string $column, int $post_id): void
 {
-    $catalog = chama_ops_get_gift_shop_catalog();
-
     switch ($column) {
         case 'chama_gift_room':
             echo esc_html((string) get_post_meta($post_id, '_chama_gift_room_number', true));
             break;
 
         case 'chama_gift_item':
-            $item_key = (string) get_post_meta($post_id, '_chama_gift_item_key', true);
-            $item_label = isset($catalog[$item_key]['label']) ? (string) $catalog[$item_key]['label'] : $item_key;
-            echo esc_html($item_label !== '' ? $item_label : __('N/A', 'chama-ops'));
+            $line_items = chama_ops_get_gift_shop_order_line_items($post_id);
+
+            if (empty($line_items)) {
+                echo esc_html__('N/A', 'chama-ops');
+                break;
+            }
+
+            $rendered_rows = [];
+            $max_rows = 2;
+            $visible_items = array_slice($line_items, 0, $max_rows);
+
+            foreach ($visible_items as $line_item) {
+                $rendered_rows[] = sprintf(
+                    /* translators: 1: catalog item label, 2: quantity */
+                    __('%1$s x%2$d', 'chama-ops'),
+                    $line_item['label'],
+                    $line_item['qty']
+                );
+            }
+
+            if (count($line_items) > $max_rows) {
+                $remaining = count($line_items) - $max_rows;
+                $rendered_rows[] = sprintf(
+                    /* translators: %d: count of additional order line items */
+                    __('+%d more', 'chama-ops'),
+                    $remaining
+                );
+            }
+
+            echo esc_html(implode(' | ', $rendered_rows));
             break;
 
         case 'chama_gift_qty':
