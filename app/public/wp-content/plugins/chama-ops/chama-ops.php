@@ -5905,7 +5905,7 @@ function chama_ops_print_guest_cart_script_once(): void
             return;
         }
 
-        var trashSvg = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>';
+        var trashIcon = '<span class="dashicons dashicons-trash" aria-hidden="true"></span>';
 
         roots.forEach(function (root) {
             var cards = root.querySelectorAll('[data-cart-item]');
@@ -5990,7 +5990,7 @@ function chama_ops_print_guest_cart_script_once(): void
                 lines.forEach(function (line) {
                     html += '<li class="chama-cart-line">';
                     html += '<div class="chama-cart-line__info"><strong>' + escapeHtml(line.title) + '</strong><span>x' + line.qty + ' - $' + line.subtotal.toFixed(2) + '</span></div>';
-                    html += '<button type="button" class="chama-cart-remove" data-remove-id="' + line.id + '" aria-label="Remove item">' + trashSvg + '</button>';
+                    html += '<button type="button" class="chama-cart-remove" data-remove-id="' + line.id + '" aria-label="Remove item">' + trashIcon + '</button>';
                     html += '</li>';
                 });
 
@@ -6149,7 +6149,7 @@ function chama_ops_render_room_service_app_shortcode(): string
                                     <span class="chama-step-qty" data-qty>0</span>
                                     <button type="button" class="chama-step-btn" data-action="increment" aria-label="<?php esc_attr_e('Increase quantity', 'chama-ops'); ?>">+</button>
                                     <button type="button" class="chama-step-clear" data-action="clear" hidden aria-label="<?php esc_attr_e('Remove item', 'chama-ops'); ?>">
-                                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>
+                                        <span class="dashicons dashicons-trash" aria-hidden="true"></span>
                                     </button>
                                 </div>
                             </article>
@@ -7428,7 +7428,7 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                                         <span class="chama-step-qty" data-qty>0</span>
                                         <button type="button" class="chama-step-btn" data-action="increment" aria-label="<?php esc_attr_e('Increase quantity', 'chama-ops'); ?>">+</button>
                                         <button type="button" class="chama-step-clear" data-action="clear" hidden aria-label="<?php esc_attr_e('Remove item', 'chama-ops'); ?>">
-                                            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>
+                                            <span class="dashicons dashicons-trash" aria-hidden="true"></span>
                                         </button>
                                     </div>
                                 </div>

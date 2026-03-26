@@ -1632,6 +1632,14 @@ body.admin-bar .guest-auth-shell__backdrop {
   color: #8a4c49;
 }
 
+.chama-step-clear .dashicons,
+.chama-cart-remove .dashicons {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+}
+
 .chama-cart-summary {
   border: 1px solid var(--chama-border);
   border-radius: 12px;
