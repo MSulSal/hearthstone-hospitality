@@ -326,7 +326,7 @@ iframe {
   position: sticky;
   top: 0;
   z-index: 70;
-  background: var(--chama-shell-glass);
+  background: color-mix(in srgb, var(--chama-shell-bg) 66%, transparent 34%);
   backdrop-filter: blur(14px) saturate(1.08);
   -webkit-backdrop-filter: blur(14px) saturate(1.08);
   border-bottom: 1px solid var(--chama-border);
@@ -685,16 +685,17 @@ iframe {
   flex-direction: column;
   min-height: 100vh;
   padding: 0;
-}
-
-.home .site-main {
-  padding-top: clamp(1rem, 1.3vw, 1.4rem);
-  padding-bottom: 0;
   background-image: url("assets/images/csi-assets/Sunny%20patio%20with%20vacancy%20sign.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
+
+.home .site-main {
+  padding-top: clamp(1rem, 1.3vw, 1.4rem);
+  padding-bottom: 0;
+  background: transparent;
 }
 
 .home-hero {
@@ -1206,7 +1207,7 @@ body.admin-bar .guest-auth-shell__backdrop {
   right: 0;
   bottom: 0;
   z-index: 80;
-  background: var(--chama-shell-glass-soft);
+  background: color-mix(in srgb, var(--chama-shell-bg) 64%, transparent 36%);
   border-top: 1px solid color-mix(in srgb, var(--chama-border) 45%, transparent 55%);
   box-shadow: 0 -8px 18px rgba(8, 7, 6, 0.24);
   backdrop-filter: blur(12px) saturate(1.08);
@@ -1823,6 +1824,10 @@ body.home .site-footer {
     background-position: center top;
     padding-top: clamp(1rem, 4vw, 1.8rem);
     padding-bottom: clamp(1.25rem, 5vw, 2.1rem);
+  }
+
+  .home-shell {
+    background-attachment: scroll;
   }
 
   .home-content__inner {
