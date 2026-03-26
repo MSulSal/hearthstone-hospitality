@@ -7316,22 +7316,33 @@ function chama_ops_render_gift_shop_app_shortcode(): string
     $order_ref  = isset($_GET['chama_gift_order']) ? absint($_GET['chama_gift_order']) : 0;
 
     $grouped_catalog = [];
+    $category_index = [];
 
     foreach ($catalog as $item_key => $item) {
         $category = isset($item['category']) && is_string($item['category'])
             ? $item['category']
             : __('Collection', 'chama-ops');
+        $category_slug = sanitize_title($category);
 
         if (!isset($grouped_catalog[$category])) {
             $grouped_catalog[$category] = [];
         }
 
         $grouped_catalog[$category][$item_key] = $item;
+
+        if (!isset($category_index[$category_slug])) {
+            $category_index[$category_slug] = [
+                'label' => $category,
+                'count' => 0,
+            ];
+        }
+
+        $category_index[$category_slug]['count']++;
     }
 
     ob_start();
     ?>
-    <section class="chama-gift-shop-app chama-service-app" data-cart-app="gift-shop" style="margin:0 auto;max-width:1160px;">
+    <section class="chama-gift-shop-app chama-service-app" data-cart-app="gift-shop" data-shop-app style="margin:0 auto;max-width:1160px;">
         <?php if ($notice_key === 'submitted' && $order_ref > 0) : ?>
             <div class="chama-app-notice chama-app-notice--success">
                 <?php
@@ -7347,23 +7358,55 @@ function chama_ops_render_gift_shop_app_shortcode(): string
             </div>
         <?php endif; ?>
 
-        <div class="chama-service-app__layout">
-            <div class="chama-service-app__catalog">
-                <h3 class="chama-service-app__heading"><?php esc_html_e('Gift shop catalog', 'chama-ops'); ?></h3>
+        <header class="chama-shopfront__header">
+            <div class="chama-shopfront__intro">
+                <h2 class="chama-service-app__heading chama-shopfront__title"><?php esc_html_e('Gift shop', 'chama-ops'); ?></h2>
+                <p class="chama-order-meta"><?php esc_html_e('Souvenirs, essentials, and comfort upgrades delivered during your stay.', 'chama-ops'); ?></p>
+            </div>
+            <div class="chama-shopfront__search-wrap">
+                <label for="chama_shop_search" class="screen-reader-text"><?php esc_html_e('Search gift shop items', 'chama-ops'); ?></label>
+                <input type="search" id="chama_shop_search" class="chama-shopfront__search" data-shop-search placeholder="<?php esc_attr_e('Search by item name', 'chama-ops'); ?>">
+            </div>
+        </header>
 
-                <?php foreach ($grouped_catalog as $category_label => $group_items) : ?>
-                    <h4 class="chama-service-app__section-title"><?php echo esc_html($category_label); ?></h4>
-                    <div class="chama-order-grid">
-                        <?php foreach ($group_items as $item_key => $item) : ?>
-                            <?php
+        <div class="chama-shopfront__filters" role="tablist" aria-label="<?php esc_attr_e('Gift shop categories', 'chama-ops'); ?>">
+            <button type="button" class="chama-shopfront__filter is-active" data-shop-filter="all" aria-pressed="true">
+                <?php esc_html_e('All', 'chama-ops'); ?>
+                <span class="chama-shopfront__filter-count"><?php echo esc_html((string) count($catalog)); ?></span>
+            </button>
+            <?php foreach ($category_index as $category_slug => $category_data) : ?>
+                <button type="button" class="chama-shopfront__filter" data-shop-filter="<?php echo esc_attr($category_slug); ?>" aria-pressed="false">
+                    <?php echo esc_html((string) $category_data['label']); ?>
+                    <span class="chama-shopfront__filter-count"><?php echo esc_html((string) $category_data['count']); ?></span>
+                </button>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="chama-service-app__layout chama-shopfront__layout">
+            <div class="chama-service-app__catalog chama-shopfront__catalog">
+                <div class="chama-order-grid chama-order-grid--shop">
+                    <?php foreach ($grouped_catalog as $category_label => $group_items) : ?>
+                        <?php
+                        $category_slug = sanitize_title($category_label);
+                        foreach ($group_items as $item_key => $item) :
                             $item_label = isset($item['label']) ? (string) $item['label'] : '';
                             $item_description = isset($item['description']) ? (string) $item['description'] : '';
                             $item_price = isset($item['price']) ? (float) $item['price'] : 0.0;
                             $image_url = isset($item['image_url']) ? (string) $item['image_url'] : '';
+                            $search_index = strtolower(trim($item_label . ' ' . $item_description . ' ' . $category_label));
                             ?>
-                            <article class="chama-order-card">
+                            <article
+                                class="chama-order-card chama-shop-card"
+                                data-shop-card
+                                data-shop-category="<?php echo esc_attr($category_slug); ?>"
+                                data-shop-search-index="<?php echo esc_attr($search_index); ?>"
+                                data-cart-item
+                                data-item-id="<?php echo esc_attr((string) $item_key); ?>"
+                                data-item-title="<?php echo esc_attr($item_label); ?>"
+                                data-item-price="<?php echo esc_attr((string) $item_price); ?>"
+                            >
                                 <?php if ($image_url !== '') : ?>
-                                    <div class="chama-order-card__media">
+                                    <div class="chama-order-card__media chama-shop-card__media">
                                         <img
                                             src="<?php echo esc_url($image_url); ?>"
                                             alt="<?php echo esc_attr($item_label); ?>"
@@ -7372,36 +7415,33 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                                         >
                                     </div>
                                 <?php endif; ?>
-                                <h3><?php echo esc_html($item_label); ?></h3>
-                                <p class="chama-order-meta"><?php echo esc_html($item_description); ?></p>
-                                <div class="chama-order-card__meta-row">
-                                    <p class="chama-order-price"><?php echo esc_html('$' . number_format($item_price, 2)); ?></p>
-                                    <p class="chama-order-chip"><?php esc_html_e('Pickup or drop-off', 'chama-ops'); ?></p>
-                                </div>
-                                <div
-                                    class="chama-item-stepper"
-                                    data-cart-item
-                                    data-item-id="<?php echo esc_attr((string) $item_key); ?>"
-                                    data-item-title="<?php echo esc_attr($item_label); ?>"
-                                    data-item-price="<?php echo esc_attr((string) $item_price); ?>"
-                                >
-                                    <button type="button" class="chama-step-btn" data-action="decrement" aria-label="<?php esc_attr_e('Decrease quantity', 'chama-ops'); ?>">-</button>
-                                    <span class="chama-step-qty" data-qty>0</span>
-                                    <button type="button" class="chama-step-btn" data-action="increment" aria-label="<?php esc_attr_e('Increase quantity', 'chama-ops'); ?>">+</button>
-                                    <button type="button" class="chama-step-clear" data-action="clear" hidden aria-label="<?php esc_attr_e('Remove item', 'chama-ops'); ?>">
-                                        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>
-                                    </button>
+                                <div class="chama-shop-card__body">
+                                    <p class="chama-order-chip chama-shop-card__category"><?php echo esc_html($category_label); ?></p>
+                                    <h3><?php echo esc_html($item_label); ?></h3>
+                                    <p class="chama-order-meta"><?php echo esc_html($item_description); ?></p>
+                                    <div class="chama-order-card__meta-row chama-shop-card__meta">
+                                        <p class="chama-order-price"><?php echo esc_html('$' . number_format($item_price, 2)); ?></p>
+                                        <button type="button" class="chama-shop-card__add-btn" data-action="increment"><?php esc_html_e('Add', 'chama-ops'); ?></button>
+                                    </div>
+                                    <div class="chama-item-stepper chama-shop-card__stepper">
+                                        <button type="button" class="chama-step-btn" data-action="decrement" aria-label="<?php esc_attr_e('Decrease quantity', 'chama-ops'); ?>">-</button>
+                                        <span class="chama-step-qty" data-qty>0</span>
+                                        <button type="button" class="chama-step-btn" data-action="increment" aria-label="<?php esc_attr_e('Increase quantity', 'chama-ops'); ?>">+</button>
+                                        <button type="button" class="chama-step-clear" data-action="clear" hidden aria-label="<?php esc_attr_e('Remove item', 'chama-ops'); ?>">
+                                            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </article>
                         <?php endforeach; ?>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
+                <p class="chama-order-meta chama-shopfront__empty" data-shop-empty hidden><?php esc_html_e('No products match that filter yet. Try another category or search term.', 'chama-ops'); ?></p>
             </div>
 
             <aside class="chama-service-app__panel">
                 <div class="chama-card chama-order-panel">
-                    <h3 class="chama-service-app__heading"><?php esc_html_e('Checkout', 'chama-ops'); ?></h3>
-                    <p class="chama-order-meta"><?php esc_html_e('Adjust quantities and submit once when ready.', 'chama-ops'); ?></p>
+                    <h3 class="chama-service-app__heading"><?php esc_html_e('Shopping cart', 'chama-ops'); ?></h3>
 
                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
                         <?php wp_nonce_field('chama_ops_submit_gift_shop_order_action', 'chama_ops_submit_gift_shop_order_nonce'); ?>
@@ -7431,16 +7471,102 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                             <textarea id="chama_gift_notes" name="chama_gift_notes" rows="3"></textarea>
                         </p>
 
-                        <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled><?php esc_html_e('Submit gift order', 'chama-ops'); ?></button>
+                        <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled><?php esc_html_e('Place gift shop order', 'chama-ops'); ?></button>
                     </form>
                 </div>
             </aside>
         </div>
     </section>
     <?php chama_ops_print_guest_cart_script_once(); ?>
+    <?php chama_ops_print_gift_shop_filters_script_once(); ?>
     <?php
 
     return (string) ob_get_clean();
+}
+
+/**
+ * Print gift shop filters/search script one time per response.
+ */
+function chama_ops_print_gift_shop_filters_script_once(): void
+{
+    static $printed = false;
+
+    if ($printed) {
+        return;
+    }
+
+    $printed = true;
+    ?>
+    <script>
+    (function () {
+        var roots = document.querySelectorAll('[data-shop-app]');
+
+        if (!roots.length) {
+            return;
+        }
+
+        var normalize = function (value) {
+            return String(value || '').toLowerCase();
+        };
+
+        roots.forEach(function (root) {
+            var cards = root.querySelectorAll('[data-shop-card]');
+            var filters = root.querySelectorAll('[data-shop-filter]');
+            var search = root.querySelector('[data-shop-search]');
+            var emptyState = root.querySelector('[data-shop-empty]');
+
+            if (!cards.length || !filters.length) {
+                return;
+            }
+
+            var activeFilter = 'all';
+
+            var applyFilters = function () {
+                var query = normalize(search ? search.value : '');
+                var visibleCount = 0;
+
+                cards.forEach(function (card) {
+                    var category = normalize(card.getAttribute('data-shop-category'));
+                    var searchIndex = normalize(card.getAttribute('data-shop-search-index'));
+                    var matchesCategory = activeFilter === 'all' || category === activeFilter;
+                    var matchesQuery = query === '' || searchIndex.indexOf(query) !== -1;
+                    var visible = matchesCategory && matchesQuery;
+
+                    card.hidden = !visible;
+
+                    if (visible) {
+                        visibleCount += 1;
+                    }
+                });
+
+                if (emptyState) {
+                    emptyState.hidden = visibleCount > 0;
+                }
+            };
+
+            filters.forEach(function (filterButton) {
+                filterButton.addEventListener('click', function () {
+                    activeFilter = normalize(filterButton.getAttribute('data-shop-filter') || 'all');
+
+                    filters.forEach(function (button) {
+                        var isActive = button === filterButton;
+                        button.classList.toggle('is-active', isActive);
+                        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    });
+
+                    applyFilters();
+                });
+            });
+
+            if (search) {
+                search.addEventListener('input', applyFilters);
+            }
+
+            applyFilters();
+        });
+    }());
+    </script>
+    <?php
 }
 add_shortcode('chama_gift_shop_app', 'chama_ops_render_gift_shop_app_shortcode');
 

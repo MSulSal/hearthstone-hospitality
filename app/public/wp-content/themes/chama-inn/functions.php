@@ -1297,7 +1297,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 18;
+    $target_version = 20;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -1345,12 +1345,6 @@ function chama_inn_migrate_seeded_copy(): void
         $page = get_page_by_path($slug, OBJECT, "page");
 
         if (!($page instanceof WP_Post)) {
-            continue;
-        }
-
-        $is_elementor_managed = (string) get_post_meta((int) $page->ID, "_elementor_edit_mode", true) !== "";
-
-        if ($is_elementor_managed) {
             continue;
         }
 
@@ -1446,6 +1440,9 @@ function chama_inn_migrate_seeded_copy(): void
         if ($slug === "dining") {
             $should_refresh_dining = strpos($updated_content, "Service hours") !== false
                 || strpos($updated_content, "Planned expansions") !== false
+                || strpos($updated_content, "Order in seconds") !== false
+                || strpos($updated_content, "Use <strong>+</strong> and <strong>-</strong> to adjust quantity, then submit once.") !== false
+                || strpos($updated_content, "<strong>Fast path:</strong> choose items, review totals, submit order.") !== false
                 || strpos($updated_content, "[chama_room_service_app]") === false;
 
             if ($should_refresh_dining) {
@@ -1499,8 +1496,11 @@ function chama_inn_migrate_seeded_copy(): void
         if ($slug === "gift-shop") {
             $should_refresh_gift_shop = strpos($updated_content, "Featured categories") !== false
                 || strpos($updated_content, "Operations readiness") !== false
-                || strpos($updated_content, "Sample catalog (demo data)") === false
-                || strpos($updated_content, "Chama Rail Mug") === false;
+                || strpos($updated_content, "Sample catalog (demo data)") !== false
+                || strpos($updated_content, "Chama Rail Mug") !== false
+                || strpos($updated_content, "Shop from your room") !== false
+                || strpos($updated_content, "Browse the catalog and send your order for front-desk pickup or room drop-off.") !== false
+                || strpos($updated_content, "[chama_gift_shop_app]") === false;
 
             if ($should_refresh_gift_shop) {
                 $fresh_gift_shop_pattern = chama_inn_load_pattern_content("patterns/gift-shop-page.php");
