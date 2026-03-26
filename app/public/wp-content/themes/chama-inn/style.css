@@ -32,6 +32,14 @@ Text Domain: chama-inn
   --chama-shell-glass: rgba(38, 47, 57, 0.88);
   --chama-shell-glass-soft: rgba(38, 47, 57, 0.72);
   --chama-shell-panel: rgba(38, 47, 57, 0.8);
+  --chama-page-spotlight-top: color-mix(in srgb, var(--chama-highlight) 14%, transparent 86%);
+  --chama-page-spotlight-bottom: color-mix(in srgb, var(--chama-accent) 16%, transparent 84%);
+  --chama-page-wash-start: color-mix(in srgb, var(--chama-shell-bg) 74%, transparent 26%);
+  --chama-page-wash-end: color-mix(in srgb, var(--chama-shell-bg-soft) 78%, transparent 22%);
+  --chama-home-spotlight-top: color-mix(in srgb, var(--chama-highlight) 18%, transparent 82%);
+  --chama-home-spotlight-bottom: color-mix(in srgb, var(--chama-accent) 14%, transparent 86%);
+  --chama-home-wash-start: color-mix(in srgb, var(--chama-shell-bg) 72%, transparent 28%);
+  --chama-home-wash-end: color-mix(in srgb, var(--chama-shell-bg-soft) 76%, transparent 24%);
   --chama-card-surface: linear-gradient(
     165deg,
     color-mix(in srgb, var(--chama-surface) 92%, #fff 8%) 0%,
@@ -215,21 +223,16 @@ html {
 
 body {
   background:
-    radial-gradient(
-      circle at 20% 0%,
-      color-mix(in srgb, var(--chama-highlight) 18%, transparent 82%) 0%,
-      transparent 48%
-    ),
-    radial-gradient(
-      circle at 80% 100%,
-      color-mix(in srgb, var(--chama-accent) 16%, transparent 84%) 0%,
-      transparent 52%
-    ),
     linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--chama-shell-bg) 66%, var(--chama-bg-soft) 34%) 0%,
-      color-mix(in srgb, var(--chama-shell-bg-soft) 70%, var(--chama-bg-soft) 30%) 100%
-    );
+      145deg,
+      color-mix(in srgb, var(--chama-shell-bg) 58%, transparent 42%) 0%,
+      color-mix(in srgb, var(--chama-shell-bg-soft) 62%, transparent 38%) 100%
+    ),
+    url("assets/images/csi-assets/Sunny%20patio%20with%20vacancy%20sign.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--chama-text);
   font-family: "Manrope", "Segoe UI", Tahoma, Arial, sans-serif;
   line-height: 1.6;
@@ -248,11 +251,30 @@ body.page-slug-guest-access {
 body.home {
   display: flex;
   flex-direction: column;
-  background-image: url("assets/images/csi-assets/Sunny%20patio%20with%20vacancy%20sign.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+}
+
+body.page-dining,
+body.page-restaurant-orders {
+  --chama-page-spotlight-top: color-mix(in srgb, #d7a250 22%, transparent 78%);
+  --chama-page-spotlight-bottom: color-mix(in srgb, #5e9ea6 18%, transparent 82%);
+}
+
+body.page-gift-shop {
+  --chama-page-spotlight-top: color-mix(in srgb, #5ea0ac 22%, transparent 78%);
+  --chama-page-spotlight-bottom: color-mix(in srgb, #cc934a 17%, transparent 83%);
+}
+
+body.page-help,
+body.page-front-desk-contact {
+  --chama-page-spotlight-top: color-mix(in srgb, #6a9fb6 20%, transparent 80%);
+  --chama-page-spotlight-bottom: color-mix(in srgb, #7eb1b4 16%, transparent 84%);
+  --chama-page-wash-start: color-mix(in srgb, var(--chama-shell-bg) 78%, transparent 22%);
+  --chama-page-wash-end: color-mix(in srgb, var(--chama-shell-bg-soft) 82%, transparent 18%);
+}
+
+body.page-my-stay {
+  --chama-page-spotlight-top: color-mix(in srgb, #c99347 20%, transparent 80%);
+  --chama-page-spotlight-bottom: color-mix(in srgb, #6d9ea4 15%, transparent 85%);
 }
 
 a,
@@ -587,18 +609,18 @@ iframe {
   background:
     radial-gradient(
       circle at 10% 0%,
-      color-mix(in srgb, var(--chama-highlight) 12%, transparent 88%) 0%,
+      var(--chama-page-spotlight-top) 0%,
       transparent 44%
     ),
     radial-gradient(
       circle at 90% 100%,
-      color-mix(in srgb, var(--chama-accent) 18%, transparent 82%) 0%,
+      var(--chama-page-spotlight-bottom) 0%,
       transparent 46%
     ),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--chama-shell-bg) 64%, var(--chama-bg-soft) 36%) 0%,
-      color-mix(in srgb, var(--chama-shell-bg-soft) 68%, var(--chama-bg-soft) 32%) 100%
+      var(--chama-page-wash-start) 0%,
+      var(--chama-page-wash-end) 100%
     );
   padding: clamp(1rem, 1.3vw, 1.4rem) 0 clamp(1.4rem, 1.8vw, 2rem);
 }
@@ -688,9 +710,40 @@ iframe {
 .home-shell {
   display: flex;
   flex-direction: column;
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   padding: 0;
   background: transparent;
+}
+
+.home-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      circle at 14% 0%,
+      var(--chama-home-spotlight-top) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 88% 100%,
+      var(--chama-home-spotlight-bottom) 0%,
+      transparent 48%
+    ),
+    linear-gradient(
+      180deg,
+      var(--chama-home-wash-start) 0%,
+      var(--chama-home-wash-end) 100%
+    );
+}
+
+.home-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 .home .site-main {
@@ -1833,6 +1886,10 @@ body.home .site-footer {
   }
 
   body.home {
+    background-attachment: scroll;
+  }
+
+  body {
     background-attachment: scroll;
   }
 
