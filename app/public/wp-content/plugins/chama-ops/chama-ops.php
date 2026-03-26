@@ -1465,7 +1465,7 @@ function chama_ops_save_room_service_order_meta(int $post_id): void
     $order_total = isset($_POST['chama_order_total']) ? chama_ops_sanitize_decimal_amount((string) wp_unslash($_POST['chama_order_total'])) : '';
     $order_state = isset($_POST['chama_order_status']) ? sanitize_key((string) wp_unslash($_POST['chama_order_status'])) : 'submitted';
 
-    $allowed_states = ['submitted', 'in_kitchen', 'ready', 'delivering', 'completed', 'cancelled'];
+    $allowed_states = ['submitted', 'confirmed', 'in_kitchen', 'ready', 'delivering', 'completed', 'cancelled'];
 
     if (!in_array($order_state, $allowed_states, true)) {
         $order_state = 'submitted';
@@ -2260,7 +2260,7 @@ function chama_ops_get_room_service_order_metrics(): array
         ];
     }
 
-    $open_statuses = ['submitted', 'in_kitchen', 'ready', 'delivering'];
+    $open_statuses = ['submitted', 'confirmed', 'in_kitchen', 'ready', 'delivering'];
     $open_orders = 0;
     $completed_orders = 0;
     $gross_revenue = 0.0;
@@ -2406,6 +2406,7 @@ function chama_ops_render_room_service_order_meta_box(WP_Post $post): void
                 <td>
                     <select id="chama_order_status" name="chama_order_status">
                         <option value="submitted" <?php selected($order_state, 'submitted'); ?>><?php esc_html_e('Submitted', 'chama-ops'); ?></option>
+                        <option value="confirmed" <?php selected($order_state, 'confirmed'); ?>><?php esc_html_e('Confirmed', 'chama-ops'); ?></option>
                         <option value="in_kitchen" <?php selected($order_state, 'in_kitchen'); ?>><?php esc_html_e('In Kitchen', 'chama-ops'); ?></option>
                         <option value="ready" <?php selected($order_state, 'ready'); ?>><?php esc_html_e('Ready', 'chama-ops'); ?></option>
                         <option value="delivering" <?php selected($order_state, 'delivering'); ?>><?php esc_html_e('Delivering', 'chama-ops'); ?></option>
@@ -6368,6 +6369,66 @@ add_action('admin_post_nopriv_chama_ops_submit_room_service_order', 'chama_ops_s
 add_action('admin_post_chama_ops_submit_room_service_order', 'chama_ops_submit_room_service_order');
 
 /**
+ * Advance room-service order status from the admin queue.
+ */
+function chama_ops_advance_room_service_status(): void
+{
+    if (!current_user_can('edit_posts')) {
+        wp_die(esc_html__('You are not allowed to update orders.', 'chama-ops'));
+    }
+
+    $order_id = isset($_GET['order_id']) ? absint(wp_unslash($_GET['order_id'])) : 0;
+    $next_status = isset($_GET['next_status']) ? sanitize_key((string) wp_unslash($_GET['next_status'])) : '';
+    $nonce = isset($_GET['_wpnonce']) ? sanitize_text_field((string) wp_unslash($_GET['_wpnonce'])) : '';
+
+    $redirect_url = wp_get_referer();
+
+    if (!is_string($redirect_url) || $redirect_url === '') {
+        $redirect_url = admin_url('edit.php?post_type=room_service_order');
+    }
+
+    if ($order_id <= 0 || $next_status === '') {
+        wp_safe_redirect($redirect_url);
+        exit;
+    }
+
+    $order_post = get_post($order_id);
+
+    if (!$order_post instanceof WP_Post || $order_post->post_type !== 'room_service_order') {
+        wp_safe_redirect($redirect_url);
+        exit;
+    }
+
+    if (!current_user_can('edit_post', $order_id)) {
+        wp_die(esc_html__('You are not allowed to edit this order.', 'chama-ops'));
+    }
+
+    if (!wp_verify_nonce($nonce, 'chama_ops_advance_room_service_status_' . $order_id . '_' . $next_status)) {
+        wp_die(esc_html__('Security check failed.', 'chama-ops'));
+    }
+
+    $delivery_method = (string) get_post_meta($order_id, '_chama_order_delivery_method', true);
+    $current_status = (string) get_post_meta($order_id, '_chama_order_status', true);
+    $expected_next_status = chama_ops_get_next_room_service_status($current_status, $delivery_method);
+
+    if ($expected_next_status !== $next_status) {
+        wp_safe_redirect(add_query_arg('chama_order_status_invalid', '1', $redirect_url));
+        exit;
+    }
+
+    update_post_meta($order_id, '_chama_order_status', $next_status);
+    update_post_meta($order_id, '_chama_order_status_updated_at', current_time('mysql'));
+
+    wp_safe_redirect(add_query_arg([
+        'chama_order_status_updated' => '1',
+        'chama_order_ref' => $order_id,
+        'chama_order_status' => $next_status,
+    ], $redirect_url));
+    exit;
+}
+add_action('admin_post_chama_ops_advance_room_service_status', 'chama_ops_advance_room_service_status');
+
+/**
  * Resolve a front-end page URL by slug with fallback.
  *
  * @param string $slug Page slug.
@@ -6637,12 +6698,16 @@ function chama_ops_get_guest_active_orders_for_room(string $room_number): array
 
     if (is_array($room_service_ids)) {
         foreach ($room_service_ids as $order_id) {
+            $order_id_int = (int) $order_id;
+            $delivery_method = (string) get_post_meta($order_id_int, '_chama_order_delivery_method', true);
             $orders[] = [
-                'id'     => (int) $order_id,
-                'type'   => 'dining',
-                'title'  => (string) get_the_title((int) $order_id),
-                'status' => (string) get_post_meta((int) $order_id, '_chama_order_status', true),
-                'date'   => (string) get_post_field('post_date', (int) $order_id),
+                'id'          => $order_id_int,
+                'type'        => 'dining',
+                'title'       => (string) get_the_title($order_id_int),
+                'status'      => (string) get_post_meta($order_id_int, '_chama_order_status', true),
+                'eta'         => chama_ops_get_room_service_eta_label($order_id_int),
+                'fulfillment' => chama_ops_get_guest_fulfillment_label($delivery_method),
+                'date'        => (string) get_post_field('post_date', $order_id_int),
             ];
         }
     }
@@ -6670,12 +6735,17 @@ function chama_ops_get_guest_active_orders_for_room(string $room_number): array
 
     if (is_array($gift_order_ids)) {
         foreach ($gift_order_ids as $order_id) {
+            $order_id_int = (int) $order_id;
+            $fulfillment_method = (string) get_post_meta($order_id_int, '_chama_gift_fulfillment_method', true);
+            $window = trim((string) get_post_meta($order_id_int, '_chama_gift_fulfillment_window', true));
             $orders[] = [
-                'id'     => (int) $order_id,
-                'type'   => 'gift',
-                'title'  => (string) get_the_title((int) $order_id),
-                'status' => (string) get_post_meta((int) $order_id, '_chama_gift_order_status', true),
-                'date'   => (string) get_post_field('post_date', (int) $order_id),
+                'id'          => $order_id_int,
+                'type'        => 'gift',
+                'title'       => (string) get_the_title($order_id_int),
+                'status'      => (string) get_post_meta($order_id_int, '_chama_gift_order_status', true),
+                'eta'         => $window !== '' ? sprintf(__('Window %s', 'chama-ops'), $window) : '',
+                'fulfillment' => chama_ops_get_guest_fulfillment_label($fulfillment_method),
+                'date'        => (string) get_post_field('post_date', $order_id_int),
             ];
         }
     }
@@ -6696,6 +6766,166 @@ function chama_ops_get_guest_active_orders_for_room(string $room_number): array
     });
 
     return array_slice($orders, 0, 6);
+}
+
+/**
+ * Resolve guest-facing fulfillment labels.
+ */
+function chama_ops_get_guest_fulfillment_label(string $method): string
+{
+    $normalized_method = sanitize_key($method);
+
+    $labels = [
+        'room_delivery'     => __('Room delivery', 'chama-ops'),
+        'pickup'            => __('Pickup', 'chama-ops'),
+        'front_desk_pickup' => __('Front desk pickup', 'chama-ops'),
+    ];
+
+    if (isset($labels[$normalized_method])) {
+        return (string) $labels[$normalized_method];
+    }
+
+    return '';
+}
+
+/**
+ * Build estimated dining-ready text for guest tracking cards.
+ */
+function chama_ops_get_room_service_eta_label(int $order_id): string
+{
+    if ($order_id <= 0) {
+        return '';
+    }
+
+    $status = sanitize_key((string) get_post_meta($order_id, '_chama_order_status', true));
+
+    if (in_array($status, ['ready', 'delivering', 'completed', 'cancelled'], true)) {
+        return '';
+    }
+
+    $requested_time = trim((string) get_post_meta($order_id, '_chama_order_requested_time', true));
+
+    if ($requested_time !== '') {
+        return sprintf(
+            /* translators: %s: requested time value */
+            __('Requested %s', 'chama-ops'),
+            $requested_time
+        );
+    }
+
+    $prep_minutes = 0;
+    $cart_json = (string) get_post_meta($order_id, '_chama_order_items_json', true);
+    $decoded_cart = json_decode($cart_json, true);
+
+    if (is_array($decoded_cart)) {
+        foreach ($decoded_cart as $item_id_raw => $qty_raw) {
+            $item_id = absint((string) $item_id_raw);
+            $qty = max(0, absint($qty_raw));
+
+            if ($item_id <= 0 || $qty <= 0) {
+                continue;
+            }
+
+            $item_prep = (int) get_post_meta($item_id, '_chama_room_service_prep_minutes', true);
+            $prep_minutes = max($prep_minutes, $item_prep);
+        }
+    }
+
+    if ($prep_minutes <= 0) {
+        $fallback_item_id = (int) get_post_meta($order_id, '_chama_order_item_id', true);
+        $prep_minutes = $fallback_item_id > 0
+            ? (int) get_post_meta($fallback_item_id, '_chama_room_service_prep_minutes', true)
+            : 0;
+    }
+
+    if ($prep_minutes <= 0) {
+        $prep_minutes = 25;
+    }
+
+    $prep_minutes = max(10, $prep_minutes);
+    $created_ts = get_post_time('U', true, $order_id);
+
+    if (!is_int($created_ts) || $created_ts <= 0) {
+        $created_ts = (int) current_time('timestamp', true);
+    }
+
+    $eta_ts = $created_ts + ($prep_minutes * 60);
+
+    return sprintf(
+        /* translators: %s: local estimated ready time */
+        __('Est. ready %s', 'chama-ops'),
+        wp_date((string) get_option('time_format'), $eta_ts)
+    );
+}
+
+/**
+ * Return the next operational status for a room-service order.
+ */
+function chama_ops_get_next_room_service_status(string $current_status, string $delivery_method = ''): string
+{
+    $status = sanitize_key($current_status);
+    $method = sanitize_key($delivery_method);
+
+    if ($status === '') {
+        $status = 'submitted';
+    }
+
+    if ($status === 'submitted') {
+        return 'confirmed';
+    }
+
+    if ($status === 'confirmed') {
+        return 'in_kitchen';
+    }
+
+    if ($status === 'in_kitchen') {
+        return 'ready';
+    }
+
+    if ($status === 'ready') {
+        return $method === 'pickup' ? 'completed' : 'delivering';
+    }
+
+    if ($status === 'delivering') {
+        return 'completed';
+    }
+
+    return '';
+}
+
+/**
+ * Return small CTA labels for admin queue progression.
+ */
+function chama_ops_get_room_service_status_transition_label(string $next_status): string
+{
+    $labels = [
+        'confirmed'  => __('Confirm', 'chama-ops'),
+        'in_kitchen' => __('Send to kitchen', 'chama-ops'),
+        'ready'      => __('Mark ready', 'chama-ops'),
+        'delivering' => __('Out for delivery', 'chama-ops'),
+        'completed'  => __('Complete', 'chama-ops'),
+    ];
+
+    $normalized_status = sanitize_key($next_status);
+
+    return isset($labels[$normalized_status]) ? (string) $labels[$normalized_status] : '';
+}
+
+/**
+ * Build a secure action URL for admin queue status updates.
+ */
+function chama_ops_get_room_service_status_advance_url(int $order_id, string $next_status): string
+{
+    $url = add_query_arg([
+        'action'      => 'chama_ops_advance_room_service_status',
+        'order_id'    => $order_id,
+        'next_status' => sanitize_key($next_status),
+    ], admin_url('admin-post.php'));
+
+    return (string) wp_nonce_url(
+        $url,
+        'chama_ops_advance_room_service_status_' . $order_id . '_' . sanitize_key($next_status)
+    );
 }
 
 /**
@@ -6927,11 +7157,14 @@ function chama_ops_render_guest_home_shell_shortcode(): string
                             ? __('Gift Shop', 'chama-ops')
                             : __('Dining', 'chama-ops');
                         $status_label = chama_ops_get_guest_order_status_label(isset($order['status']) ? (string) $order['status'] : '');
+                        $order_eta = isset($order['eta']) ? (string) $order['eta'] : '';
+                        $order_fulfillment = isset($order['fulfillment']) ? (string) $order['fulfillment'] : '';
+                        $meta_bits = array_filter([$status_label, $order_eta, $order_fulfillment]);
                         ?>
                         <li class="chama-cart-line">
                             <div class="chama-cart-line__info">
                                 <strong><?php echo esc_html($type_label . ' - ' . (string) ($order['title'] ?? '')); ?></strong>
-                                <span><?php echo esc_html($status_label); ?></span>
+                                <span><?php echo esc_html(implode(' • ', $meta_bits)); ?></span>
                             </div>
                         </li>
                     <?php endforeach; ?>
@@ -6988,10 +7221,16 @@ function chama_ops_render_guest_my_stay_shortcode(): string
             <?php else : ?>
                 <ul class="chama-cart-lines">
                     <?php foreach ($active_orders as $order) : ?>
+                        <?php
+                        $status_label = chama_ops_get_guest_order_status_label((string) ($order['status'] ?? 'submitted'));
+                        $order_eta = isset($order['eta']) ? (string) $order['eta'] : '';
+                        $order_fulfillment = isset($order['fulfillment']) ? (string) $order['fulfillment'] : '';
+                        $meta_bits = array_filter([$status_label, $order_eta, $order_fulfillment]);
+                        ?>
                         <li class="chama-cart-line">
                             <div class="chama-cart-line__info">
                                 <strong><?php echo esc_html((string) ($order['title'] ?? '')); ?></strong>
-                                <span><?php echo esc_html(chama_ops_get_guest_order_status_label((string) ($order['status'] ?? 'submitted'))); ?></span>
+                                <span><?php echo esc_html(implode(' • ', $meta_bits)); ?></span>
                             </div>
                         </li>
                     <?php endforeach; ?>
@@ -7987,6 +8226,41 @@ function chama_ops_seed_room_service_menu_items(): void
 add_action('admin_init', 'chama_ops_seed_room_service_menu_items');
 
 /**
+ * Show admin notices for room-service queue actions.
+ */
+function chama_ops_render_room_service_queue_notice(): void
+{
+    if (!current_user_can('edit_posts')) {
+        return;
+    }
+
+    $updated = isset($_GET['chama_order_status_updated']) ? sanitize_key((string) wp_unslash($_GET['chama_order_status_updated'])) : '';
+    $invalid = isset($_GET['chama_order_status_invalid']) ? sanitize_key((string) wp_unslash($_GET['chama_order_status_invalid'])) : '';
+
+    if ($updated === '1') {
+        $order_id = isset($_GET['chama_order_ref']) ? absint(wp_unslash($_GET['chama_order_ref'])) : 0;
+        $status = isset($_GET['chama_order_status']) ? sanitize_key((string) wp_unslash($_GET['chama_order_status'])) : '';
+        $status_label = chama_ops_get_guest_order_status_label($status);
+
+        echo '<div class="notice notice-success is-dismissible"><p>';
+        printf(
+            esc_html__('Room-service order #%1$d moved to %2$s.', 'chama-ops'),
+            $order_id,
+            esc_html($status_label)
+        );
+        echo '</p></div>';
+        return;
+    }
+
+    if ($invalid === '1') {
+        echo '<div class="notice notice-warning is-dismissible"><p>';
+        esc_html_e('Order status could not be advanced from the current state.', 'chama-ops');
+        echo '</p></div>';
+    }
+}
+add_action('admin_notices', 'chama_ops_render_room_service_queue_notice');
+
+/**
  * Customize room-service order admin columns.
  *
  * @param array<string, string> $columns Existing columns.
@@ -7999,6 +8273,7 @@ function chama_ops_add_room_service_order_columns(array $columns): array
     $columns['chama_order_qty'] = __('Qty', 'chama-ops');
     $columns['chama_order_total'] = __('Total', 'chama-ops');
     $columns['chama_order_status'] = __('Order Status', 'chama-ops');
+    $columns['chama_order_next'] = __('Next Step', 'chama-ops');
 
     return $columns;
 }
@@ -8037,7 +8312,32 @@ function chama_ops_render_room_service_order_column(string $column, int $post_id
             break;
 
         case 'chama_order_status':
-            echo esc_html((string) get_post_meta($post_id, '_chama_order_status', true));
+            echo esc_html(chama_ops_get_guest_order_status_label((string) get_post_meta($post_id, '_chama_order_status', true)));
+            break;
+
+        case 'chama_order_next':
+            $current_status = (string) get_post_meta($post_id, '_chama_order_status', true);
+            $delivery_method = (string) get_post_meta($post_id, '_chama_order_delivery_method', true);
+            $next_status = chama_ops_get_next_room_service_status($current_status, $delivery_method);
+
+            if ($next_status === '') {
+                echo '&mdash;';
+                break;
+            }
+
+            $next_label = chama_ops_get_room_service_status_transition_label($next_status);
+
+            if ($next_label === '') {
+                echo '&mdash;';
+                break;
+            }
+
+            $action_url = chama_ops_get_room_service_status_advance_url($post_id, $next_status);
+            printf(
+                '<a class="button button-small" href="%1$s">%2$s</a>',
+                esc_url($action_url),
+                esc_html($next_label)
+            );
             break;
     }
 }
