@@ -1641,10 +1641,18 @@ body.admin-bar .guest-auth-shell__backdrop {
 }
 
 .chama-cart-summary {
-  border: 1px solid var(--chama-border);
-  border-radius: 12px;
-  padding: 0.65rem 0.7rem;
-  background: color-mix(in srgb, var(--chama-surface) 80%, transparent 20%);
+  border: 1px solid color-mix(in srgb, var(--chama-border) 78%, #fff 22%);
+  border-radius: 14px;
+  padding: 0.75rem;
+  background:
+    linear-gradient(
+      170deg,
+      color-mix(in srgb, var(--chama-surface) 92%, #fff 8%) 0%,
+      color-mix(in srgb, var(--chama-bg-soft) 80%, #fff 20%) 100%
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  max-height: min(42vh, 360px);
+  overflow: auto;
 }
 
 .chama-cart-lines {
@@ -1652,59 +1660,88 @@ body.admin-bar .guest-auth-shell__backdrop {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.58rem;
 }
 
 .chama-cart-line {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.56rem;
+  padding: 0.52rem 0.58rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--chama-border) 56%, transparent 44%);
+  background: color-mix(in srgb, var(--chama-surface) 84%, #fff 16%);
 }
 
 .chama-cart-line__info {
   display: grid;
-  gap: 0.1rem;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.chama-cart-line__info strong {
+  line-height: 1.3;
+  font-size: 0.93rem;
+  color: var(--chama-text);
+  overflow-wrap: anywhere;
 }
 
 .chama-cart-line__info span {
   color: var(--chama-text-soft);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
 }
 
 .chama-cart-remove {
-  border: 1px solid var(--chama-border);
+  border: 1px solid color-mix(in srgb, var(--chama-border) 62%, transparent 38%);
   border-radius: 8px;
   width: 1.8rem;
   height: 1.8rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--chama-surface);
+  background: color-mix(in srgb, var(--chama-surface) 74%, #fff 26%);
   color: #8a4c49;
   cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .chama-cart-remove:hover {
-  background: var(--chama-bg-soft);
+  background: color-mix(in srgb, var(--chama-highlight) 18%, var(--chama-surface) 82%);
+  transform: translateY(-1px);
 }
 
 .chama-cart-total {
-  margin: 0.72rem 0 0.9rem;
+  margin: 0.9rem 0 1rem;
+  padding-top: 0.68rem;
+  border-top: 1px solid color-mix(in srgb, var(--chama-border) 56%, transparent 44%);
   color: var(--chama-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .chama-order-panel {
   position: sticky;
   top: 92px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--chama-border) 72%, #fff 28%);
+  background: color-mix(in srgb, var(--chama-surface) 92%, #fff 8%);
+  padding: 14px;
+  box-shadow: 0 14px 30px rgba(34, 30, 26, 0.12);
 }
 
 .chama-order-form {
   margin-top: 0.8rem;
+  display: grid;
+  gap: 0.74rem;
 }
 
 .chama-form-field {
-  margin: 0 0 0.72rem;
+  margin: 0;
 }
 
 .chama-form-field label {
@@ -1732,28 +1769,63 @@ body.admin-bar .guest-auth-shell__backdrop {
 
 .chama-order-submit {
   width: 100%;
-  border: 0;
-  border-radius: 999px;
-  background: var(--chama-accent-strong);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--chama-shell-bg-soft) 78%, var(--chama-shell-bg) 22%);
   color: var(--chama-text-inverse);
   font-weight: 700;
-  padding: 0.7rem 0.95rem;
+  letter-spacing: 0.01em;
+  padding: 0.74rem 0.95rem;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.chama-order-submit[data-checkout-mode="ops"] {
+  background: color-mix(in srgb, var(--chama-shell-bg-soft) 76%, var(--chama-accent-strong) 24%);
+  color: var(--chama-text-inverse);
+}
+
+.chama-order-submit[data-checkout-mode="woocommerce"] {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--chama-accent-strong) 78%, #0f1d2a 22%) 0%,
+    color-mix(in srgb, var(--chama-accent) 82%, #142431 18%) 100%
+  );
+  color: var(--chama-text-inverse);
+}
+
+.chama-order-submit.is-mode-active {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--chama-accent-soft) 54%, transparent 46%),
+    0 10px 20px rgba(17, 24, 34, 0.24);
+  border-color: color-mix(in srgb, var(--chama-accent-soft) 46%, #fff 54%);
 }
 
 .chama-order-submit:hover,
 .chama-order-submit:focus-visible {
-  background: var(--chama-accent);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(18, 24, 35, 0.2);
+}
+
+.chama-order-submit:focus-visible {
+  outline: 0;
+  border-color: color-mix(in srgb, var(--chama-accent-soft) 68%, #fff 32%);
 }
 
 .chama-order-submit:disabled {
-  background: #b7b1aa;
-  color: #f1efeb;
+  background: color-mix(in srgb, var(--chama-muted) 56%, #9ea5aa 44%);
+  color: color-mix(in srgb, var(--chama-text-inverse) 86%, #d7d7d7 14%);
+  border-color: transparent;
+  transform: none;
+  box-shadow: none;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .chama-order-actions {
-  margin-top: 0.7rem;
+  margin-top: 0.2rem;
+  display: grid;
+  gap: 0.52rem;
 }
 
 .chama-order-actions .wp-block-button {

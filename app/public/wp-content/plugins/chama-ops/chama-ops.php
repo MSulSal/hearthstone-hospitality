@@ -7080,6 +7080,46 @@ function chama_ops_print_guest_cart_script_once(): void
                 initialCart = {};
             }
 
+            submitButtons.forEach(function (submitButton) {
+                var baseLabel = String(submitButton.getAttribute('data-base-label') || submitButton.textContent || '').trim();
+                submitButton.setAttribute('data-base-label', baseLabel);
+                submitButton.setAttribute('aria-pressed', 'false');
+            });
+
+            var hasCheckoutMode = function (mode) {
+                var normalizedMode = String(mode || 'ops');
+                for (var index = 0; index < submitButtons.length; index += 1) {
+                    if (String(submitButtons[index].getAttribute('data-checkout-mode') || 'ops') === normalizedMode) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            var resolveCheckoutMode = function (mode) {
+                var requestedMode = String(mode || 'ops');
+                if (hasCheckoutMode(requestedMode)) {
+                    return requestedMode;
+                }
+                return hasCheckoutMode('ops') ? 'ops' : requestedMode;
+            };
+
+            var setCheckoutMode = function (mode) {
+                if (!checkoutModeInput) {
+                    return;
+                }
+
+                var activeMode = resolveCheckoutMode(mode);
+                checkoutModeInput.value = activeMode;
+
+                submitButtons.forEach(function (submitButton) {
+                    var buttonMode = String(submitButton.getAttribute('data-checkout-mode') || 'ops');
+                    var isActiveMode = buttonMode === activeMode;
+                    submitButton.classList.toggle('is-mode-active', isActiveMode);
+                    submitButton.setAttribute('aria-pressed', isActiveMode ? 'true' : 'false');
+                });
+            };
+
             root.addEventListener('click', function (event) {
                 var modeTrigger = event.target.closest('[data-checkout-mode]');
 
@@ -7087,7 +7127,7 @@ function chama_ops_print_guest_cart_script_once(): void
                     return;
                 }
 
-                checkoutModeInput.value = String(modeTrigger.getAttribute('data-checkout-mode') || 'ops');
+                setCheckoutMode(String(modeTrigger.getAttribute('data-checkout-mode') || 'ops'));
             });
 
             var setCartValue = function (value) {
@@ -7099,6 +7139,26 @@ function chama_ops_print_guest_cart_script_once(): void
             var setSubmitDisabled = function (isDisabled) {
                 submitButtons.forEach(function (submitButton) {
                     submitButton.disabled = isDisabled;
+                });
+            };
+
+            var setSubmitLabels = function (hasItems, itemCount, total) {
+                submitButtons.forEach(function (submitButton) {
+                    var baseLabel = String(submitButton.getAttribute('data-base-label') || submitButton.textContent || '').trim();
+
+                    if (!hasItems) {
+                        submitButton.textContent = baseLabel;
+                        return;
+                    }
+
+                    var checkoutMode = String(submitButton.getAttribute('data-checkout-mode') || 'ops');
+
+                    if (checkoutMode === 'woocommerce') {
+                        submitButton.textContent = baseLabel + ' • $' + total.toFixed(2);
+                        return;
+                    }
+
+                    submitButton.textContent = baseLabel + ' • ' + itemCount + ' item' + (itemCount === 1 ? '' : 's');
                 });
             };
 
@@ -7135,6 +7195,7 @@ function chama_ops_print_guest_cart_script_once(): void
             var recalculate = function () {
                 var lines = [];
                 var total = 0;
+                var itemCount = 0;
 
                 cards.forEach(function (card) {
                     var item = getItemData(card);
@@ -7147,6 +7208,7 @@ function chama_ops_print_guest_cart_script_once(): void
 
                     setQtyOnCard(card, qty);
                     total += item.price * qty;
+                    itemCount += qty;
                     lines.push({
                         id: item.id,
                         title: item.title,
@@ -7160,12 +7222,14 @@ function chama_ops_print_guest_cart_script_once(): void
                     setSubmitDisabled(true);
                     setCartValue('{}');
                     totalNode.textContent = '$0.00';
+                    setSubmitLabels(false, 0, 0);
                     return;
                 }
 
                 setSubmitDisabled(false);
                 setCartValue(JSON.stringify(cart));
                 totalNode.textContent = '$' + total.toFixed(2);
+                setSubmitLabels(true, itemCount, total);
 
                 var html = '<ul class="chama-cart-lines">';
 
@@ -7232,6 +7296,10 @@ function chama_ops_print_guest_cart_script_once(): void
                     recalculate();
                 }
             });
+
+            if (checkoutModeInput) {
+                setCheckoutMode(String(checkoutModeInput.value || 'ops'));
+            }
 
             recalculate();
         });
@@ -7486,11 +7554,26 @@ function chama_ops_render_room_service_app_shortcode(): string
                             </p>
 
                             <div class="chama-order-actions wp-block-buttons">
-                                <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit data-checkout-mode="ops" disabled>
-                                    <?php echo esc_html($editing_order_id > 0 ? __('Update order', 'chama-ops') : __('Submit order', 'chama-ops')); ?>
+                                <?php $ops_checkout_label = $editing_order_id > 0 ? __('Update order', 'chama-ops') : __('Submit order', 'chama-ops'); ?>
+                                <button
+                                    type="submit"
+                                    class="wp-element-button chama-order-submit"
+                                    data-cart-submit
+                                    data-checkout-mode="ops"
+                                    data-base-label="<?php echo esc_attr($ops_checkout_label); ?>"
+                                    disabled
+                                >
+                                    <?php echo esc_html($ops_checkout_label); ?>
                                 </button>
                                 <?php if ($has_woocommerce) : ?>
-                                    <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit data-checkout-mode="woocommerce" disabled>
+                                    <button
+                                        type="submit"
+                                        class="wp-element-button chama-order-submit"
+                                        data-cart-submit
+                                        data-checkout-mode="woocommerce"
+                                        data-base-label="<?php echo esc_attr__('Checkout with card', 'chama-ops'); ?>"
+                                        disabled
+                                    >
                                         <?php esc_html_e('Checkout with card', 'chama-ops'); ?>
                                     </button>
                                 <?php endif; ?>
@@ -9146,9 +9229,27 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                         </p>
 
                         <div class="chama-order-actions wp-block-buttons">
-                            <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit data-checkout-mode="ops" disabled><?php esc_html_e('Place gift shop order', 'chama-ops'); ?></button>
+                            <button
+                                type="submit"
+                                class="wp-element-button chama-order-submit"
+                                data-cart-submit
+                                data-checkout-mode="ops"
+                                data-base-label="<?php echo esc_attr__('Place gift shop order', 'chama-ops'); ?>"
+                                disabled
+                            >
+                                <?php esc_html_e('Place gift shop order', 'chama-ops'); ?>
+                            </button>
                             <?php if ($has_woocommerce) : ?>
-                                <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit data-checkout-mode="woocommerce" disabled><?php esc_html_e('Checkout with card', 'chama-ops'); ?></button>
+                                <button
+                                    type="submit"
+                                    class="wp-element-button chama-order-submit"
+                                    data-cart-submit
+                                    data-checkout-mode="woocommerce"
+                                    data-base-label="<?php echo esc_attr__('Checkout with card', 'chama-ops'); ?>"
+                                    disabled
+                                >
+                                    <?php esc_html_e('Checkout with card', 'chama-ops'); ?>
+                                </button>
                             <?php endif; ?>
                         </div>
                     </form>
