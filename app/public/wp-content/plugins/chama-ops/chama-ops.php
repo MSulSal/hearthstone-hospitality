@@ -7422,8 +7422,20 @@ function chama_ops_render_room_service_app_shortcode(): string
             </div>
         <?php endif; ?>
         <?php
-        if (in_array($notice_key, ['submitted', 'updated'], true) && $order_ref > 0) {
-            echo chama_ops_render_guest_order_confirmation_card('dining', $order_ref); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        $tracked_order_card = '';
+
+        if ($order_ref > 0) {
+            $tracked_order_card = chama_ops_render_guest_order_confirmation_card('dining', $order_ref, $room_number);
+        }
+
+        if ($tracked_order_card !== '') {
+            echo $tracked_order_card; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        } elseif ($order_ref > 0) {
+            ?>
+            <div class="chama-app-notice chama-app-notice--error">
+                <?php esc_html_e('That order is not available for this stay session.', 'chama-ops'); ?>
+            </div>
+            <?php
         }
         ?>
 
@@ -8548,7 +8560,7 @@ function chama_ops_render_guest_order_feedback_notices(): string
 /**
  * Render a guest-facing order confirmation card after submit/update.
  */
-function chama_ops_render_guest_order_confirmation_card(string $order_type, int $order_id): string
+function chama_ops_render_guest_order_confirmation_card(string $order_type, int $order_id, string $room_number = ''): string
 {
     $normalized_type = sanitize_key($order_type);
 
@@ -8568,6 +8580,17 @@ function chama_ops_render_guest_order_confirmation_card(string $order_type, int 
 
     if ($normalized_type === 'gift' && $order_post->post_type !== 'gift_shop_order') {
         return '';
+    }
+
+    if ($room_number !== '') {
+        $normalized_room = strtoupper(trim($room_number));
+        $order_room = $normalized_type === 'gift'
+            ? (string) get_post_meta($order_id, '_chama_gift_room_number', true)
+            : (string) get_post_meta($order_id, '_chama_order_room_number', true);
+
+        if (strtoupper(trim($order_room)) !== $normalized_room) {
+            return '';
+        }
     }
 
     $status_key = $normalized_type === 'gift'
@@ -8865,9 +8888,9 @@ function chama_ops_render_guest_home_shell_shortcode(): string
         <?php echo chama_ops_render_guest_order_feedback_notices(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php
         if (in_array($room_notice_key, ['submitted', 'updated'], true) && $room_order_ref > 0) {
-            echo chama_ops_render_guest_order_confirmation_card('dining', $room_order_ref); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            echo chama_ops_render_guest_order_confirmation_card('dining', $room_order_ref, $room_number); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         } elseif ($gift_notice_key === 'submitted' && $gift_order_ref > 0) {
-            echo chama_ops_render_guest_order_confirmation_card('gift', $gift_order_ref); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            echo chama_ops_render_guest_order_confirmation_card('gift', $gift_order_ref, $room_number); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         }
         ?>
 
@@ -8941,9 +8964,9 @@ function chama_ops_render_guest_my_stay_shortcode(): string
         <?php echo chama_ops_render_guest_order_feedback_notices(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php
         if (in_array($room_notice_key, ['submitted', 'updated'], true) && $room_order_ref > 0) {
-            echo chama_ops_render_guest_order_confirmation_card('dining', $room_order_ref); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            echo chama_ops_render_guest_order_confirmation_card('dining', $room_order_ref, $room_number); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         } elseif ($gift_notice_key === 'submitted' && $gift_order_ref > 0) {
-            echo chama_ops_render_guest_order_confirmation_card('gift', $gift_order_ref); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            echo chama_ops_render_guest_order_confirmation_card('gift', $gift_order_ref, $room_number); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         }
         ?>
         <div class="chama-card">
@@ -9286,6 +9309,7 @@ function chama_ops_render_gift_shop_app_shortcode(): string
     $notice_key = isset($_GET['chama_gift_shop']) ? sanitize_key((string) wp_unslash($_GET['chama_gift_shop'])) : '';
     $order_ref  = isset($_GET['chama_gift_order']) ? absint($_GET['chama_gift_order']) : 0;
     $has_woocommerce = chama_ops_is_wc_gift_checkout_enabled();
+    $room_number = chama_ops_get_guest_room_context();
 
     $grouped_catalog = [];
     $category_index = [];
@@ -9334,8 +9358,20 @@ function chama_ops_render_gift_shop_app_shortcode(): string
             </div>
         <?php endif; ?>
         <?php
-        if ($notice_key === 'submitted' && $order_ref > 0) {
-            echo chama_ops_render_guest_order_confirmation_card('gift', $order_ref); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        $tracked_gift_order_card = '';
+
+        if ($order_ref > 0) {
+            $tracked_gift_order_card = chama_ops_render_guest_order_confirmation_card('gift', $order_ref, $room_number);
+        }
+
+        if ($tracked_gift_order_card !== '') {
+            echo $tracked_gift_order_card; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        } elseif ($order_ref > 0) {
+            ?>
+            <div class="chama-app-notice chama-app-notice--error">
+                <?php esc_html_e('That order is not available for this stay session.', 'chama-ops'); ?>
+            </div>
+            <?php
         }
         ?>
 
