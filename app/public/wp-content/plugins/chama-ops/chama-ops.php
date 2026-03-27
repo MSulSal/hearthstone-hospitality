@@ -2942,6 +2942,12 @@ function chama_ops_render_overview_page(): void
     $notice_phone_scanned = isset($_GET['chama_ops_phone_scanned'])
         ? max(0, (int) sanitize_text_field(wp_unslash($_GET['chama_ops_phone_scanned'])))
         : 0;
+    $notice_checkout_target = isset($_GET['chama_ops_checkout_target'])
+        ? sanitize_key((string) wp_unslash($_GET['chama_ops_checkout_target']))
+        : '';
+    $notice_checkout_enabled = isset($_GET['chama_ops_checkout_enabled'])
+        ? sanitize_key((string) wp_unslash($_GET['chama_ops_checkout_enabled']))
+        : '';
     $seeded_guest_login = get_transient('chama_ops_seeded_guest_login');
     $seeded_guest_room = '';
     $seeded_guest_code = '';
@@ -2996,6 +3002,14 @@ function chama_ops_render_overview_page(): void
             'message' => __('Guest phone values were normalized for consistent display format.', 'chama-ops'),
             'type'    => 'notice-success',
         ],
+        'wc_checkout_toggle_updated' => [
+            'message' => __('Card-checkout availability was updated.', 'chama-ops'),
+            'type'    => 'notice-success',
+        ],
+        'wc_checkout_toggle_invalid' => [
+            'message' => __('Card-checkout update could not be applied due to an invalid target.', 'chama-ops'),
+            'type'    => 'notice-error',
+        ],
     ];
 
     $recent_guests = get_posts([
@@ -3028,6 +3042,7 @@ function chama_ops_render_overview_page(): void
     $checked_in_total       = (int) ($stay_status_summary['checked_in'] ?? 0);
     $booked_total           = (int) ($stay_status_summary['booked'] ?? 0);
     $room_service_metrics   = chama_ops_get_room_service_order_metrics();
+    $wc_checkout_readiness  = chama_ops_get_wc_checkout_readiness();
     $sample_data_counts     = chama_ops_get_sample_data_counts();
     $persistent_guest_count = max(0, $guest_total - (int) $sample_data_counts['guest']);
     $persistent_stay_count  = max(0, $stay_total - (int) $sample_data_counts['stay']);
@@ -3106,6 +3121,7 @@ function chama_ops_render_overview_page(): void
         'chama_ops_export_arrival_contact_gaps_csv_action',
         'chama_ops_export_arrival_contact_gaps_csv_nonce'
     );
+    $wc_settings_url = admin_url('admin.php?page=wc-settings');
     ?>
     <div class="wrap">
         <?php if (isset($seed_notice_messages[$notice_key])) : ?>
@@ -3154,6 +3170,21 @@ function chama_ops_render_overview_page(): void
                             $notice_phone_updated,
                             $notice_phone_unchanged,
                             $notice_phone_scanned
+                        );
+                    }
+                    if ($notice_key === 'wc_checkout_toggle_updated') {
+                        $target_label = $notice_checkout_target === 'gift_shop'
+                            ? __('Gift shop', 'chama-ops')
+                            : __('Dining', 'chama-ops');
+                        $toggle_label = $notice_checkout_enabled === '1'
+                            ? __('enabled', 'chama-ops')
+                            : __('disabled', 'chama-ops');
+
+                        $notice_message .= ' ' . sprintf(
+                            /* translators: 1: checkout target label, 2: enabled/disabled label. */
+                            __('%1$s card checkout is now %2$s.', 'chama-ops'),
+                            $target_label,
+                            $toggle_label
                         );
                     }
 
@@ -3332,6 +3363,76 @@ function chama_ops_render_overview_page(): void
                         (int) $room_service_metrics['completed_orders']
                     );
                     ?>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid #dcdcde;padding:16px;margin-bottom:16px;">
+            <h2 style="margin-top:0;"><?php esc_html_e('Guest Card Checkout Readiness', 'chama-ops'); ?></h2>
+            <p style="margin-top:0;"><?php esc_html_e('Control card checkout availability per module and confirm WooCommerce is ready before demos.', 'chama-ops'); ?></p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('WooCommerce Status', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html($wc_checkout_readiness['woo_ready'] ? __('Ready', 'chama-ops') : __('Not ready', 'chama-ops')); ?><br>
+                    <?php
+                    if ($wc_checkout_readiness['currency'] !== '') {
+                        printf(
+                            esc_html__('Currency: %s', 'chama-ops'),
+                            esc_html($wc_checkout_readiness['currency'])
+                        );
+                    } else {
+                        esc_html_e('Currency: not detected', 'chama-ops');
+                    }
+                    ?>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Enabled Payment Methods', 'chama-ops'); ?></strong><br>
+                    <?php
+                    if (!empty($wc_checkout_readiness['enabled_gateways'])) {
+                        echo esc_html(implode(', ', $wc_checkout_readiness['enabled_gateways']));
+                    } else {
+                        esc_html_e('No active gateway detected.', 'chama-ops');
+                    }
+                    ?><br>
+                    <a href="<?php echo esc_url($wc_settings_url); ?>"><?php esc_html_e('Open WooCommerce settings', 'chama-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Dining Card Checkout', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html($wc_checkout_readiness['dining_card_enabled'] ? __('Enabled', 'chama-ops') : __('Disabled', 'chama-ops')); ?><br>
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-top:8px;">
+                        <?php wp_nonce_field('chama_ops_update_wc_checkout_toggle_action', 'chama_ops_update_wc_checkout_toggle_nonce'); ?>
+                        <input type="hidden" name="action" value="chama_ops_update_wc_checkout_toggle">
+                        <input type="hidden" name="chama_ops_checkout_target" value="dining">
+                        <input type="hidden" name="chama_ops_checkout_enabled" value="<?php echo esc_attr($wc_checkout_readiness['dining_card_enabled'] ? '0' : '1'); ?>">
+                        <button type="submit" class="button button-secondary">
+                            <?php
+                            echo esc_html(
+                                $wc_checkout_readiness['dining_card_enabled']
+                                    ? __('Disable dining card checkout', 'chama-ops')
+                                    : __('Enable dining card checkout', 'chama-ops')
+                            );
+                            ?>
+                        </button>
+                    </form>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Gift Shop Card Checkout', 'chama-ops'); ?></strong><br>
+                    <?php echo esc_html($wc_checkout_readiness['gift_card_enabled'] ? __('Enabled', 'chama-ops') : __('Disabled', 'chama-ops')); ?><br>
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-top:8px;">
+                        <?php wp_nonce_field('chama_ops_update_wc_checkout_toggle_action', 'chama_ops_update_wc_checkout_toggle_nonce'); ?>
+                        <input type="hidden" name="action" value="chama_ops_update_wc_checkout_toggle">
+                        <input type="hidden" name="chama_ops_checkout_target" value="gift_shop">
+                        <input type="hidden" name="chama_ops_checkout_enabled" value="<?php echo esc_attr($wc_checkout_readiness['gift_card_enabled'] ? '0' : '1'); ?>">
+                        <button type="submit" class="button button-secondary">
+                            <?php
+                            echo esc_html(
+                                $wc_checkout_readiness['gift_card_enabled']
+                                    ? __('Disable gift shop card checkout', 'chama-ops')
+                                    : __('Enable gift shop card checkout', 'chama-ops')
+                            );
+                            ?>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -6162,12 +6263,25 @@ function chama_ops_is_woocommerce_ready(): bool
 }
 
 /**
+ * Read a boolean plugin option with a fallback default.
+ */
+function chama_ops_get_boolean_option(string $option_name, bool $default = false): bool
+{
+    $fallback = $default ? '1' : '0';
+    $value = get_option($option_name, $fallback);
+
+    return in_array((string) $value, ['1', 'yes', 'true', 'on'], true);
+}
+
+/**
  * Dining card checkout toggle (enabled by default when WooCommerce is available).
  */
 function chama_ops_is_wc_dining_checkout_enabled(): bool
 {
+    $enabled = chama_ops_get_boolean_option('chama_ops_wc_dining_checkout_enabled', true);
+
     return chama_ops_is_woocommerce_ready()
-        && (bool) apply_filters('chama_ops_enable_wc_dining_checkout', true);
+        && (bool) apply_filters('chama_ops_enable_wc_dining_checkout', $enabled);
 }
 
 /**
@@ -6175,9 +6289,115 @@ function chama_ops_is_wc_dining_checkout_enabled(): bool
  */
 function chama_ops_is_wc_gift_checkout_enabled(): bool
 {
+    $enabled = chama_ops_get_boolean_option('chama_ops_wc_gift_checkout_enabled', true);
+
     return chama_ops_is_woocommerce_ready()
-        && (bool) apply_filters('chama_ops_enable_wc_gift_checkout', true);
+        && (bool) apply_filters('chama_ops_enable_wc_gift_checkout', $enabled);
 }
+
+/**
+ * Return WooCommerce checkout readiness details for ops admin.
+ *
+ * @return array{
+ *   woo_ready: bool,
+ *   currency: string,
+ *   enabled_gateways: array<int, string>,
+ *   dining_card_enabled: bool,
+ *   gift_card_enabled: bool
+ * }
+ */
+function chama_ops_get_wc_checkout_readiness(): array
+{
+    $readiness = [
+        'woo_ready'           => chama_ops_is_woocommerce_ready(),
+        'currency'            => '',
+        'enabled_gateways'    => [],
+        'dining_card_enabled' => chama_ops_is_wc_dining_checkout_enabled(),
+        'gift_card_enabled'   => chama_ops_is_wc_gift_checkout_enabled(),
+    ];
+
+    if (!$readiness['woo_ready']) {
+        return $readiness;
+    }
+
+    if (function_exists('get_woocommerce_currency')) {
+        $currency = (string) get_woocommerce_currency();
+        if ($currency !== '') {
+            $readiness['currency'] = $currency;
+        }
+    }
+
+    $wc = WC();
+    if (!is_object($wc) || !method_exists($wc, 'payment_gateways')) {
+        return $readiness;
+    }
+
+    $payment_gateways = $wc->payment_gateways();
+    if (!is_object($payment_gateways) || !method_exists($payment_gateways, 'get_available_payment_gateways')) {
+        return $readiness;
+    }
+
+    $available_gateways = $payment_gateways->get_available_payment_gateways();
+    if (!is_array($available_gateways)) {
+        return $readiness;
+    }
+
+    foreach ($available_gateways as $gateway) {
+        if (!is_object($gateway)) {
+            continue;
+        }
+
+        $gateway_title = '';
+        if (isset($gateway->title)) {
+            $gateway_title = trim((string) $gateway->title);
+        }
+        if ($gateway_title === '' && isset($gateway->id)) {
+            $gateway_title = (string) $gateway->id;
+        }
+
+        if ($gateway_title !== '') {
+            $readiness['enabled_gateways'][] = $gateway_title;
+        }
+    }
+
+    return $readiness;
+}
+
+/**
+ * Toggle guest card-checkout options from the overview page.
+ */
+function chama_ops_update_wc_checkout_toggle(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('You do not have permission to update checkout settings.', 'chama-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer('chama_ops_update_wc_checkout_toggle_action', 'chama_ops_update_wc_checkout_toggle_nonce');
+
+    $target = isset($_POST['chama_ops_checkout_target']) ? sanitize_key((string) wp_unslash($_POST['chama_ops_checkout_target'])) : '';
+    $enabled = isset($_POST['chama_ops_checkout_enabled']) ? sanitize_key((string) wp_unslash($_POST['chama_ops_checkout_enabled'])) : '0';
+
+    $option_map = [
+        'dining'    => 'chama_ops_wc_dining_checkout_enabled',
+        'gift_shop' => 'chama_ops_wc_gift_checkout_enabled',
+    ];
+
+    if (!isset($option_map[$target])) {
+        wp_safe_redirect(add_query_arg('chama_ops_notice', 'wc_checkout_toggle_invalid', wp_get_referer() ?: admin_url('admin.php?page=chama-ops-overview')));
+        exit;
+    }
+
+    $normalized_enabled = $enabled === '1' ? '1' : '0';
+    update_option($option_map[$target], $normalized_enabled, false);
+
+    wp_safe_redirect(add_query_arg([
+        'chama_ops_notice'           => 'wc_checkout_toggle_updated',
+        'chama_ops_checkout_target'  => $target,
+        'chama_ops_checkout_enabled' => $normalized_enabled,
+    ], wp_get_referer() ?: admin_url('admin.php?page=chama-ops-overview')));
+    exit;
+}
+add_action('admin_post_chama_ops_update_wc_checkout_toggle', 'chama_ops_update_wc_checkout_toggle');
 
 /**
  * Ensure WooCommerce cart/session objects are ready for checkout redirects.
