@@ -6151,6 +6151,449 @@ function chama_ops_render_guest_room_service_order_actions(int $order_id, string
 }
 
 /**
+ * Check whether WooCommerce checkout APIs are available.
+ */
+function chama_ops_is_woocommerce_ready(): bool
+{
+    return class_exists('WooCommerce')
+        && function_exists('WC')
+        && function_exists('wc_get_checkout_url')
+        && function_exists('wc_load_cart');
+}
+
+/**
+ * Ensure WooCommerce cart/session objects are ready for checkout redirects.
+ */
+function chama_ops_bootstrap_woocommerce_cart(): bool
+{
+    if (!chama_ops_is_woocommerce_ready()) {
+        return false;
+    }
+
+    $wc = WC();
+
+    if (!is_object($wc)) {
+        return false;
+    }
+
+    if (!isset($wc->cart) || !is_object($wc->cart)) {
+        wc_load_cart();
+    }
+
+    return isset($wc->cart) && is_object($wc->cart) && method_exists($wc->cart, 'add_to_cart');
+}
+
+/**
+ * Ensure a hidden WooCommerce product exists for a room-service item.
+ */
+function chama_ops_get_or_create_wc_product_for_room_service_item(int $item_id): int
+{
+    if (!chama_ops_is_woocommerce_ready() || $item_id <= 0) {
+        return 0;
+    }
+
+    $item_post = get_post($item_id);
+
+    if (!$item_post instanceof WP_Post || $item_post->post_type !== 'room_service_item') {
+        return 0;
+    }
+
+    $price_raw = (string) get_post_meta($item_id, '_chama_room_service_price', true);
+    $price = $price_raw !== '' ? (float) $price_raw : 0.0;
+    $mapped_product_id = (int) get_post_meta($item_id, '_chama_wc_product_id', true);
+    $product = $mapped_product_id > 0 ? wc_get_product($mapped_product_id) : null;
+
+    if (!($product instanceof WC_Product)) {
+        $product = new WC_Product_Simple();
+        $product->set_status('publish');
+        $product->set_catalog_visibility('hidden');
+        $product->set_virtual(true);
+        $product->set_manage_stock(false);
+        $product->set_sku('chama-rs-' . $item_id);
+    }
+
+    $product->set_name((string) $item_post->post_title);
+    $product->set_description((string) $item_post->post_content);
+    $product->set_regular_price(number_format($price, 2, '.', ''));
+    $product->set_price(number_format($price, 2, '.', ''));
+    $product->set_catalog_visibility('hidden');
+    $product->set_virtual(true);
+    $saved_product_id = (int) $product->save();
+
+    if ($saved_product_id <= 0) {
+        return 0;
+    }
+
+    update_post_meta($saved_product_id, '_chama_ops_source_type', 'room_service_item');
+    update_post_meta($saved_product_id, '_chama_ops_source_id', $item_id);
+    update_post_meta($item_id, '_chama_wc_product_id', $saved_product_id);
+
+    return $saved_product_id;
+}
+
+/**
+ * Ensure a hidden WooCommerce product exists for a gift-shop catalog item.
+ */
+function chama_ops_get_or_create_wc_product_for_gift_item(string $item_key, array $catalog_item): int
+{
+    if (!chama_ops_is_woocommerce_ready()) {
+        return 0;
+    }
+
+    $normalized_key = sanitize_key($item_key);
+
+    if ($normalized_key === '') {
+        return 0;
+    }
+
+    $map = get_option('chama_ops_wc_gift_product_map', []);
+    $map = is_array($map) ? $map : [];
+    $mapped_product_id = isset($map[$normalized_key]) ? absint($map[$normalized_key]) : 0;
+    $product = $mapped_product_id > 0 ? wc_get_product($mapped_product_id) : null;
+
+    if (!($product instanceof WC_Product)) {
+        $product = new WC_Product_Simple();
+        $product->set_status('publish');
+        $product->set_catalog_visibility('hidden');
+        $product->set_virtual(true);
+        $product->set_manage_stock(false);
+        $product->set_sku('chama-gift-' . $normalized_key);
+    }
+
+    $label = isset($catalog_item['label']) ? (string) $catalog_item['label'] : $normalized_key;
+    $description = isset($catalog_item['description']) ? (string) $catalog_item['description'] : '';
+    $price = isset($catalog_item['price']) ? (float) $catalog_item['price'] : 0.0;
+
+    $product->set_name($label);
+    $product->set_description($description);
+    $product->set_regular_price(number_format($price, 2, '.', ''));
+    $product->set_price(number_format($price, 2, '.', ''));
+    $product->set_catalog_visibility('hidden');
+    $product->set_virtual(true);
+    $saved_product_id = (int) $product->save();
+
+    if ($saved_product_id <= 0) {
+        return 0;
+    }
+
+    update_post_meta($saved_product_id, '_chama_ops_source_type', 'gift_shop_catalog');
+    update_post_meta($saved_product_id, '_chama_ops_source_key', $normalized_key);
+    $map[$normalized_key] = $saved_product_id;
+    update_option('chama_ops_wc_gift_product_map', $map, false);
+
+    return $saved_product_id;
+}
+
+/**
+ * Begin WooCommerce checkout for a validated room-service cart.
+ *
+ * @param array<int, int> $validated_cart
+ */
+function chama_ops_start_room_service_woocommerce_checkout(
+    array $validated_cart,
+    string $room,
+    string $delivery_method,
+    string $requested_time,
+    int $tip_percent,
+    string $order_notes,
+    string $redirect_url
+): void {
+    if (!chama_ops_bootstrap_woocommerce_cart()) {
+        wp_safe_redirect(add_query_arg('chama_room_service', 'woo_unavailable', $redirect_url));
+        exit;
+    }
+
+    $wc = WC();
+
+    if (!is_object($wc) || !isset($wc->cart) || !is_object($wc->cart)) {
+        wp_safe_redirect(add_query_arg('chama_room_service', 'woo_unavailable', $redirect_url));
+        exit;
+    }
+
+    $wc->cart->empty_cart();
+    $checkout_cart = [];
+
+    foreach ($validated_cart as $item_id => $qty) {
+        $product_id = chama_ops_get_or_create_wc_product_for_room_service_item((int) $item_id);
+
+        if ($product_id <= 0 || $qty <= 0) {
+            continue;
+        }
+
+        $added = $wc->cart->add_to_cart(
+            $product_id,
+            $qty,
+            0,
+            [],
+            [
+                'chama_source_type' => 'dining',
+                'chama_source_item_id' => (int) $item_id,
+            ]
+        );
+
+        if ($added) {
+            $checkout_cart[(int) $item_id] = $qty;
+        }
+    }
+
+    if (empty($checkout_cart)) {
+        wp_safe_redirect(add_query_arg('chama_room_service', 'invalid_item', $redirect_url));
+        exit;
+    }
+
+    if (isset($wc->session) && is_object($wc->session)) {
+        $wc->session->set('chama_guest_checkout_context', [
+            'source_type'     => 'dining',
+            'room_number'     => strtoupper(trim($room)),
+            'cart'            => $checkout_cart,
+            'delivery_method' => sanitize_key($delivery_method),
+            'requested_time'  => $requested_time,
+            'tip_percent'     => max(0, $tip_percent),
+            'notes'           => $order_notes,
+            'created_at'      => time(),
+        ]);
+    }
+
+    wp_safe_redirect((string) wc_get_checkout_url());
+    exit;
+}
+
+/**
+ * Begin WooCommerce checkout for a validated gift-shop cart.
+ *
+ * @param array<string, int> $validated_cart
+ */
+function chama_ops_start_gift_shop_woocommerce_checkout(
+    array $validated_cart,
+    array $catalog,
+    string $room,
+    string $fulfillment_method,
+    string $fulfillment_window,
+    string $guest_notes,
+    string $redirect_url
+): void {
+    if (!chama_ops_bootstrap_woocommerce_cart()) {
+        wp_safe_redirect(add_query_arg('chama_gift_shop', 'woo_unavailable', $redirect_url));
+        exit;
+    }
+
+    $wc = WC();
+
+    if (!is_object($wc) || !isset($wc->cart) || !is_object($wc->cart)) {
+        wp_safe_redirect(add_query_arg('chama_gift_shop', 'woo_unavailable', $redirect_url));
+        exit;
+    }
+
+    $wc->cart->empty_cart();
+    $checkout_cart = [];
+
+    foreach ($validated_cart as $item_key => $qty) {
+        if (!isset($catalog[$item_key]) || $qty <= 0) {
+            continue;
+        }
+
+        $product_id = chama_ops_get_or_create_wc_product_for_gift_item($item_key, (array) $catalog[$item_key]);
+
+        if ($product_id <= 0) {
+            continue;
+        }
+
+        $added = $wc->cart->add_to_cart(
+            $product_id,
+            $qty,
+            0,
+            [],
+            [
+                'chama_source_type' => 'gift_shop',
+                'chama_source_item_key' => $item_key,
+            ]
+        );
+
+        if ($added) {
+            $checkout_cart[$item_key] = $qty;
+        }
+    }
+
+    if (empty($checkout_cart)) {
+        wp_safe_redirect(add_query_arg('chama_gift_shop', 'invalid_item', $redirect_url));
+        exit;
+    }
+
+    if (isset($wc->session) && is_object($wc->session)) {
+        $wc->session->set('chama_guest_checkout_context', [
+            'source_type'        => 'gift_shop',
+            'room_number'        => strtoupper(trim($room)),
+            'cart'               => $checkout_cart,
+            'fulfillment_method' => sanitize_key($fulfillment_method),
+            'fulfillment_window' => $fulfillment_window,
+            'notes'              => $guest_notes,
+            'created_at'         => time(),
+        ]);
+    }
+
+    wp_safe_redirect((string) wc_get_checkout_url());
+    exit;
+}
+
+/**
+ * Mirror WooCommerce checkout orders into ops records for dashboards.
+ *
+ * @param int         $wc_order_id WooCommerce order ID.
+ * @param string      $posted_data Raw posted checkout data.
+ * @param object|null $wc_order    WooCommerce order object.
+ */
+function chama_ops_sync_wc_checkout_context_to_ops_order(int $wc_order_id, string $posted_data, $wc_order): void
+{
+    if (!chama_ops_is_woocommerce_ready() || !is_object($wc_order) || !method_exists($wc_order, 'get_meta')) {
+        return;
+    }
+
+    if ((int) $wc_order->get_meta('_chama_ops_synced_order_id', true) > 0) {
+        return;
+    }
+
+    $wc = WC();
+
+    if (!is_object($wc) || !isset($wc->session) || !is_object($wc->session)) {
+        return;
+    }
+
+    $context = $wc->session->get('chama_guest_checkout_context');
+
+    if (!is_array($context)) {
+        return;
+    }
+
+    $source_type = isset($context['source_type']) ? sanitize_key((string) $context['source_type']) : '';
+    $room_number = isset($context['room_number']) ? strtoupper(trim((string) $context['room_number'])) : '';
+    $cart = isset($context['cart']) && is_array($context['cart']) ? (array) $context['cart'] : [];
+    $synced_record_id = 0;
+
+    if ($source_type === 'dining' && !empty($cart)) {
+        $validated_cart = [];
+        $order_note_lines = [];
+        $total_qty = 0;
+
+        foreach ($cart as $item_id_raw => $qty_raw) {
+            $item_id = absint((string) $item_id_raw);
+            $qty = max(0, absint($qty_raw));
+
+            if ($item_id <= 0 || $qty <= 0) {
+                continue;
+            }
+
+            $item_post = get_post($item_id);
+
+            if (!$item_post instanceof WP_Post || $item_post->post_type !== 'room_service_item') {
+                continue;
+            }
+
+            $validated_cart[$item_id] = $qty;
+            $total_qty += $qty;
+            $order_note_lines[] = sprintf(
+                __('%1$s x%2$d', 'chama-ops'),
+                (string) $item_post->post_title,
+                $qty
+            );
+        }
+
+        if (!empty($validated_cart)) {
+            $tip_percent = isset($context['tip_percent']) ? max(0, absint($context['tip_percent'])) : 0;
+            $requested_time = isset($context['requested_time']) ? sanitize_text_field((string) $context['requested_time']) : '';
+            $notes = isset($context['notes']) ? sanitize_textarea_field((string) $context['notes']) : '';
+            $delivery_method = isset($context['delivery_method']) ? sanitize_key((string) $context['delivery_method']) : 'room_delivery';
+
+            if ($notes !== '') {
+                $order_note_lines[] = __('Guest notes:', 'chama-ops') . ' ' . $notes;
+            }
+
+            $synced_record_id = (int) wp_insert_post([
+                'post_type'    => 'room_service_order',
+                'post_status'  => 'publish',
+                'post_title'   => sprintf(__('Room %1$s - Woo Order #%2$d', 'chama-ops'), $room_number !== '' ? $room_number : 'N/A', $wc_order_id),
+                'post_content' => implode("\n", $order_note_lines),
+            ], true);
+
+            if ($synced_record_id > 0) {
+                update_post_meta($synced_record_id, '_chama_order_item_id', (int) array_key_first($validated_cart));
+                update_post_meta($synced_record_id, '_chama_order_quantity', $total_qty);
+                update_post_meta($synced_record_id, '_chama_order_items_json', wp_json_encode($validated_cart));
+                update_post_meta($synced_record_id, '_chama_order_room_number', $room_number);
+                update_post_meta($synced_record_id, '_chama_order_delivery_method', $delivery_method);
+                update_post_meta($synced_record_id, '_chama_order_requested_time', $requested_time);
+                update_post_meta($synced_record_id, '_chama_order_tip_percent', $tip_percent);
+                update_post_meta($synced_record_id, '_chama_order_notes', $notes);
+                update_post_meta($synced_record_id, '_chama_order_subtotal', number_format((float) $wc_order->get_subtotal(), 2, '.', ''));
+                update_post_meta($synced_record_id, '_chama_order_total', number_format((float) $wc_order->get_total(), 2, '.', ''));
+                update_post_meta($synced_record_id, '_chama_order_status', 'submitted');
+                update_post_meta($synced_record_id, '_chama_wc_order_id', $wc_order_id);
+            }
+        }
+    } elseif ($source_type === 'gift_shop' && !empty($cart)) {
+        $catalog = chama_ops_get_gift_shop_catalog();
+        $validated_cart = [];
+        $order_note_lines = [];
+        $total_qty = 0;
+
+        foreach ($cart as $item_key_raw => $qty_raw) {
+            $item_key = sanitize_key((string) $item_key_raw);
+            $qty = max(0, absint($qty_raw));
+
+            if ($item_key === '' || $qty <= 0 || !isset($catalog[$item_key])) {
+                continue;
+            }
+
+            $label = isset($catalog[$item_key]['label']) ? (string) $catalog[$item_key]['label'] : $item_key;
+            $validated_cart[$item_key] = $qty;
+            $total_qty += $qty;
+            $order_note_lines[] = sprintf(
+                __('%1$s x%2$d', 'chama-ops'),
+                $label,
+                $qty
+            );
+        }
+
+        if (!empty($validated_cart)) {
+            $notes = isset($context['notes']) ? sanitize_textarea_field((string) $context['notes']) : '';
+            $fulfillment_method = isset($context['fulfillment_method']) ? sanitize_key((string) $context['fulfillment_method']) : 'room_delivery';
+            $fulfillment_window = isset($context['fulfillment_window']) ? sanitize_text_field((string) $context['fulfillment_window']) : '';
+
+            if ($notes !== '') {
+                $order_note_lines[] = __('Guest notes:', 'chama-ops') . ' ' . $notes;
+            }
+
+            $synced_record_id = (int) wp_insert_post([
+                'post_type'    => 'gift_shop_order',
+                'post_status'  => 'publish',
+                'post_title'   => sprintf(__('Room %1$s - Woo Gift Order #%2$d', 'chama-ops'), $room_number !== '' ? $room_number : 'N/A', $wc_order_id),
+                'post_content' => implode("\n", $order_note_lines),
+            ], true);
+
+            if ($synced_record_id > 0) {
+                update_post_meta($synced_record_id, '_chama_gift_item_key', (string) array_key_first($validated_cart));
+                update_post_meta($synced_record_id, '_chama_gift_quantity', $total_qty);
+                update_post_meta($synced_record_id, '_chama_gift_items_json', wp_json_encode($validated_cart));
+                update_post_meta($synced_record_id, '_chama_gift_room_number', $room_number);
+                update_post_meta($synced_record_id, '_chama_gift_fulfillment_method', $fulfillment_method);
+                update_post_meta($synced_record_id, '_chama_gift_fulfillment_window', $fulfillment_window);
+                update_post_meta($synced_record_id, '_chama_gift_guest_notes', $notes);
+                update_post_meta($synced_record_id, '_chama_gift_total', number_format((float) $wc_order->get_total(), 2, '.', ''));
+                update_post_meta($synced_record_id, '_chama_gift_order_status', 'submitted');
+                update_post_meta($synced_record_id, '_chama_wc_order_id', $wc_order_id);
+            }
+        }
+    }
+
+    if ($synced_record_id > 0) {
+        $wc_order->update_meta_data('_chama_ops_synced_order_id', $synced_record_id);
+        $wc_order->save();
+    }
+
+    $wc->session->set('chama_guest_checkout_context', null);
+}
+add_action('woocommerce_checkout_order_processed', 'chama_ops_sync_wc_checkout_context_to_ops_order', 20, 3);
+
+/**
  * Print cart interaction script one time per response.
  */
 function chama_ops_print_guest_cart_script_once(): void
@@ -6175,23 +6618,47 @@ function chama_ops_print_guest_cart_script_once(): void
 
         roots.forEach(function (root) {
             var cards = root.querySelectorAll('[data-cart-item]');
-            var cartInput = root.querySelector('[data-cart-input]');
+            var cartInputs = root.querySelectorAll('[data-cart-input]');
             var summary = root.querySelector('[data-cart-summary]');
             var totalNode = root.querySelector('[data-cart-total]');
-            var submitButton = root.querySelector('[data-cart-submit]');
+            var submitButtons = root.querySelectorAll('[data-cart-submit]');
+            var checkoutModeInput = root.querySelector('[data-checkout-mode-input]');
 
-            if (!cards.length || !cartInput || !summary || !totalNode || !submitButton) {
+            if (!cards.length || !cartInputs.length || !summary || !totalNode || !submitButtons.length) {
                 return;
             }
 
+            var primaryCartInput = cartInputs[0];
             var initialCart = {};
             var cart = {};
 
             try {
-                initialCart = JSON.parse(String(cartInput.value || '{}')) || {};
+                initialCart = JSON.parse(String(primaryCartInput.value || '{}')) || {};
             } catch (error) {
                 initialCart = {};
             }
+
+            root.addEventListener('click', function (event) {
+                var modeTrigger = event.target.closest('[data-checkout-mode]');
+
+                if (!modeTrigger || !checkoutModeInput) {
+                    return;
+                }
+
+                checkoutModeInput.value = String(modeTrigger.getAttribute('data-checkout-mode') || 'ops');
+            });
+
+            var setCartValue = function (value) {
+                cartInputs.forEach(function (cartInput) {
+                    cartInput.value = value;
+                });
+            };
+
+            var setSubmitDisabled = function (isDisabled) {
+                submitButtons.forEach(function (submitButton) {
+                    submitButton.disabled = isDisabled;
+                });
+            };
 
             var setQtyOnCard = function (card, qty) {
                 var qtyNode = card.querySelector('[data-qty]');
@@ -6248,14 +6715,14 @@ function chama_ops_print_guest_cart_script_once(): void
 
                 if (!lines.length) {
                     summary.innerHTML = '<p class="chama-order-meta">No items selected yet.</p>';
-                    submitButton.disabled = true;
-                    cartInput.value = '{}';
+                    setSubmitDisabled(true);
+                    setCartValue('{}');
                     totalNode.textContent = '$0.00';
                     return;
                 }
 
-                submitButton.disabled = false;
-                cartInput.value = JSON.stringify(cart);
+                setSubmitDisabled(false);
+                setCartValue(JSON.stringify(cart));
                 totalNode.textContent = '$' + total.toFixed(2);
 
                 var html = '<ul class="chama-cart-lines">';
@@ -6347,6 +6814,7 @@ function chama_ops_render_room_service_app_shortcode(): string
     $items = chama_ops_get_available_room_service_items();
     $notice_key = isset($_GET['chama_room_service']) ? sanitize_key((string) wp_unslash($_GET['chama_room_service'])) : '';
     $order_ref  = isset($_GET['chama_room_service_order']) ? absint($_GET['chama_room_service_order']) : 0;
+    $has_woocommerce = chama_ops_is_woocommerce_ready();
     $room_number = chama_ops_get_guest_room_context();
     $edit_order_id = isset($_GET['chama_room_service_edit']) ? absint($_GET['chama_room_service_edit']) : 0;
     $editable_order = chama_ops_get_guest_editable_room_service_order($edit_order_id, $room_number);
@@ -6420,6 +6888,10 @@ function chama_ops_render_room_service_app_shortcode(): string
         <?php elseif ($notice_key === 'invalid_item') : ?>
             <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('That menu item is currently unavailable. Please choose another item.', 'chama-ops'); ?>
+            </div>
+        <?php elseif ($notice_key === 'woo_unavailable') : ?>
+            <div class="chama-app-notice chama-app-notice--error">
+                <?php esc_html_e('Card checkout is unavailable right now. Please submit as room charge.', 'chama-ops'); ?>
             </div>
         <?php elseif ($notice_key === 'edit_locked') : ?>
             <div class="chama-app-notice chama-app-notice--error">
@@ -6532,6 +7004,7 @@ function chama_ops_render_room_service_app_shortcode(): string
                         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
                             <?php wp_nonce_field('chama_ops_submit_room_service_order_action', 'chama_ops_submit_room_service_order_nonce'); ?>
                             <input type="hidden" name="action" value="chama_ops_submit_room_service_order">
+                            <input type="hidden" name="chama_checkout_mode" value="ops" data-checkout-mode-input>
                             <input type="hidden" name="chama_room_service_cart" value="<?php echo esc_attr($initial_cart_json); ?>" data-cart-input>
                             <?php if ($editing_order_id > 0) : ?>
                                 <input type="hidden" name="chama_room_service_order_id" value="<?php echo esc_attr((string) $editing_order_id); ?>">
@@ -6570,9 +7043,16 @@ function chama_ops_render_room_service_app_shortcode(): string
                                 <textarea id="chama_order_notes" name="chama_order_notes" rows="3"><?php echo esc_textarea($initial_notes); ?></textarea>
                             </p>
 
-                            <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled>
-                                <?php echo esc_html($editing_order_id > 0 ? __('Update order', 'chama-ops') : __('Submit order', 'chama-ops')); ?>
-                            </button>
+                            <div class="chama-order-actions wp-block-buttons">
+                                <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit data-checkout-mode="ops" disabled>
+                                    <?php echo esc_html($editing_order_id > 0 ? __('Update order', 'chama-ops') : __('Submit order', 'chama-ops')); ?>
+                                </button>
+                                <?php if ($has_woocommerce) : ?>
+                                    <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit data-checkout-mode="woocommerce" disabled>
+                                        <?php esc_html_e('Checkout with card', 'chama-ops'); ?>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                         </form>
                     </div>
                 </aside>
@@ -6603,6 +7083,7 @@ function chama_ops_submit_room_service_order(): void
     $tip_percent = isset($_POST['chama_order_tip_percent']) ? absint(wp_unslash($_POST['chama_order_tip_percent'])) : 0;
     $order_notes = isset($_POST['chama_order_notes']) ? sanitize_textarea_field((string) wp_unslash($_POST['chama_order_notes'])) : '';
     $order_id_to_edit = isset($_POST['chama_room_service_order_id']) ? absint(wp_unslash($_POST['chama_room_service_order_id'])) : 0;
+    $checkout_mode = isset($_POST['chama_checkout_mode']) ? sanitize_key((string) wp_unslash($_POST['chama_checkout_mode'])) : 'ops';
 
     if (!in_array($delivery_method, ['room_delivery', 'pickup'], true)) {
         $delivery_method = 'room_delivery';
@@ -6688,6 +7169,19 @@ function chama_ops_submit_room_service_order(): void
     }
 
     $room = chama_ops_get_guest_room_context();
+
+    if ($checkout_mode === 'woocommerce' && $order_id_to_edit <= 0) {
+        chama_ops_start_room_service_woocommerce_checkout(
+            $validated_cart,
+            $room,
+            $delivery_method,
+            $requested_time,
+            $tip_percent,
+            $order_notes,
+            $redirect_url
+        );
+    }
+
     $order_note_lines = $order_lines;
 
     if ($order_notes !== '') {
@@ -8041,6 +8535,7 @@ function chama_ops_render_gift_shop_app_shortcode(): string
     $catalog = chama_ops_get_gift_shop_catalog();
     $notice_key = isset($_GET['chama_gift_shop']) ? sanitize_key((string) wp_unslash($_GET['chama_gift_shop'])) : '';
     $order_ref  = isset($_GET['chama_gift_order']) ? absint($_GET['chama_gift_order']) : 0;
+    $has_woocommerce = chama_ops_is_woocommerce_ready();
 
     $grouped_catalog = [];
     $category_index = [];
@@ -8082,6 +8577,10 @@ function chama_ops_render_gift_shop_app_shortcode(): string
         <?php elseif ($notice_key === 'invalid_item') : ?>
             <div class="chama-app-notice chama-app-notice--error">
                 <?php esc_html_e('That catalog item is unavailable right now. Please choose another item.', 'chama-ops'); ?>
+            </div>
+        <?php elseif ($notice_key === 'woo_unavailable') : ?>
+            <div class="chama-app-notice chama-app-notice--error">
+                <?php esc_html_e('Card checkout is unavailable right now. Please submit as room charge.', 'chama-ops'); ?>
             </div>
         <?php endif; ?>
 
@@ -8173,6 +8672,7 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="chama-order-form">
                         <?php wp_nonce_field('chama_ops_submit_gift_shop_order_action', 'chama_ops_submit_gift_shop_order_nonce'); ?>
                         <input type="hidden" name="action" value="chama_ops_submit_gift_shop_order">
+                        <input type="hidden" name="chama_checkout_mode" value="ops" data-checkout-mode-input>
                         <input type="hidden" name="chama_gift_cart" value="{}" data-cart-input>
 
                         <div class="chama-cart-summary" data-cart-summary>
@@ -8198,7 +8698,12 @@ function chama_ops_render_gift_shop_app_shortcode(): string
                             <textarea id="chama_gift_notes" name="chama_gift_notes" rows="3"></textarea>
                         </p>
 
-                        <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit disabled><?php esc_html_e('Place gift shop order', 'chama-ops'); ?></button>
+                        <div class="chama-order-actions wp-block-buttons">
+                            <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit data-checkout-mode="ops" disabled><?php esc_html_e('Place gift shop order', 'chama-ops'); ?></button>
+                            <?php if ($has_woocommerce) : ?>
+                                <button type="submit" class="wp-element-button chama-order-submit" data-cart-submit data-checkout-mode="woocommerce" disabled><?php esc_html_e('Checkout with card', 'chama-ops'); ?></button>
+                            <?php endif; ?>
+                        </div>
                     </form>
                 </div>
             </aside>
@@ -8314,6 +8819,7 @@ function chama_ops_submit_gift_shop_order(): void
     $fulfillment_method = isset($_POST['chama_gift_fulfillment_method']) ? sanitize_key((string) wp_unslash($_POST['chama_gift_fulfillment_method'])) : 'room_delivery';
     $fulfillment_window = isset($_POST['chama_gift_fulfillment_window']) ? sanitize_text_field((string) wp_unslash($_POST['chama_gift_fulfillment_window'])) : '';
     $guest_notes = isset($_POST['chama_gift_notes']) ? sanitize_textarea_field((string) wp_unslash($_POST['chama_gift_notes'])) : '';
+    $checkout_mode = isset($_POST['chama_checkout_mode']) ? sanitize_key((string) wp_unslash($_POST['chama_checkout_mode'])) : 'ops';
 
     if (!in_array($fulfillment_method, ['room_delivery', 'front_desk_pickup'], true)) {
         $fulfillment_method = 'room_delivery';
@@ -8387,6 +8893,18 @@ function chama_ops_submit_gift_shop_order(): void
     }
 
     $room = chama_ops_get_guest_room_context();
+
+    if ($checkout_mode === 'woocommerce') {
+        chama_ops_start_gift_shop_woocommerce_checkout(
+            $validated_cart,
+            $catalog,
+            $room,
+            $fulfillment_method,
+            $fulfillment_window,
+            $guest_notes,
+            $redirect_url
+        );
+    }
 
     if ($guest_notes !== '') {
         $order_note_lines[] = __('Guest notes:', 'chama-ops') . ' ' . $guest_notes;
