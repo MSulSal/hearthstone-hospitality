@@ -6171,12 +6171,12 @@ function chama_ops_is_wc_dining_checkout_enabled(): bool
 }
 
 /**
- * Gift-shop card checkout toggle (disabled until gift checkout milestone).
+ * Gift-shop card checkout toggle.
  */
 function chama_ops_is_wc_gift_checkout_enabled(): bool
 {
     return chama_ops_is_woocommerce_ready()
-        && (bool) apply_filters('chama_ops_enable_wc_gift_checkout', false);
+        && (bool) apply_filters('chama_ops_enable_wc_gift_checkout', true);
 }
 
 /**
