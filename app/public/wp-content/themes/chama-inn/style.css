@@ -1837,6 +1837,160 @@ body.admin-bar .guest-auth-shell__backdrop {
   text-align: center;
 }
 
+.chama-app-confirmation {
+  margin-bottom: 0.95rem;
+}
+
+.chama-active-order-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.72rem;
+}
+
+.chama-active-order-item {
+  border: 1px solid color-mix(in srgb, var(--chama-border) 62%, transparent 38%);
+  border-radius: 13px;
+  padding: 0.72rem 0.78rem;
+  background: color-mix(in srgb, var(--chama-surface) 88%, #fff 12%);
+  box-shadow: 0 8px 20px rgba(30, 24, 19, 0.08);
+}
+
+.chama-active-order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin-bottom: 0.45rem;
+}
+
+.chama-active-order-header strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.chama-order-type-pill {
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--chama-border) 72%, #fff 28%);
+  padding: 0.15rem 0.56rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--chama-text-soft);
+  background: color-mix(in srgb, var(--chama-bg-soft) 72%, #fff 28%);
+}
+
+.chama-active-order-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.52rem;
+}
+
+.chama-order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.14rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.chama-order-status-badge.is-submitted {
+  color: #3b4f5e;
+  border-color: #b8c8d3;
+  background: #e8f1f6;
+}
+
+.chama-order-status-badge.is-confirmed {
+  color: #4f4a24;
+  border-color: #ddd08f;
+  background: #f7f0d3;
+}
+
+.chama-order-status-badge.is-preparing {
+  color: #5a3d28;
+  border-color: #e6bf98;
+  background: #f9e8d7;
+}
+
+.chama-order-status-badge.is-ready {
+  color: #2c4b38;
+  border-color: #a9ceb8;
+  background: #e4f3ea;
+}
+
+.chama-order-status-badge.is-delivering {
+  color: #2e4f58;
+  border-color: #9fc2cb;
+  background: #e2f0f4;
+}
+
+.chama-order-status-badge.is-completed {
+  color: #334233;
+  border-color: #b5c9b5;
+  background: #e8f0e8;
+}
+
+.chama-order-status-badge.is-cancelled {
+  color: #6a3b3b;
+  border-color: #d9a8a8;
+  background: #f8e5e5;
+}
+
+.chama-order-actions--inline {
+  margin-top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.48rem;
+}
+
+.chama-order-action-form {
+  margin: 0;
+}
+
+.chama-order-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border: 1px solid color-mix(in srgb, var(--chama-border) 72%, #fff 28%);
+  border-radius: 10px;
+  padding: 0.36rem 0.66rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--chama-text);
+  background: color-mix(in srgb, var(--chama-surface) 78%, #fff 22%);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.chama-order-action-btn:hover,
+.chama-order-action-btn:focus-visible {
+  background: color-mix(in srgb, var(--chama-bg-soft) 70%, #fff 30%);
+  transform: translateY(-1px);
+}
+
+.chama-order-action-btn.is-danger {
+  color: #fff;
+  background: color-mix(in srgb, #8d4f4f 84%, #6f3232 16%);
+  border-color: color-mix(in srgb, #8d4f4f 70%, #4d2525 30%);
+}
+
+.chama-order-action-btn.is-danger:hover,
+.chama-order-action-btn.is-danger:focus-visible {
+  background: color-mix(in srgb, #a75f5f 82%, #7b3a3a 18%);
+}
+
 .home-content .chama-brand-mark {
   margin: 0 auto 1rem;
   text-align: center;
