@@ -8599,6 +8599,8 @@ function chama_ops_render_guest_order_confirmation_card(string $order_type, int 
     $status_label = chama_ops_get_guest_order_status_label($status_key);
     $status_class = chama_ops_get_guest_order_status_css_class($status_key);
     $track_url = chama_ops_get_guest_order_track_url($normalized_type, $order_id);
+    $is_same_module_page = ($normalized_type === 'dining' && is_page('dining'))
+        || ($normalized_type === 'gift' && is_page('gift-shop'));
 
     $total_raw = $normalized_type === 'gift'
         ? (string) get_post_meta($order_id, '_chama_gift_total', true)
@@ -8652,9 +8654,11 @@ function chama_ops_render_guest_order_confirmation_card(string $order_type, int 
             <?php endif; ?>
         </div>
         <div class="chama-order-actions chama-order-actions--inline">
-            <a class="chama-order-action-btn" href="<?php echo esc_url($track_url); ?>">
-                <?php esc_html_e('Track this order', 'chama-ops'); ?>
-            </a>
+            <?php if (!$is_same_module_page) : ?>
+                <a class="chama-order-action-btn" href="<?php echo esc_url($track_url); ?>">
+                    <?php esc_html_e('Track this order', 'chama-ops'); ?>
+                </a>
+            <?php endif; ?>
             <a class="chama-order-action-btn" href="<?php echo esc_url(chama_ops_get_guest_page_url('my-stay', '/my-stay/')); ?>">
                 <?php esc_html_e('Open My Stay', 'chama-ops'); ?>
             </a>
