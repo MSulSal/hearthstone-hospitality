@@ -8598,9 +8598,12 @@ function chama_ops_render_guest_order_confirmation_card(string $order_type, int 
         : (string) get_post_meta($order_id, '_chama_order_status', true);
     $status_label = chama_ops_get_guest_order_status_label($status_key);
     $status_class = chama_ops_get_guest_order_status_css_class($status_key);
-    $track_url = chama_ops_get_guest_order_track_url($normalized_type, $order_id);
-    $is_same_module_page = ($normalized_type === 'dining' && is_page('dining'))
-        || ($normalized_type === 'gift' && is_page('gift-shop'));
+    $home_track_url = add_query_arg(
+        'chama_track_order',
+        $normalized_type . ':' . $order_id,
+        chama_ops_get_guest_page_url('home', '/')
+    );
+    $is_home_page = is_front_page() || is_page('home');
 
     $total_raw = $normalized_type === 'gift'
         ? (string) get_post_meta($order_id, '_chama_gift_total', true)
@@ -8654,9 +8657,9 @@ function chama_ops_render_guest_order_confirmation_card(string $order_type, int 
             <?php endif; ?>
         </div>
         <div class="chama-order-actions chama-order-actions--inline">
-            <?php if (!$is_same_module_page) : ?>
-                <a class="chama-order-action-btn" href="<?php echo esc_url($track_url); ?>">
-                    <?php esc_html_e('Track this order', 'chama-ops'); ?>
+            <?php if (!$is_home_page) : ?>
+                <a class="chama-order-action-btn" href="<?php echo esc_url($home_track_url); ?>">
+                    <?php esc_html_e('Track on Home', 'chama-ops'); ?>
                 </a>
             <?php endif; ?>
             <a class="chama-order-action-btn" href="<?php echo esc_url(chama_ops_get_guest_page_url('my-stay', '/my-stay/')); ?>">
@@ -8674,16 +8677,18 @@ function chama_ops_render_guest_order_confirmation_card(string $order_type, int 
  *
  * @param array<int, array<string, int|string>> $active_orders Active guest orders.
  */
-function chama_ops_render_guest_active_orders_list(array $active_orders, string $room_number, string $empty_message): string
+function chama_ops_render_guest_active_orders_list(array $active_orders, string $room_number, string $empty_message, string $view_context = 'default'): string
 {
     if (empty($active_orders)) {
         return '<p class="chama-order-meta">' . esc_html($empty_message) . '</p>';
     }
 
+    $is_home_context = $view_context === 'home';
+
     ob_start();
     ?>
     <ul class="chama-active-order-list">
-        <?php foreach ($active_orders as $order) : ?>
+        <?php foreach ($active_orders as $order_index => $order) : ?>
             <?php
             $order_type = isset($order['type']) ? sanitize_key((string) $order['type']) : 'dining';
             $type_label = $order_type === 'gift' ? __('Gift Shop', 'chama-ops') : __('Dining', 'chama-ops');
@@ -8694,29 +8699,58 @@ function chama_ops_render_guest_active_orders_list(array $active_orders, string 
             $order_fulfillment = isset($order['fulfillment']) ? trim((string) $order['fulfillment']) : '';
             $meta_bits = array_filter([$order_eta, $order_fulfillment]);
             $order_id = isset($order['id']) ? (int) $order['id'] : 0;
-            $track_url = chama_ops_get_guest_order_track_url($order_type, $order_id);
+            $tracking_key = $order_type . ':' . $order_id;
+            $details_id = 'chama-track-details-' . $order_type . '-' . ($order_id > 0 ? (string) $order_id : (string) $order_index);
             ?>
             <li class="chama-active-order-item">
                 <div class="chama-active-order-header">
                     <strong><?php echo esc_html((string) ($order['title'] ?? '')); ?></strong>
                     <span class="chama-order-type-pill"><?php echo esc_html($type_label); ?></span>
                 </div>
-                <div class="chama-active-order-status-row">
-                    <span class="chama-order-status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_label); ?></span>
-                    <?php if (!empty($meta_bits)) : ?>
-                        <span class="chama-order-meta"><?php echo esc_html(implode(' | ', $meta_bits)); ?></span>
+                <?php if ($is_home_context) : ?>
+                    <div class="chama-order-actions chama-order-actions--inline">
+                        <button
+                            type="button"
+                            class="chama-order-action-btn chama-order-track-toggle"
+                            data-order-track-toggle
+                            data-track-key="<?php echo esc_attr($tracking_key); ?>"
+                            aria-expanded="false"
+                            aria-controls="<?php echo esc_attr($details_id); ?>"
+                        >
+                            <?php esc_html_e('Track order', 'chama-ops'); ?>
+                        </button>
+                    </div>
+                    <div
+                        id="<?php echo esc_attr($details_id); ?>"
+                        class="chama-order-track-details"
+                        data-order-track-details
+                        hidden
+                    >
+                        <div class="chama-active-order-status-row">
+                            <span class="chama-order-status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_label); ?></span>
+                            <?php if (!empty($meta_bits)) : ?>
+                                <span class="chama-order-meta"><?php echo esc_html(implode(' | ', $meta_bits)); ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($order_type === 'dining' && $order_id > 0) : ?>
+                            <div class="chama-order-actions chama-order-actions--inline">
+                                <?php echo chama_ops_render_guest_room_service_order_actions($order_id, $room_number); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php else : ?>
+                    <div class="chama-active-order-status-row">
+                        <span class="chama-order-status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_label); ?></span>
+                        <?php if (!empty($meta_bits)) : ?>
+                            <span class="chama-order-meta"><?php echo esc_html(implode(' | ', $meta_bits)); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <?php if ($order_type === 'dining' && $order_id > 0) : ?>
+                        <div class="chama-order-actions chama-order-actions--inline">
+                            <?php echo chama_ops_render_guest_room_service_order_actions($order_id, $room_number); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                        </div>
                     <?php endif; ?>
-                </div>
-                <div class="chama-order-actions chama-order-actions--inline">
-                    <a class="chama-order-action-btn" href="<?php echo esc_url($track_url); ?>">
-                        <?php esc_html_e('Track order', 'chama-ops'); ?>
-                    </a>
-                    <?php
-                    if ($order_type === 'dining' && $order_id > 0) {
-                        echo chama_ops_render_guest_room_service_order_actions($order_id, $room_number); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                    }
-                    ?>
-                </div>
+                <?php endif; ?>
             </li>
         <?php endforeach; ?>
     </ul>
@@ -8885,10 +8919,21 @@ function chama_ops_render_guest_home_shell_shortcode(): string
     $room_order_ref  = isset($_GET['chama_room_service_order']) ? absint($_GET['chama_room_service_order']) : 0;
     $gift_notice_key = isset($_GET['chama_gift_shop']) ? sanitize_key((string) wp_unslash($_GET['chama_gift_shop'])) : '';
     $gift_order_ref  = isset($_GET['chama_gift_order']) ? absint($_GET['chama_gift_order']) : 0;
+    $track_order_key_raw = isset($_GET['chama_track_order']) ? sanitize_text_field((string) wp_unslash($_GET['chama_track_order'])) : '';
+    $track_order_key = preg_match('/^(dining|gift):\d+$/', $track_order_key_raw) ? $track_order_key_raw : '';
+    $orders_poll_url = add_query_arg(
+        'action',
+        'chama_ops_guest_orders_snapshot',
+        admin_url('admin-ajax.php')
+    );
 
     ob_start();
     ?>
-    <section class="chama-guest-home">
+    <section
+        class="chama-guest-home"
+        data-track-order="<?php echo esc_attr($track_order_key); ?>"
+        data-orders-poll-url="<?php echo esc_url($orders_poll_url); ?>"
+    >
         <?php echo chama_ops_render_guest_order_feedback_notices(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php
         if (in_array($room_notice_key, ['submitted', 'updated'], true) && $room_order_ref > 0) {
@@ -8924,15 +8969,112 @@ function chama_ops_render_guest_home_shell_shortcode(): string
         </div>
         <div class="chama-card chama-guest-home__orders">
             <p class="chama-service-app__section-title"><?php esc_html_e('Active orders', 'chama-ops'); ?></p>
-            <?php
-            echo chama_ops_render_guest_active_orders_list(
-                $active_orders,
-                $room_number,
-                __('No active orders right now.', 'chama-ops')
-            ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-            ?>
+            <div data-home-orders-body>
+                <?php
+                echo chama_ops_render_guest_active_orders_list(
+                    $active_orders,
+                    $room_number,
+                    __('No active orders right now.', 'chama-ops'),
+                    'home'
+                ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                ?>
+            </div>
         </div>
     </section>
+    <script>
+    (function () {
+        var homeRoot = document.querySelector('.chama-guest-home');
+
+        if (!homeRoot) {
+            return;
+        }
+
+        var bodyContainer = homeRoot.querySelector('[data-home-orders-body]');
+
+        if (!bodyContainer) {
+            return;
+        }
+
+        var pollUrl = String(homeRoot.getAttribute('data-orders-poll-url') || '');
+        var requestedTrackKey = String(homeRoot.getAttribute('data-track-order') || '');
+        var activeTrackKey = requestedTrackKey;
+
+        var setTrackToggleState = function (toggleButton, expanded) {
+            var detailsId = String(toggleButton.getAttribute('aria-controls') || '');
+
+            if (!detailsId) {
+                return;
+            }
+
+            var details = bodyContainer.querySelector('#' + detailsId);
+
+            if (!details) {
+                return;
+            }
+
+            toggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            details.hidden = !expanded;
+            toggleButton.textContent = expanded ? 'Hide tracking' : 'Track order';
+
+            if (expanded) {
+                activeTrackKey = String(toggleButton.getAttribute('data-track-key') || '');
+            } else if (activeTrackKey === String(toggleButton.getAttribute('data-track-key') || '')) {
+                activeTrackKey = '';
+            }
+        };
+
+        var bindTrackToggles = function () {
+            var toggles = bodyContainer.querySelectorAll('[data-order-track-toggle]');
+            var pendingKey = activeTrackKey !== '' ? activeTrackKey : requestedTrackKey;
+            var pendingHandled = false;
+
+            toggles.forEach(function (toggleButton) {
+                setTrackToggleState(toggleButton, false);
+
+                toggleButton.addEventListener('click', function () {
+                    var expanded = toggleButton.getAttribute('aria-expanded') === 'true';
+
+                    setTrackToggleState(toggleButton, !expanded);
+                });
+
+                if (!pendingHandled && pendingKey !== '' && String(toggleButton.getAttribute('data-track-key') || '') === pendingKey) {
+                    setTrackToggleState(toggleButton, true);
+                    pendingHandled = true;
+                    requestedTrackKey = '';
+                }
+            });
+        };
+
+        var refreshOrders = function () {
+            if (!pollUrl) {
+                return;
+            }
+
+            window.fetch(pollUrl, { credentials: 'same-origin' })
+                .then(function (response) {
+                    if (!response.ok) {
+                        return null;
+                    }
+
+                    return response.json();
+                })
+                .then(function (payload) {
+                    if (!payload || !payload.success || !payload.data || !payload.data.html) {
+                        return;
+                    }
+
+                    bodyContainer.innerHTML = String(payload.data.html);
+                    bindTrackToggles();
+                })
+                .catch(function () {
+                    return;
+                });
+        };
+
+        bindTrackToggles();
+        window.setInterval(refreshOrders, 15000);
+    }());
+    </script>
     <?php
 
     return (string) ob_get_clean();
@@ -8992,7 +9134,8 @@ function chama_ops_render_guest_my_stay_shortcode(): string
             echo chama_ops_render_guest_active_orders_list(
                 $active_orders,
                 $room_number,
-                __('No active orders yet. Open Dining or Gift Shop to place one.', 'chama-ops')
+                __('No active orders yet. Open Dining or Gift Shop to place one.', 'chama-ops'),
+                'my_stay'
             ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             ?>
         </div>
@@ -9132,6 +9275,33 @@ function chama_ops_render_guest_help_center_shortcode(): string
     return (string) ob_get_clean();
 }
 add_shortcode('chama_guest_help_center', 'chama_ops_render_guest_help_center_shortcode');
+
+/**
+ * AJAX snapshot for live guest order tracking on Home.
+ */
+function chama_ops_guest_orders_snapshot_ajax(): void
+{
+    if (!chama_ops_is_guest_authenticated()) {
+        wp_send_json_error(['message' => __('Guest session expired.', 'chama-ops')], 401);
+    }
+
+    $room_number = chama_ops_get_guest_room_context();
+    $active_orders = chama_ops_get_guest_active_orders_for_room($room_number);
+
+    $html = chama_ops_render_guest_active_orders_list(
+        $active_orders,
+        $room_number,
+        __('No active orders right now.', 'chama-ops'),
+        'home'
+    );
+
+    wp_send_json_success([
+        'html' => $html,
+        'count' => count($active_orders),
+    ]);
+}
+add_action('wp_ajax_nopriv_chama_ops_guest_orders_snapshot', 'chama_ops_guest_orders_snapshot_ajax');
+add_action('wp_ajax_chama_ops_guest_orders_snapshot', 'chama_ops_guest_orders_snapshot_ajax');
 
 /**
  * Render guest action grid shortcode.

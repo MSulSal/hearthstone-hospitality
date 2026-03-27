@@ -1952,6 +1952,18 @@ body.admin-bar .guest-auth-shell__backdrop {
   gap: 0.48rem;
 }
 
+.chama-order-track-toggle {
+  min-width: 7.5rem;
+}
+
+.chama-order-track-details {
+  margin-top: 0.5rem;
+}
+
+.chama-order-track-details[hidden] {
+  display: none !important;
+}
+
 .chama-order-action-form {
   margin: 0;
 }
