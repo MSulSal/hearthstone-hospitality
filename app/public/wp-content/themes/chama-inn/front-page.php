@@ -20,7 +20,7 @@ get_header();
     <?php else : ?>
         <section class="home-content">
             <div class="home-content__inner">
-                <h1><?php esc_html_e('Welcome to Chama Station Inn', 'chama-inn'); ?></h1>
+                <h1><?php esc_html_e('Welcome to Hearthstone Hospitality', 'chama-inn'); ?></h1>
                 <p><?php esc_html_e('Create and publish a Home page to control this content in WordPress.', 'chama-inn'); ?></p>
             </div>
         </section>

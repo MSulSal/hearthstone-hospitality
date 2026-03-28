@@ -10,11 +10,11 @@ return <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"level":1,"style":{"color":{"text":"#4e4035"}}} -->
-<h1 class="wp-block-heading has-text-color" style="color:#4e4035">Rooms designed for comfort, quiet, and Chama character</h1>
+<h1 class="wp-block-heading has-text-color" style="color:#4e4035">Rooms designed for comfort, quiet, and regional character</h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"style":{"color":{"text":"#393633"}}} -->
-<p class="has-text-color" style="color:#393633">Nine guest rooms with clean comfort, friendly service, and walkable access to the train depot and downtown Chama.</p>
+<p class="has-text-color" style="color:#393633">Nine guest rooms with clean comfort, friendly service, and easy access to nearby attractions.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
@@ -54,7 +54,7 @@ return <<<'HTML'
 <!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"16px"}}}} -->
 <div class="wp-block-columns"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
-<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-20.jpg" alt="Courtyard seating area at Chama Station Inn"/></figure>
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/csi-assets/csi-20.jpg" alt="Courtyard seating area at Hearthstone Hospitality"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 

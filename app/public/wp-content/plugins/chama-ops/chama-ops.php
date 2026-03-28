@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Chama Ops
- * Plugin URI: https://chamastationinn.com
- * Description: Hospitality operations data models and workflows for Chama Station Inn.
+ * Plugin Name: Hearthstone Ops
+ * Plugin URI: https://example.com
+ * Description: Hospitality operations data models and workflows for Hearthstone Hospitality.
  * Version: 1.27.0
  * Author: Suleman Saleem
  * Text Domain: chama-ops
@@ -481,7 +481,7 @@ function chama_ops_format_guest_phone(string $phone): string
 function chama_ops_get_room_theme_suggestions(): array
 {
     return [
-        'Chama Canyon Calm',
+        'Hearthstone Canyon Calm',
         'Taos Adobe',
         'Santa Fe Serenity',
         'Bandelier Mesa',
@@ -1860,7 +1860,7 @@ function chama_ops_register_dashboard_widgets(): void
 {
     wp_add_dashboard_widget(
         'chama_ops_dashboard_summary',
-        __('Chama Ops Summary', 'chama-ops'),
+        __('Hearthstone Ops Summary', 'chama-ops'),
         'chama_ops_render_dashboard_summary_widget'
     );
 }
@@ -1944,8 +1944,8 @@ function chama_ops_render_dashboard_summary_widget(): void
 function chama_ops_register_admin_pages(): void
 {
     add_dashboard_page(
-        __('Chama Ops Overview', 'chama-ops'),
-        __('Chama Ops Overview', 'chama-ops'),
+        __('Hearthstone Ops Overview', 'chama-ops'),
+        __('Hearthstone Ops Overview', 'chama-ops'),
         'edit_posts',
         'chama-ops-overview',
         'chama_ops_render_overview_page'
@@ -3207,7 +3207,7 @@ function chama_ops_render_overview_page(): void
                 </p>
             </div>
         <?php endif; ?>
-        <h1><?php esc_html_e('Chama Ops Overview', 'chama-ops'); ?></h1>
+        <h1><?php esc_html_e('Hearthstone Ops Overview', 'chama-ops'); ?></h1>
         <p><?php esc_html_e('Quick snapshot of guest and stay activity for the current prototype.', 'chama-ops'); ?></p>
 
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 24px;">
@@ -3866,17 +3866,17 @@ function chama_ops_seed_sample_data(): void
             [
                 'handle'           => 'elena',
                 'title'            => 'Sample Guest - Elena Cruz',
-                'email'            => 'elena@chamastationinn.com',
+                'email'            => 'elena@hearthstonehospitality.com',
                 'phone'            => '(505) 222-0100',
                 'marketing_source' => 'direct',
-                'preferred_room'   => 'Chama Canyon Calm',
+                'preferred_room'   => 'Hearthstone Canyon Calm',
                 'vip'              => '1',
                 'consent'          => '1',
             ],
             [
                 'handle'           => 'nate',
                 'title'            => 'Sample Guest - Nate Morales',
-                'email'            => 'nate+ops@chamastationinn.com',
+                'email'            => 'nate+ops@hearthstonehospitality.com',
                 'phone'            => '',
                 'marketing_source' => 'google',
                 'preferred_room'   => 'Taos Adobe',
@@ -3886,7 +3886,7 @@ function chama_ops_seed_sample_data(): void
             [
                 'handle'           => 'sara',
                 'title'            => 'Sample Guest - Sara Lin',
-                'email'            => 'sara@chamastationinn.com',
+                'email'            => 'sara@hearthstonehospitality.com',
                 'phone'            => '(505) 222-0198',
                 'marketing_source' => 'referral',
                 'preferred_room'   => 'Santa Fe Serenity',
@@ -3896,7 +3896,7 @@ function chama_ops_seed_sample_data(): void
             [
                 'handle'           => 'omar',
                 'title'            => 'Sample Guest - Omar Patel',
-                'email'            => 'omar@chamastationinn.com',
+                'email'            => 'omar@hearthstonehospitality.com',
                 'phone'            => '(505) 222-0182',
                 'marketing_source' => 'repeat',
                 'preferred_room'   => 'High Desert Moon',
@@ -3976,10 +3976,10 @@ function chama_ops_seed_sample_data(): void
             [
                 'handle'           => 'elena',
                 'title'            => 'Sample Guest - Elena Cruz',
-                'email'            => 'elena@chamastationinn.com',
+                'email'            => 'elena@hearthstonehospitality.com',
                 'phone'            => '',
                 'marketing_source' => 'direct',
-                'preferred_room'   => 'Chama Canyon Calm',
+                'preferred_room'   => 'Hearthstone Canyon Calm',
                 'vip'              => '1',
                 'consent'          => '',
             ],
@@ -4060,17 +4060,17 @@ function chama_ops_seed_sample_data(): void
             [
                 'handle'           => 'elena',
                 'title'            => 'Sample Guest - Elena Cruz',
-                'email'            => 'elena@chamastationinn.com',
+                'email'            => 'elena@hearthstonehospitality.com',
                 'phone'            => '(505) 222-0100',
                 'marketing_source' => 'direct',
-                'preferred_room'   => 'Chama Canyon Calm',
+                'preferred_room'   => 'Hearthstone Canyon Calm',
                 'vip'              => '1',
                 'consent'          => '1',
             ],
             [
                 'handle'           => 'nate',
                 'title'            => 'Sample Guest - Nate Morales',
-                'email'            => 'nate+ops@chamastationinn.com',
+                'email'            => 'nate+ops@hearthstonehospitality.com',
                 'phone'            => '',
                 'marketing_source' => 'google',
                 'preferred_room'   => 'Taos Adobe',
@@ -9234,16 +9234,16 @@ function chama_ops_render_guest_my_stay_shortcode(): string
                     </ul>
                 </article>
                 <article class="chama-order-card">
-                    <h3><?php esc_html_e('In Chama', 'chama-ops'); ?></h3>
+                    <h3><?php esc_html_e('In town', 'chama-ops'); ?></h3>
                     <ul class="chama-guest-home__bullet-list">
-                        <li><?php esc_html_e('The Cumbres and Toltec depot is directly across from the inn.', 'chama-ops'); ?></li>
+                        <li><?php esc_html_e('Local highlights are easy to reach from the property.', 'chama-ops'); ?></li>
                         <li><?php esc_html_e('Most downtown dining and shops are walkable from your room.', 'chama-ops'); ?></li>
                         <li><?php esc_html_e('Message front desk for same-day recommendations and timing tips.', 'chama-ops'); ?></li>
                     </ul>
                 </article>
             </div>
             <div class="chama-photo-frame" style="margin-top:14px;">
-                <img src="<?php echo esc_url(get_theme_file_uri('assets/images/nearby.png')); ?>" alt="<?php esc_attr_e('Map and nearby points around Chama Station Inn', 'chama-ops'); ?>">
+                <img src="<?php echo esc_url(get_theme_file_uri('assets/images/nearby.png')); ?>" alt="<?php esc_attr_e('Map and nearby points around Hearthstone Hospitality', 'chama-ops'); ?>">
             </div>
         </div>
 
@@ -9445,8 +9445,8 @@ add_shortcode('chama_guest_action_grid', 'chama_ops_render_guest_action_grid_sho
 function chama_ops_get_gift_shop_catalog(): array
 {
     return [
-        'chama_rail_mug' => [
-            'label' => __('Chama Rail Mug', 'chama-ops'),
+        'hearthstone_rail_mug' => [
+            'label' => __('Hearthstone Rail Mug', 'chama-ops'),
             'description' => __('Matte ceramic mug with station-inspired crest.', 'chama-ops'),
             'price' => 18.00,
             'category' => __('Station Collection', 'chama-ops'),
@@ -9461,7 +9461,7 @@ function chama_ops_get_gift_shop_catalog(): array
         ],
         'vintage_postcard_pack' => [
             'label' => __('Vintage Postcard Pack', 'chama-ops'),
-            'description' => __('Set of 12 Chama-inspired postcards for keepsakes or mailing home.', 'chama-ops'),
+            'description' => __('Set of 12 destination-inspired postcards for keepsakes or mailing home.', 'chama-ops'),
             'price' => 12.00,
             'category' => __('Station Collection', 'chama-ops'),
             'image_url' => 'https://images.pexels.com/photos/1051075/pexels-photo-1051075.jpeg?auto=compress&cs=tinysrgb&w=1400',

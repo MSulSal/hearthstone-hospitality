@@ -1042,7 +1042,7 @@ function chama_inn_get_core_page_blueprint(): array
         [
             "title"   => __("Explore Town", "chama-inn"),
             "slug"    => "explore-chama",
-            "excerpt" => __("What to do at the inn and in Chama during your current stay.", "chama-inn"),
+            "excerpt" => __("What to do at the inn and in town during your current stay.", "chama-inn"),
             "pattern" => "patterns/explore-chama-page.php",
         ],
         [
@@ -1353,7 +1353,7 @@ function chama_inn_created_pages_notice(): void
     echo '<div class="notice notice-success is-dismissible"><p>';
     echo esc_html(sprintf(
         /* translators: %d: number of pages auto-created */
-        __("Chama Inn setup created %d core pages and assigned the primary menu.", "chama-inn"),
+        __("Hearthstone Hospitality setup created %d core pages and assigned the primary menu.", "chama-inn"),
         $created_count
     ));
     echo "</p></div>";
@@ -1395,7 +1395,7 @@ function chama_inn_migrate_seeded_copy(): void
         return;
     }
 
-    $target_version = 20;
+    $target_version = 21;
     $current_version = (int) get_option("chama_inn_copy_migration_version", 0);
 
     if ($current_version >= $target_version) {
@@ -1403,20 +1403,24 @@ function chama_inn_migrate_seeded_copy(): void
     }
 
     $replacements = [
-        "Restored railroad inn in Chama, New Mexico" => "Boutique railroad-town inn in Chama, New Mexico",
-        "restored railroad inn in chama, new mexico" => "Boutique railroad-town inn in Chama, New Mexico",
-        "A lightened historic inn with clean comfort, welcoming service, and courtyard calm in the heart of Chama." => "A lightened Chama inn with clean comfort, welcoming service, and courtyard calm in the heart of town.",
+        "Chama Station Inn" => "Hearthstone Hospitality",
+        "chama station inn" => "hearthstone hospitality",
+        "Chama Inn" => "Hearthstone Hospitality",
+        "chama inn" => "hearthstone hospitality",
+        "Restored railroad inn in Chama, New Mexico" => "Boutique stay with regional character and modern comfort.",
+        "restored railroad inn in chama, new mexico" => "Boutique stay with regional character and modern comfort.",
+        "A lightened historic inn with clean comfort, welcoming service, and courtyard calm in the heart of Chama." => "A lightened boutique stay with clean comfort, welcoming service, and courtyard calm.",
         "Historic place. Modern comfort." => "Quiet place. Modern comfort.",
         "Use this card for a room category that highlights historic details and classic character." => "Character-forward rooms with thoughtful details, comfortable bedding, and practical layouts for train travelers and weekend guests.",
-        "Use this card for bright rooms, premium bedding, and a slower restorative atmosphere." => "Bright, quiet rooms designed for restorative nights and easy mornings before exploring Chama.",
+        "Use this card for bright rooms, premium bedding, and a slower restorative atmosphere." => "Bright, quiet rooms designed for restorative nights and easy mornings before exploring the area.",
         "Use this card for families or longer stays looking for space and easy downtown/train access." => "Extra-space options for couples, families, and longer stays who want walkable convenience and mountain-town calm.",
         "Use this section to show flowers, outdoor seating, fresh air, and the quiet rhythm guests remember after their stay." => "Courtyard seating, mountain air, and a slower rhythm make the inn feel both grounded and quietly premium.",
         "Use this trust area for verified, review-backed themes: clean rooms, friendly service, train convenience, and restful stays." => "Review themes consistently mention clean rooms, friendly hospitality, and easy train-station convenience.",
-        "A historic inn, thoughtfully restored for modern Chama stays" => "A boutique Chama inn with regional character and modern comfort",
+        "A historic inn, thoughtfully restored for modern Chama stays" => "A boutique stay with regional character and modern comfort",
         "Use this page to connect heritage, restoration, and the inn's long-term vision for guests and community." => "Use this page to connect place, hospitality style, and the inn's long-term vision for guests and community.",
-        "Intimate celebrations in a restored Chama setting" => "Intimate celebrations in a calm Chama setting",
+        "Intimate celebrations in a restored Chama setting" => "Intimate celebrations in a calm boutique setting",
         "Feature up to three room experiences here so guests can choose quickly and confidently." => "Choose from nine thoughtfully prepared rooms designed for comfort, quiet sleep, and easy access to the train and downtown.",
-        "Keep the tone intimate and restorative, not resort-scale." => "Ideal for couples, families, and rail travelers who want a welcoming home base in Chama.",
+        "Keep the tone intimate and restorative, not resort-scale." => "Ideal for couples, families, and travelers who want a welcoming home base.",
         "Present current food-and-beverage reality clearly, then leave space for future additions such as expanded dinner service, market items, and a fuller bar program." => "Dining around the inn keeps your stay easy: quick coffee options, walkable local favorites, and growing on-site offerings over time.",
         "<li>On-site convenience for train travelers and weekend guests</li><li>Seasonal and local flavor where possible</li><li>Clear operating hours and easy access to menus</li>" => "<li>Easy options before and after your train day</li><li>Walkable choices in the heart of town</li><li>Clear hours and simple dining guidance at check-in</li>",
         "<strong>Dining note:</strong> Keep promises specific and credible. Show what guests can enjoy now, then label upcoming additions as \"coming soon.\"</p>" => "<strong>Dining update:</strong> The inn continues to expand guest dining options while keeping clear, reliable recommendations available now.</p>",
@@ -1646,7 +1650,7 @@ function chama_inn_copy_migration_notice(): void
     echo '<div class="notice notice-success is-dismissible"><p>';
     echo esc_html(sprintf(
         /* translators: %d: number of pages updated */
-        __("Chama Inn content update applied to %d page(s), including sample menu and gift shop catalog blocks.", "chama-inn"),
+        __("Hearthstone Hospitality content update applied to %d page(s), including sample menu and gift shop catalog blocks.", "chama-inn"),
         $updated_pages
     ));
     echo "</p></div>";
@@ -1661,7 +1665,7 @@ function chama_inn_register_block_patterns(): void
 
     if (function_exists("register_block_pattern_category")) {
         register_block_pattern_category("chama-inn", [
-            "label" => __("Chama Inn", "chama-inn"),
+            "label" => __("Hearthstone Hospitality", "chama-inn"),
         ]);
     }
 
@@ -1699,7 +1703,7 @@ function chama_inn_register_block_patterns(): void
         "explore-chama-page" => [
             "file"        => "patterns/explore-chama-page.php",
             "title"       => __("Interior: Explore Town", "chama-inn"),
-            "description" => __("What to do at the inn and around Chama during your stay.", "chama-inn"),
+            "description" => __("What to do at the inn and around town during your stay.", "chama-inn"),
         ],
         "help-page" => [
             "file"        => "patterns/help-page.php",

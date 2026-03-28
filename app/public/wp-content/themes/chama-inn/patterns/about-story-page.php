@@ -10,11 +10,11 @@ return <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"level":1,"style":{"color":{"text":"#4e4035"}}} -->
-<h1 class="wp-block-heading has-text-color" style="color:#4e4035">A boutique Chama inn with regional character and modern comfort</h1>
+<h1 class="wp-block-heading has-text-color" style="color:#4e4035">A boutique stay with regional character and modern comfort</h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"style":{"color":{"text":"#393633"}}} -->
-<p class="has-text-color" style="color:#393633">Welcome to Chama Station Inn in Chama, New Mexico, across from the Cumbres and Toltec Scenic Railroad and close to mountain-town essentials.</p>
+<p class="has-text-color" style="color:#393633">Welcome to Hearthstone Hospitality, a calm boutique stay with convenient access to dining, local experiences, and front desk support.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 

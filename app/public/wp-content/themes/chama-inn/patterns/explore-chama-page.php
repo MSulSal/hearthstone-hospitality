@@ -10,7 +10,7 @@ return <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:heading {"level":1,"style":{"color":{"text":"#4e4035"}}} -->
-<h1 class="wp-block-heading has-text-color" style="color:#4e4035">What to do at the inn and in Chama</h1>
+<h1 class="wp-block-heading has-text-color" style="color:#4e4035">What to do during your stay</h1>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"style":{"color":{"text":"#393633"}}} -->
@@ -35,18 +35,18 @@ return <<<'HTML'
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:group {"className":"chama-card","layout":{"type":"constrained"}} -->
 <div class="wp-block-group chama-card"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">In Chama</h3>
+<h3 class="wp-block-heading">In town</h3>
 <!-- /wp:heading -->
 
 <!-- wp:list -->
-<ul><li>Cumbres and Toltec Scenic Railroad is directly across the street.</li><li>Most downtown dining and small shops are walkable from the inn.</li><li>Guests commonly pair train days with short local shopping stops.</li><li>For same-day suggestions, message the front desk.</li></ul>
+<ul><li>Local highlights are easy to reach from the property.</li><li>Dining and shopping options are available within a short walk or drive.</li><li>Guests commonly pair stay days with short local activity stops.</li><li>For same-day suggestions, message the front desk.</li></ul>
 <!-- /wp:list --></div>
 <!-- /wp:group --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->
 
 <!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"chama-photo-frame"} -->
-<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/nearby.png" alt="Map and nearby points around Chama Station Inn"/></figure>
+<figure class="wp-block-image size-large chama-photo-frame"><img src="/wp-content/themes/chama-inn/assets/images/nearby.png" alt="Map and nearby points around Hearthstone Hospitality"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:buttons -->
