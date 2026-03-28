@@ -7,18 +7,21 @@ if (!defined('ABSPATH')) {
     <footer class="site-footer">
         <?php
         $footer_logo = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri('footer') : '';
+        $property_name = function_exists('chama_inn_get_branding_value')
+            ? chama_inn_get_branding_value('property_name')
+            : get_bloginfo('name');
         ?>
         <div class="site-footer__inner">
             <div class="site-footer__brand">
                 <?php if ($footer_logo !== '') : ?>
-                    <img class="site-footer__logo-image" src="<?php echo esc_url($footer_logo); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+                    <img class="site-footer__logo-image" src="<?php echo esc_url($footer_logo); ?>" alt="<?php echo esc_attr($property_name); ?>">
                 <?php endif; ?>
                 <p class="site-footer__text">
                     <?php
                     printf(
                         esc_html__('Copyright %1$s %2$s - All Rights Reserved.', 'chama-inn'),
                         esc_html(gmdate('Y')),
-                        esc_html(get_bloginfo('name'))
+                        esc_html($property_name)
                     );
                     ?>
                 </p>

@@ -24,6 +24,40 @@ function chama_inn_setup(): void
 }
 add_action("after_setup_theme", "chama_inn_setup");
 
+function chama_inn_get_branding_defaults(): array
+{
+    return [
+        "property_name"   => "Chama Station Inn",
+        "app_name"        => "Guest Stay App",
+        "app_short_name"  => "Stay App",
+        "app_description" => "Guest stay app for restaurant orders, gift shop purchases, service requests, and front desk support.",
+        "location_label"  => "Chama, New Mexico",
+    ];
+}
+
+function chama_inn_sanitize_branding_text($value): string
+{
+    return sanitize_text_field((string) $value);
+}
+
+function chama_inn_get_branding_value(string $key): string
+{
+    $defaults = chama_inn_get_branding_defaults();
+
+    if (!array_key_exists($key, $defaults)) {
+        return "";
+    }
+
+    $value = get_theme_mod("chama_inn_brand_" . $key, (string) $defaults[$key]);
+    $value = is_string($value) ? trim($value) : "";
+
+    if ($value === "") {
+        return (string) $defaults[$key];
+    }
+
+    return $value;
+}
+
 function chama_inn_should_hide_page_hero(int $post_id): bool
 {
     if ($post_id <= 0) {
@@ -362,6 +396,7 @@ function chama_inn_enqueue_assets(): void
 
     wp_localize_script("chama-inn-pwa-register", "chamaPwaConfig", [
         "serviceWorkerUrl" => (string) home_url("/?chama_pwa_sw=1"),
+        "cachePrefix"      => sanitize_title(chama_inn_get_branding_value("app_short_name")),
     ]);
 }
 add_action("wp_enqueue_scripts", "chama_inn_enqueue_assets");
@@ -463,6 +498,56 @@ function chama_inn_customize_register(WP_Customize_Manager $wp_customize): void
         "type"        => "select",
         "choices"     => chama_inn_get_color_schemes(),
     ]);
+
+    $wp_customize->add_section("chama_inn_branding", [
+        "title"       => __("Guest App Branding", "chama-inn"),
+        "priority"    => 36,
+        "description" => __("White-label prep: update names/labels once and reuse across manifest and theme UI.", "chama-inn"),
+    ]);
+
+    $branding_fields = [
+        "property_name" => [
+            "label"       => __("Property Name", "chama-inn"),
+            "description" => __("Used for logo alt text, footer copy, and fallback title.", "chama-inn"),
+        ],
+        "app_name" => [
+            "label"       => __("App Name", "chama-inn"),
+            "description" => __("Used in PWA manifest name.", "chama-inn"),
+        ],
+        "app_short_name" => [
+            "label"       => __("App Short Name", "chama-inn"),
+            "description" => __("Used in PWA install icon label.", "chama-inn"),
+        ],
+        "app_description" => [
+            "label"       => __("App Description", "chama-inn"),
+            "description" => __("Used in PWA manifest description.", "chama-inn"),
+        ],
+        "location_label" => [
+            "label"       => __("Location Label", "chama-inn"),
+            "description" => __("Optional display label for future marketing copy swaps.", "chama-inn"),
+        ],
+    ];
+
+    foreach ($branding_fields as $field_key => $field_config) {
+        if (!is_array($field_config) || !isset($field_config["label"])) {
+            continue;
+        }
+
+        $setting_id = "chama_inn_brand_" . $field_key;
+
+        $wp_customize->add_setting($setting_id, [
+            "default"           => chama_inn_get_branding_defaults()[$field_key] ?? "",
+            "sanitize_callback" => "chama_inn_sanitize_branding_text",
+            "type"              => "theme_mod",
+        ]);
+
+        $wp_customize->add_control($setting_id, [
+            "label"       => (string) $field_config["label"],
+            "description" => isset($field_config["description"]) ? (string) $field_config["description"] : "",
+            "section"     => "chama_inn_branding",
+            "type"        => "text",
+        ]);
+    }
 
 }
 add_action("customize_register", "chama_inn_customize_register");
@@ -775,12 +860,15 @@ function chama_inn_should_serve_pwa_payload(string $key): bool
 function chama_inn_serve_pwa_manifest(): void
 {
     $icons = chama_inn_get_pwa_icon_entries();
+    $app_name = chama_inn_get_branding_value("app_name");
+    $app_short_name = chama_inn_get_branding_value("app_short_name");
+    $app_description = chama_inn_get_branding_value("app_description");
 
     $manifest = [
         "id"               => (string) home_url("/"),
-        "name"             => "Chama Station Inn Stay App",
-        "short_name"       => "Chama Stay",
-        "description"      => "Guest stay app for restaurant orders, gift shop purchases, service requests, and front desk support.",
+        "name"             => $app_name,
+        "short_name"       => $app_short_name,
+        "description"      => $app_description,
         "start_url"        => (string) home_url("/"),
         "scope"            => "/",
         "display"          => "standalone",
@@ -807,7 +895,13 @@ function chama_inn_serve_service_worker(): void
     $navigation_script_version = file_exists($navigation_script_path) ? (string) filemtime($navigation_script_path) : $theme_version;
     $pwa_script_version = file_exists($pwa_script_path) ? (string) filemtime($pwa_script_path) : $theme_version;
 
-    $cache_name = "chama-stay-v" . md5($theme_version . "|" . $style_version . "|" . $navigation_script_version . "|" . $pwa_script_version . "|pwa");
+    $cache_prefix = sanitize_title(chama_inn_get_branding_value("app_short_name"));
+
+    if ($cache_prefix === "") {
+        $cache_prefix = "guest-app";
+    }
+
+    $cache_name = $cache_prefix . "-v" . md5($theme_version . "|" . $style_version . "|" . $navigation_script_version . "|" . $pwa_script_version . "|pwa");
 
     $precache_urls = array_values(array_unique([
         (string) home_url("/guest-access/"),

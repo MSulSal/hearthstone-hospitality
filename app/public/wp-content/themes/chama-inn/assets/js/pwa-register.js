@@ -5,6 +5,9 @@
 
   const config = window.chamaPwaConfig || {};
   const serviceWorkerUrl = String(config.serviceWorkerUrl || "").trim();
+  const configuredCachePrefix = String(config.cachePrefix || "").trim();
+  const cachePrefix = configuredCachePrefix || "guest-app";
+  const cachePrefixLegacy = "chama-stay";
 
   if (!serviceWorkerUrl) {
     return;
@@ -23,7 +26,7 @@
       if ("caches" in window) {
         caches.keys().then((cacheKeys) => {
           cacheKeys.forEach((cacheKey) => {
-            if (cacheKey.indexOf("chama-stay-v") === 0) {
+            if (cacheKey.indexOf(cachePrefix + "-v") === 0 || cacheKey.indexOf(cachePrefixLegacy + "-v") === 0) {
               caches.delete(cacheKey);
             }
           });

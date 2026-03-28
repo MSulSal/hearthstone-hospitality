@@ -6,7 +6,9 @@ if (!defined('ABSPATH')) {
 $header_logo_context = is_front_page() ? 'header-home' : 'header';
 $header_logo_uri = function_exists('chama_inn_get_logo_variant_uri') ? chama_inn_get_logo_variant_uri($header_logo_context) : '';
 $guest_logout_url = function_exists('chama_inn_get_guest_logout_url') ? chama_inn_get_guest_logout_url() : '';
-$site_name = get_bloginfo('name');
+$site_name = function_exists('chama_inn_get_branding_value')
+    ? chama_inn_get_branding_value('property_name')
+    : get_bloginfo('name');
 $show_site_title = true;
 $hide_site_header = is_page('guest-access');
 ?>
