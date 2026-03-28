@@ -27,11 +27,11 @@ add_action("after_setup_theme", "chama_inn_setup");
 function chama_inn_get_branding_defaults(): array
 {
     return [
-        "property_name"   => "Chama Station Inn",
-        "app_name"        => "Guest Stay App",
-        "app_short_name"  => "Stay App",
-        "app_description" => "Guest stay app for restaurant orders, gift shop purchases, service requests, and front desk support.",
-        "location_label"  => "Chama, New Mexico",
+        "property_name"   => "Hearthstone Hospitality",
+        "app_name"        => "Hearthstone Guest App",
+        "app_short_name"  => "Hearthstone",
+        "app_description" => "Guest stay app for dining orders, gift shop purchases, service requests, and front desk support.",
+        "location_label"  => "Your Destination",
     ];
 }
 
@@ -480,7 +480,7 @@ function chama_inn_sanitize_color_scheme(string $value): string
 function chama_inn_customize_register(WP_Customize_Manager $wp_customize): void
 {
     $wp_customize->add_section("chama_inn_design", [
-        "title"       => __("Chama Inn Design", "chama-inn"),
+        "title"       => __("Guest App Design", "chama-inn"),
         "priority"    => 35,
         "description" => __("Adjust visual presentation without editing code.", "chama-inn"),
     ]);
@@ -664,6 +664,16 @@ function chama_inn_get_logo_variant_uri(string $context = "default"): string
 {
     $context = sanitize_key($context);
 
+    // Prefer a single universal logo file first so white-label swaps are instant.
+    $global_paths = [
+        "assets/images/chama_logo_bg_extremes/warm_white.png",
+        "assets/images/client-logo.webp",
+        "assets/images/client-logo.png",
+        "assets/images/client-logo.jpg",
+        "assets/images/client-logo.jpeg",
+        "assets/images/client-logo.svg",
+    ];
+
     $context_paths = [
         "header-home" => [
             "assets/images/chama_logo_bg_extremes/warm_white.png",
@@ -698,13 +708,7 @@ function chama_inn_get_logo_variant_uri(string $context = "default"): string
 
     $paths = $context_paths[$context] ?? [];
 
-    $paths = array_merge($paths, [
-        "assets/images/client-logo.webp",
-        "assets/images/client-logo.png",
-        "assets/images/client-logo.jpg",
-        "assets/images/client-logo.jpeg",
-        "assets/images/client-logo.svg",
-    ]);
+    $paths = array_values(array_unique(array_merge($global_paths, $paths)));
 
     foreach ($paths as $relative_path) {
         $absolute_path = get_theme_file_path($relative_path);
