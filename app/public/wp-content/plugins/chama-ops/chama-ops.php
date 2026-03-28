@@ -9242,9 +9242,6 @@ function chama_ops_render_guest_my_stay_shortcode(): string
                     </ul>
                 </article>
             </div>
-            <div class="chama-photo-frame" style="margin-top:14px;">
-                <img src="<?php echo esc_url(get_theme_file_uri('assets/images/nearby.png')); ?>" alt="<?php esc_attr_e('Map and nearby points around Hearthstone Hospitality', 'chama-ops'); ?>">
-            </div>
         </div>
 
     </section>
@@ -9447,30 +9444,30 @@ function chama_ops_get_gift_shop_catalog(): array
     return [
         'hearthstone_rail_mug' => [
             'label' => __('Hearthstone Rail Mug', 'chama-ops'),
-            'description' => __('Matte ceramic mug with station-inspired crest.', 'chama-ops'),
+            'description' => __('Matte ceramic mug with signature crest.', 'chama-ops'),
             'price' => 18.00,
-            'category' => __('Station Collection', 'chama-ops'),
+            'category' => __('Signature Collection', 'chama-ops'),
             'image_url' => 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
-        'station_canvas_tote' => [
-            'label' => __('Station Inn Canvas Tote', 'chama-ops'),
+        'hearthstone_canvas_tote' => [
+            'label' => __('Hearthstone Canvas Tote', 'chama-ops'),
             'description' => __('Natural canvas tote for train-day essentials.', 'chama-ops'),
             'price' => 22.00,
-            'category' => __('Station Collection', 'chama-ops'),
+            'category' => __('Signature Collection', 'chama-ops'),
             'image_url' => 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         'vintage_postcard_pack' => [
             'label' => __('Vintage Postcard Pack', 'chama-ops'),
             'description' => __('Set of 12 destination-inspired postcards for keepsakes or mailing home.', 'chama-ops'),
             'price' => 12.00,
-            'category' => __('Station Collection', 'chama-ops'),
+            'category' => __('Signature Collection', 'chama-ops'),
             'image_url' => 'https://images.pexels.com/photos/1051075/pexels-photo-1051075.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         'rail_keychain_brass' => [
             'label' => __('Brass Rail Keychain', 'chama-ops'),
             'description' => __('Engraved keychain inspired by historic rail details.', 'chama-ops'),
             'price' => 9.00,
-            'category' => __('Station Collection', 'chama-ops'),
+            'category' => __('Signature Collection', 'chama-ops'),
             'image_url' => 'https://images.pexels.com/photos/9428789/pexels-photo-9428789.jpeg?auto=compress&cs=tinysrgb&w=1400',
         ],
         'blue_corn_cookie_tin' => [

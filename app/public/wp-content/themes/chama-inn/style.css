@@ -11,27 +11,27 @@ Text Domain: chama-inn
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --chama-bg: #ecd8ab;
-  --chama-bg-soft: #f3e6c8;
-  --chama-bg-deep: #d1ab67;
-  --chama-surface: #fbf4e3;
-  --chama-shell-bg: #262f39;
-  --chama-shell-bg-soft: #313c49;
+  --chama-bg: #f2e8d7;
+  --chama-bg-soft: #f8f0e3;
+  --chama-bg-deep: #d7ba90;
+  --chama-surface: #fff8ee;
+  --chama-shell-bg: #151719;
+  --chama-shell-bg-soft: #212326;
   --chama-text: #201a15;
-  --chama-text-soft: #4a4032;
-  --chama-text-inverse: #f8f2e4;
-  --chama-muted: #7eaeb0;
-  --chama-nav-ink: #f6f0e1;
-  --chama-accent: #5a9ea5;
-  --chama-accent-soft: #78bbc0;
-  --chama-accent-strong: #3b7d84;
-  --chama-highlight: #c99347;
-  --chama-highlight-strong: #9e6f30;
-  --chama-garnet: #6a4759;
-  --chama-border: #d3b87d;
-  --chama-shell-glass: rgba(38, 47, 57, 0.88);
-  --chama-shell-glass-soft: rgba(38, 47, 57, 0.72);
-  --chama-shell-panel: rgba(38, 47, 57, 0.8);
+  --chama-text-soft: #443629;
+  --chama-text-inverse: #f7f0e4;
+  --chama-muted: #a39786;
+  --chama-nav-ink: #f7efe1;
+  --chama-accent: #b48a56;
+  --chama-accent-soft: #d0ad7c;
+  --chama-accent-strong: #8f6d3e;
+  --chama-highlight: #c99a62;
+  --chama-highlight-strong: #9e7443;
+  --chama-garnet: #6a4d46;
+  --chama-border: #be9a69;
+  --chama-shell-glass: rgba(21, 23, 25, 0.88);
+  --chama-shell-glass-soft: rgba(21, 23, 25, 0.7);
+  --chama-shell-panel: rgba(21, 23, 25, 0.78);
   --chama-page-spotlight-top: color-mix(in srgb, var(--chama-highlight) 14%, transparent 86%);
   --chama-page-spotlight-bottom: color-mix(in srgb, var(--chama-accent) 16%, transparent 84%);
   --chama-page-wash-start: color-mix(in srgb, var(--chama-shell-bg) 74%, transparent 26%);
@@ -180,27 +180,27 @@ body.chama-scheme-terracotta-dawn {
 
 /* Use one app-wide palette (from assets/images/color-palette.png), regardless of selected scheme. */
 body[class*="chama-scheme-"] {
-  --chama-bg: #ecd8ab;
-  --chama-bg-soft: #f3e6c8;
-  --chama-bg-deep: #d1ab67;
-  --chama-surface: #fbf4e3;
-  --chama-shell-bg: #262f39;
-  --chama-shell-bg-soft: #313c49;
+  --chama-bg: #f2e8d7;
+  --chama-bg-soft: #f8f0e3;
+  --chama-bg-deep: #d7ba90;
+  --chama-surface: #fff8ee;
+  --chama-shell-bg: #151719;
+  --chama-shell-bg-soft: #212326;
   --chama-text: #201a15;
-  --chama-text-soft: #4a4032;
-  --chama-text-inverse: #f8f2e4;
-  --chama-muted: #7eaeb0;
-  --chama-nav-ink: #f6f0e1;
-  --chama-accent: #5a9ea5;
-  --chama-accent-soft: #78bbc0;
-  --chama-accent-strong: #3b7d84;
-  --chama-highlight: #c99347;
-  --chama-highlight-strong: #9e6f30;
-  --chama-garnet: #6a4759;
-  --chama-border: #d3b87d;
-  --chama-shell-glass: rgba(38, 47, 57, 0.88);
-  --chama-shell-glass-soft: rgba(38, 47, 57, 0.72);
-  --chama-shell-panel: rgba(38, 47, 57, 0.8);
+  --chama-text-soft: #443629;
+  --chama-text-inverse: #f7f0e4;
+  --chama-muted: #a39786;
+  --chama-nav-ink: #f7efe1;
+  --chama-accent: #b48a56;
+  --chama-accent-soft: #d0ad7c;
+  --chama-accent-strong: #8f6d3e;
+  --chama-highlight: #c99a62;
+  --chama-highlight-strong: #9e7443;
+  --chama-garnet: #6a4d46;
+  --chama-border: #be9a69;
+  --chama-shell-glass: rgba(21, 23, 25, 0.88);
+  --chama-shell-glass-soft: rgba(21, 23, 25, 0.7);
+  --chama-shell-panel: rgba(21, 23, 25, 0.78);
 }
 
 *,
@@ -225,10 +225,10 @@ body {
   background:
     linear-gradient(
       145deg,
-      color-mix(in srgb, var(--chama-shell-bg) 58%, transparent 42%) 0%,
-      color-mix(in srgb, var(--chama-shell-bg-soft) 62%, transparent 38%) 100%
+      color-mix(in srgb, var(--chama-shell-bg) 72%, transparent 28%) 0%,
+      color-mix(in srgb, var(--chama-shell-bg-soft) 76%, transparent 24%) 100%
     ),
-    url("assets/images/csi-assets/Sunny%20patio%20with%20vacancy%20sign.png");
+    url("https://cdn.pixabay.com/photo/2020/06/29/17/54/courtyard-5354495_1280.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
