@@ -8679,11 +8679,31 @@ function chama_ops_render_guest_order_confirmation_card(string $order_type, int 
  */
 function chama_ops_render_guest_active_orders_list(array $active_orders, string $room_number, string $empty_message, string $view_context = 'default'): string
 {
-    if (empty($active_orders)) {
-        return '<p class="chama-order-meta">' . esc_html($empty_message) . '</p>';
-    }
-
     $is_home_context = $view_context === 'home';
+
+    if (empty($active_orders)) {
+        $dining_url = chama_ops_get_guest_page_url('dining', '/dining/');
+        $gift_url = chama_ops_get_guest_page_url('gift-shop', '/gift-shop/');
+
+        ob_start();
+        ?>
+        <div class="chama-order-empty">
+            <p class="chama-order-meta"><?php echo esc_html($empty_message); ?></p>
+            <?php if ($is_home_context) : ?>
+                <div class="chama-order-actions chama-order-actions--inline">
+                    <a class="chama-order-action-btn" href="<?php echo esc_url($dining_url); ?>">
+                        <?php esc_html_e('Order from Dining', 'chama-ops'); ?>
+                    </a>
+                    <a class="chama-order-action-btn" href="<?php echo esc_url($gift_url); ?>">
+                        <?php esc_html_e('Browse Gift Shop', 'chama-ops'); ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php
+
+        return (string) ob_get_clean();
+    }
 
     ob_start();
     ?>
@@ -8933,6 +8953,11 @@ function chama_ops_render_guest_home_shell_shortcode(): string
         class="chama-guest-home"
         data-track-order="<?php echo esc_attr($track_order_key); ?>"
         data-orders-poll-url="<?php echo esc_url($orders_poll_url); ?>"
+        data-track-label="<?php echo esc_attr__('Track order', 'chama-ops'); ?>"
+        data-hide-label="<?php echo esc_attr__('Hide tracking', 'chama-ops'); ?>"
+        data-live-label="<?php echo esc_attr__('Live', 'chama-ops'); ?>"
+        data-reconnecting-label="<?php echo esc_attr__('Reconnecting...', 'chama-ops'); ?>"
+        data-updated-prefix="<?php echo esc_attr__('Updated', 'chama-ops'); ?>"
     >
         <?php echo chama_ops_render_guest_order_feedback_notices(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php
@@ -8968,7 +8993,19 @@ function chama_ops_render_guest_home_shell_shortcode(): string
             </article>
         </div>
         <div class="chama-card chama-guest-home__orders">
-            <p class="chama-service-app__section-title"><?php esc_html_e('Active orders', 'chama-ops'); ?></p>
+            <div class="chama-orders-head">
+                <p class="chama-service-app__section-title">
+                    <?php esc_html_e('Active orders', 'chama-ops'); ?>
+                    <span class="chama-orders-count" data-orders-count><?php echo esc_html((string) count($active_orders)); ?></span>
+                </p>
+                <div class="chama-orders-live">
+                    <span class="chama-orders-live__dot" aria-hidden="true"></span>
+                    <span class="chama-order-meta" data-orders-updated><?php esc_html_e('Live', 'chama-ops'); ?></span>
+                    <button type="button" class="chama-order-action-btn chama-order-refresh-btn" data-orders-refresh>
+                        <?php esc_html_e('Refresh', 'chama-ops'); ?>
+                    </button>
+                </div>
+            </div>
             <div data-home-orders-body>
                 <?php
                 echo chama_ops_render_guest_active_orders_list(
@@ -8997,7 +9034,28 @@ function chama_ops_render_guest_home_shell_shortcode(): string
 
         var pollUrl = String(homeRoot.getAttribute('data-orders-poll-url') || '');
         var requestedTrackKey = String(homeRoot.getAttribute('data-track-order') || '');
+        var trackLabel = String(homeRoot.getAttribute('data-track-label') || 'Track order');
+        var hideLabel = String(homeRoot.getAttribute('data-hide-label') || 'Hide tracking');
+        var liveLabel = String(homeRoot.getAttribute('data-live-label') || 'Live');
+        var reconnectingLabel = String(homeRoot.getAttribute('data-reconnecting-label') || 'Reconnecting...');
+        var updatedPrefix = String(homeRoot.getAttribute('data-updated-prefix') || 'Updated');
         var activeTrackKey = requestedTrackKey;
+        var refreshButton = homeRoot.querySelector('[data-orders-refresh]');
+        var updatedNode = homeRoot.querySelector('[data-orders-updated]');
+        var countNode = homeRoot.querySelector('[data-orders-count]');
+        var isRefreshing = false;
+
+        var setUpdatedLabel = function (label) {
+            if (updatedNode) {
+                updatedNode.textContent = label;
+            }
+        };
+
+        var setRefreshDisabled = function (disabled) {
+            if (refreshButton) {
+                refreshButton.disabled = !!disabled;
+            }
+        };
 
         var setTrackToggleState = function (toggleButton, expanded) {
             var detailsId = String(toggleButton.getAttribute('aria-controls') || '');
@@ -9014,7 +9072,7 @@ function chama_ops_render_guest_home_shell_shortcode(): string
 
             toggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
             details.hidden = !expanded;
-            toggleButton.textContent = expanded ? 'Hide tracking' : 'Track order';
+            toggleButton.textContent = expanded ? hideLabel : trackLabel;
 
             if (expanded) {
                 activeTrackKey = String(toggleButton.getAttribute('data-track-key') || '');
@@ -9045,10 +9103,13 @@ function chama_ops_render_guest_home_shell_shortcode(): string
             });
         };
 
-        var refreshOrders = function () {
-            if (!pollUrl) {
+        var refreshOrders = function (forceRefresh) {
+            if (!pollUrl || (isRefreshing && !forceRefresh)) {
                 return;
             }
+
+            isRefreshing = true;
+            setRefreshDisabled(true);
 
             window.fetch(pollUrl, { credentials: 'same-origin' })
                 .then(function (response) {
@@ -9065,13 +9126,29 @@ function chama_ops_render_guest_home_shell_shortcode(): string
 
                     bodyContainer.innerHTML = String(payload.data.html);
                     bindTrackToggles();
+
+                    if (countNode && typeof payload.data.count !== 'undefined') {
+                        countNode.textContent = String(payload.data.count);
+                    }
+
+                    setUpdatedLabel(updatedPrefix + ' ' + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
                 })
                 .catch(function () {
-                    return;
+                    setUpdatedLabel(reconnectingLabel);
+                })
+                .then(function () {
+                    isRefreshing = false;
+                    setRefreshDisabled(false);
                 });
         };
 
         bindTrackToggles();
+        setUpdatedLabel(liveLabel);
+        if (refreshButton) {
+            refreshButton.addEventListener('click', function () {
+                refreshOrders(true);
+            });
+        }
         window.setInterval(refreshOrders, 15000);
     }());
     </script>
@@ -9298,6 +9375,7 @@ function chama_ops_guest_orders_snapshot_ajax(): void
     wp_send_json_success([
         'html' => $html,
         'count' => count($active_orders),
+        'updated_at' => current_time('mysql'),
     ]);
 }
 add_action('wp_ajax_nopriv_chama_ops_guest_orders_snapshot', 'chama_ops_guest_orders_snapshot_ajax');

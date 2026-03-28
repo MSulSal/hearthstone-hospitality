@@ -1952,6 +1952,54 @@ body.admin-bar .guest-auth-shell__backdrop {
   gap: 0.48rem;
 }
 
+.chama-orders-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.55rem;
+}
+
+.chama-orders-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.chama-orders-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  margin-left: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--chama-border) 68%, #fff 32%);
+  background: color-mix(in srgb, var(--chama-bg-soft) 75%, #fff 25%);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--chama-text);
+}
+
+.chama-orders-live__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #4f8c63;
+  box-shadow: 0 0 0 0 rgba(79, 140, 99, 0.6);
+  animation: chamaPulseLiveDot 2.2s infinite;
+}
+
+.chama-order-refresh-btn {
+  min-height: 1.72rem;
+  padding: 0.24rem 0.58rem;
+  font-size: 0.75rem;
+}
+
+.chama-order-empty {
+  padding: 0.4rem 0.1rem 0.2rem;
+}
+
 .chama-order-track-toggle {
   min-width: 7.5rem;
 }
@@ -1962,6 +2010,30 @@ body.admin-bar .guest-auth-shell__backdrop {
 
 .chama-order-track-details[hidden] {
   display: none !important;
+}
+
+@keyframes chamaPulseLiveDot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 140, 99, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 9px rgba(79, 140, 99, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 140, 99, 0);
+  }
+}
+
+@media (max-width: 720px) {
+  .chama-orders-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chama-orders-live {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 .chama-order-action-form {
