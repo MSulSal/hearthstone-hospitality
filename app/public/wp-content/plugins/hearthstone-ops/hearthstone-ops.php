@@ -9538,7 +9538,7 @@ function hearthstone_ops_render_guest_help_center_shortcode(): string
             </article>
         </div>
 
-        <div style="margin-top:14px;">
+        <div class="hearthstone-guest-help-center__form-wrap">
             <?php echo do_shortcode('[hearthstone_service_request_app]'); ?>
         </div>
     </section>
@@ -10230,9 +10230,9 @@ function hearthstone_ops_render_service_request_app_shortcode(): string
 
     ob_start();
     ?>
-    <section class="hearthstone-service-request-app" style="margin:0 auto;max-width:900px;">
+    <section class="hearthstone-service-request-app">
         <?php if ($notice_key === 'submitted' && $request_ref > 0) : ?>
-            <div style="border:1px solid #b7d8c0;background:#ecf8ef;padding:12px;border-radius:10px;margin-bottom:14px;">
+            <div class="hearthstone-app-notice hearthstone-app-notice--success">
                 <?php
                 printf(
                     esc_html__('Request submitted. Reference #%d. Front desk will follow up shortly.', 'hearthstone-ops'),
@@ -10241,63 +10241,76 @@ function hearthstone_ops_render_service_request_app_shortcode(): string
                 ?>
             </div>
         <?php elseif ($notice_key === 'missing_room') : ?>
-            <div style="border:1px solid #e2b3b0;background:#fff2f2;padding:12px;border-radius:10px;margin-bottom:14px;">
+            <div class="hearthstone-app-notice hearthstone-app-notice--error">
                 <?php esc_html_e('Please add your room number before submitting.', 'hearthstone-ops'); ?>
             </div>
         <?php endif; ?>
 
-        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="hearthstone-card">
+        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="hearthstone-order-panel hearthstone-service-request-form">
             <?php wp_nonce_field('hearthstone_ops_submit_service_request_action', 'hearthstone_ops_submit_service_request_nonce'); ?>
             <input type="hidden" name="action" value="hearthstone_ops_submit_service_request">
-
-            <p style="margin:0 0 8px;">
-                <label>
-                    <?php esc_html_e('Request type', 'hearthstone-ops'); ?><br>
-                    <select name="hearthstone_service_request_category" required style="width:100%;">
+            <div class="hearthstone-service-request-form__header">
+                <h3 class="hearthstone-service-app__heading"><?php esc_html_e('Front desk request', 'hearthstone-ops'); ?></h3>
+                <p class="hearthstone-order-meta"><?php esc_html_e('Tell us what you need and our team will follow up at your room.', 'hearthstone-ops'); ?></p>
+            </div>
+            <div class="hearthstone-service-request-form__grid">
+                <p class="hearthstone-form-field">
+                    <label for="hearthstone_service_request_category"><?php esc_html_e('Request type', 'hearthstone-ops'); ?></label>
+                    <select id="hearthstone_service_request_category" name="hearthstone_service_request_category" required>
                         <option value="housekeeping"><?php esc_html_e('Housekeeping', 'hearthstone-ops'); ?></option>
                         <option value="amenities"><?php esc_html_e('Amenities', 'hearthstone-ops'); ?></option>
                         <option value="front_desk"><?php esc_html_e('Front desk support', 'hearthstone-ops'); ?></option>
                         <option value="maintenance"><?php esc_html_e('Maintenance', 'hearthstone-ops'); ?></option>
                         <option value="other"><?php esc_html_e('Other', 'hearthstone-ops'); ?></option>
                     </select>
-                </label>
-            </p>
-            <p style="margin:0 0 8px;">
-                <label>
-                    <?php esc_html_e('Priority', 'hearthstone-ops'); ?><br>
-                    <select name="hearthstone_service_request_priority" required style="width:100%;">
+                </p>
+
+                <p class="hearthstone-form-field">
+                    <label for="hearthstone_service_request_priority"><?php esc_html_e('Priority', 'hearthstone-ops'); ?></label>
+                    <select id="hearthstone_service_request_priority" name="hearthstone_service_request_priority" required>
                         <option value="normal"><?php esc_html_e('Normal', 'hearthstone-ops'); ?></option>
                         <option value="urgent"><?php esc_html_e('Urgent', 'hearthstone-ops'); ?></option>
                     </select>
-                </label>
-            </p>
-            <p style="margin:0 0 8px;">
-                <label>
-                    <?php esc_html_e('Room', 'hearthstone-ops'); ?><br>
-                    <strong><?php echo esc_html($room_number !== '' ? $room_number : __('Assigned at check-in', 'hearthstone-ops')); ?></strong>
-                </label>
-            </p>
+                </p>
+
+                <p class="hearthstone-form-field hearthstone-form-field--full">
+                    <label><?php esc_html_e('Room', 'hearthstone-ops'); ?></label>
+                    <span class="hearthstone-service-request-form__room-value"><?php echo esc_html($room_number !== '' ? $room_number : __('Assigned at check-in', 'hearthstone-ops')); ?></span>
+                </p>
+            </div>
+
             <input type="hidden" name="hearthstone_service_request_room" value="<?php echo esc_attr($room_number); ?>">
-            <p style="margin:0 0 8px;">
-                <label>
-                    <?php esc_html_e('Name (optional)', 'hearthstone-ops'); ?><br>
-                    <input type="text" name="hearthstone_service_request_guest_name" style="width:100%;">
-                </label>
+            <p class="hearthstone-form-field">
+                <label for="hearthstone_service_request_guest_name"><?php esc_html_e('Name (optional)', 'hearthstone-ops'); ?></label>
+                <input
+                    type="text"
+                    id="hearthstone_service_request_guest_name"
+                    name="hearthstone_service_request_guest_name"
+                    autocomplete="name"
+                >
             </p>
-            <p style="margin:0 0 8px;">
-                <label>
-                    <?php esc_html_e('Phone (optional)', 'hearthstone-ops'); ?><br>
-                    <input type="text" name="hearthstone_service_request_guest_phone" style="width:100%;">
-                </label>
+            <p class="hearthstone-form-field">
+                <label for="hearthstone_service_request_guest_phone"><?php esc_html_e('Phone (optional)', 'hearthstone-ops'); ?></label>
+                <input
+                    type="tel"
+                    id="hearthstone_service_request_guest_phone"
+                    name="hearthstone_service_request_guest_phone"
+                    inputmode="tel"
+                    autocomplete="tel"
+                >
             </p>
-            <p style="margin:0 0 10px;">
-                <label>
-                    <?php esc_html_e('Details', 'hearthstone-ops'); ?><br>
-                    <textarea name="hearthstone_service_request_notes" rows="4" required style="width:100%;"></textarea>
-                </label>
+            <p class="hearthstone-form-field hearthstone-form-field--full">
+                <label for="hearthstone_service_request_notes"><?php esc_html_e('Details', 'hearthstone-ops'); ?></label>
+                <textarea
+                    id="hearthstone_service_request_notes"
+                    name="hearthstone_service_request_notes"
+                    rows="4"
+                    required
+                    placeholder="<?php esc_attr_e('Tell the front desk what you need and where to deliver it.', 'hearthstone-ops'); ?>"
+                ></textarea>
             </p>
 
-            <button type="submit" class="wp-element-button"><?php esc_html_e('Submit request', 'hearthstone-ops'); ?></button>
+            <button type="submit" class="hearthstone-order-submit hearthstone-service-request-form__submit"><?php esc_html_e('Submit request', 'hearthstone-ops'); ?></button>
         </form>
     </section>
     <?php

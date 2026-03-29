@@ -1534,6 +1534,72 @@ body.admin-bar .guest-auth-shell__backdrop {
   background: color-mix(in srgb, #b25a56 11%, #fff 89%);
 }
 
+.hearthstone-guest-help-center__form-wrap {
+  margin-top: 14px;
+}
+
+.hearthstone-service-request-app {
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.hearthstone-service-request-form {
+  display: grid;
+  gap: 0.86rem;
+  padding: clamp(1rem, 0.88rem + 0.7vw, 1.35rem);
+}
+
+.hearthstone-service-request-form__header {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.hearthstone-service-request-form__header .hearthstone-service-app__heading {
+  margin: 0;
+}
+
+.hearthstone-service-request-form__header .hearthstone-order-meta {
+  margin: 0;
+}
+
+.hearthstone-service-request-form__grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
+}
+
+.hearthstone-service-request-form__room-value {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.65rem;
+  border: 1px solid var(--hearthstone-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--hearthstone-surface) 90%, #fff 10%);
+  padding: 0.58rem 0.74rem;
+  color: var(--hearthstone-text);
+  font-weight: 600;
+}
+
+.hearthstone-service-request-form__submit {
+  width: 100%;
+  margin-top: 0.15rem;
+}
+
+.hearthstone-service-request-form .hearthstone-form-field {
+  margin: 0;
+}
+
+@media (min-width: 760px) {
+  .hearthstone-service-request-form__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hearthstone-service-request-form__grid .hearthstone-form-field--full,
+  .hearthstone-service-request-form > .hearthstone-form-field--full {
+    grid-column: 1 / -1;
+  }
+}
+
 .hearthstone-order-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

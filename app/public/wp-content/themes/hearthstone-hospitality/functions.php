@@ -97,7 +97,7 @@ function hearthstone_hospitality_get_primary_nav_items(): array
         ],
         [
             "slug" => "help",
-            "label" => __("Help", "hearthstone-hospitality"),
+            "label" => __("Front Desk", "hearthstone-hospitality"),
             "fallback_path" => "/help/",
         ],
         [
@@ -205,6 +205,28 @@ function hearthstone_hospitality_render_fallback_menu($args = []): void
     echo "</ul>";
 }
 
+/**
+ * Force normalized labels in the primary menu regardless of stored menu-item title.
+ */
+function hearthstone_hospitality_filter_primary_menu_item_title(string $title, WP_Post $menu_item, stdClass $args, int $depth): string
+{
+    unset($depth);
+
+    if (($args->theme_location ?? "") !== "primary") {
+        return $title;
+    }
+
+    $path = wp_parse_url((string) ($menu_item->url ?? ""), PHP_URL_PATH);
+    $path = is_string($path) ? trim($path, "/") : "";
+
+    if ($path === "help") {
+        return __("Front Desk", "hearthstone-hospitality");
+    }
+
+    return $title;
+}
+add_filter("nav_menu_item_title", "hearthstone_hospitality_filter_primary_menu_item_title", 10, 4);
+
 function hearthstone_hospitality_get_guest_logout_url(): string
 {
     if (!hearthstone_hospitality_has_active_guest_session()) {
@@ -247,7 +269,7 @@ function hearthstone_hospitality_get_guest_mobile_nav_items(): array
         ],
         [
             "slug"  => "help",
-            "label" => __("Help", "hearthstone-hospitality"),
+            "label" => __("Front Desk", "hearthstone-hospitality"),
             "icon"  => "dashicons-bell",
             "url"   => home_url("/help/"),
         ],
@@ -1046,7 +1068,7 @@ function hearthstone_hospitality_get_core_page_blueprint(): array
             "pattern" => "patterns/explore-local-page.php",
         ],
         [
-            "title"   => __("Help", "hearthstone-hospitality"),
+            "title"   => __("Front Desk", "hearthstone-hospitality"),
             "slug"    => "help",
             "excerpt" => __("Call front desk, submit requests, and track support updates.", "hearthstone-hospitality"),
             "pattern" => "patterns/help-page.php",
@@ -1137,6 +1159,17 @@ function hearthstone_hospitality_set_default_nav_menu(array $pages_by_slug): voi
     }
 
     $menu_order = hearthstone_hospitality_get_primary_nav_slugs();
+    $nav_labels_by_slug = [];
+
+    foreach (hearthstone_hospitality_get_primary_nav_items() as $nav_item) {
+        $slug = sanitize_title((string) ($nav_item["slug"] ?? ""));
+
+        if ($slug === "") {
+            continue;
+        }
+
+        $nav_labels_by_slug[$slug] = (string) ($nav_item["label"] ?? $slug);
+    }
 
     $legacy_slugs_to_remove = ["weddings-events", "stay-rooms", "guest-hub", "about-our-story", "service-requests", "contact"];
     $menu_items = wp_get_nav_menu_items($menu_id);
@@ -1184,10 +1217,12 @@ function hearthstone_hospitality_set_default_nav_menu(array $pages_by_slug): voi
         }
 
         $existing_menu_item_id = hearthstone_hospitality_get_menu_item_id_for_page($menu_id, $page_id);
+        $menu_label = $nav_labels_by_slug[$slug] ?? get_the_title($page_id);
 
         if ($existing_menu_item_id > 0) {
             wp_update_nav_menu_item($menu_id, $existing_menu_item_id, [
                 "menu-item-position" => $menu_position,
+                "menu-item-title"    => $menu_label,
             ]);
             $menu_position++;
             continue;
@@ -1199,6 +1234,7 @@ function hearthstone_hospitality_set_default_nav_menu(array $pages_by_slug): voi
             "menu-item-type"      => "post_type",
             "menu-item-status"    => "publish",
             "menu-item-position"  => $menu_position,
+            "menu-item-title"     => $menu_label,
         ]);
         $menu_position++;
     }
