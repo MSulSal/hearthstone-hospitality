@@ -411,7 +411,7 @@ iframe {
 
 .site-header__logo .custom-logo {
   width: auto;
-  max-height: 48px;
+  max-height: 62px;
 }
 
 .site-header__logo-link {
@@ -420,7 +420,7 @@ iframe {
 
 .site-header__logo-image {
   width: auto;
-  max-height: 110px;
+  max-height: 132px;
   filter: saturate(1.04) contrast(1.04);
 }
 
@@ -1107,6 +1107,13 @@ body.admin-bar .guest-auth-shell__backdrop {
   margin: 0 0 0.8rem;
   color: color-mix(in srgb, var(--chama-nav-ink) 88%, var(--chama-accent-soft) 12%);
   text-align: center;
+}
+
+.chama-guest-auth-screen__demo {
+  margin: 0 0 0.9rem;
+  text-align: center;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--chama-nav-ink) 90%, var(--chama-accent-soft) 10%);
 }
 
 .chama-guest-auth-screen .chama-order-form {
@@ -2155,7 +2162,7 @@ body.home .site-footer {
 }
 
 .site-footer__logo-image {
-  height: 42px;
+  height: 56px;
   width: auto;
 }
 
@@ -2195,7 +2202,7 @@ body.home .site-footer {
   }
 
   .site-header__logo-image {
-    max-height: 68px;
+    max-height: 82px;
   }
 
   .site-header__inner {
@@ -2322,10 +2329,14 @@ body.home .site-footer {
   }
 
   body.has-guest-mobile-nav {
+    padding-bottom: 0;
+  }
+
+  body.has-guest-mobile-nav .site-main {
     padding-bottom: 4.6rem;
   }
 
-  body.home.has-guest-mobile-nav {
+  body.home.has-guest-mobile-nav .site-main {
     padding-bottom: 0;
   }
 

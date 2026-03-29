@@ -4372,6 +4372,171 @@ function chama_ops_backfill_sample_guest_access_once(): void
 add_action('admin_init', 'chama_ops_backfill_sample_guest_access_once');
 
 /**
+ * Return deterministic demo guest credentials for non-production walkthroughs.
+ *
+ * @return array{room:string,code:string}
+ */
+function chama_ops_get_demo_guest_credentials(): array
+{
+    return [
+        'room' => 'DEMO101',
+        'code' => 'hearthstone-demo',
+    ];
+}
+
+/**
+ * Decide whether demo guest credentials should be available.
+ */
+function chama_ops_should_enable_demo_guest_login(): bool
+{
+    if (defined('CHAMA_OPS_ENABLE_DEMO_GUEST_LOGIN')) {
+        return (bool) CHAMA_OPS_ENABLE_DEMO_GUEST_LOGIN;
+    }
+
+    $environment = function_exists('wp_get_environment_type')
+        ? (string) wp_get_environment_type()
+        : 'production';
+
+    if ($environment !== 'production') {
+        return true;
+    }
+
+    $host = wp_parse_url(home_url('/'), PHP_URL_HOST);
+
+    if (!is_string($host) || $host === '') {
+        return false;
+    }
+
+    return str_contains($host, '.local')
+        || str_contains($host, 'localhost')
+        || str_contains($host, '.test');
+}
+
+/**
+ * Ensure a single demo stay exists for public prototype walkthroughs.
+ */
+function chama_ops_ensure_demo_guest_login_stay(): void
+{
+    if (!chama_ops_should_enable_demo_guest_login()) {
+        return;
+    }
+
+    $credentials = chama_ops_get_demo_guest_credentials();
+    $room_number = strtoupper(trim($credentials['room']));
+    $access_code = trim($credentials['code']);
+
+    if ($room_number === '' || $access_code === '') {
+        return;
+    }
+
+    $now = time();
+    $check_in = wp_date('Y-m-d', $now);
+    $check_out = wp_date('Y-m-d', $now + (30 * DAY_IN_SECONDS));
+    $checkout_at_unix = strtotime($check_out . ' 11:00:00');
+    $checkout_at = (is_int($checkout_at_unix) && $checkout_at_unix > 0)
+        ? gmdate('Y-m-d\TH:i', $checkout_at_unix)
+        : '';
+
+    $stay_id = 0;
+
+    $demo_stay_ids = get_posts([
+        'post_type'      => 'stay',
+        'post_status'    => ['publish', 'draft'],
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+        'meta_query'     => [
+            [
+                'key'   => '_chama_ops_demo_guest_login',
+                'value' => '1',
+            ],
+        ],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    ]);
+
+    if (is_array($demo_stay_ids) && !empty($demo_stay_ids)) {
+        $stay_id = (int) $demo_stay_ids[0];
+    }
+
+    if ($stay_id <= 0) {
+        $room_stay_ids = get_posts([
+            'post_type'      => 'stay',
+            'post_status'    => ['publish', 'draft'],
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'   => '_chama_stay_room_number',
+                    'value' => $room_number,
+                ],
+            ],
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ]);
+
+        if (is_array($room_stay_ids) && !empty($room_stay_ids)) {
+            $stay_id = (int) $room_stay_ids[0];
+        }
+    }
+
+    if ($stay_id <= 0) {
+        $new_stay_id = wp_insert_post([
+            'post_title'   => 'Demo Stay - Visitor Access',
+            'post_type'    => 'stay',
+            'post_status'  => 'publish',
+            'post_content' => esc_html__('Persistent demo stay record for public guest-app walkthroughs.', 'chama-ops'),
+        ], true);
+
+        if (is_wp_error($new_stay_id)) {
+            return;
+        }
+
+        $stay_id = (int) $new_stay_id;
+    }
+
+    if ($stay_id <= 0) {
+        return;
+    }
+
+    $meta_updates = [
+        '_chama_ops_demo_guest_login' => '1',
+        '_chama_stay_room_number'     => $room_number,
+        '_chama_stay_check_in'        => $check_in,
+        '_chama_stay_check_out'       => $check_out,
+        '_chama_stay_status'          => 'checked_in',
+    ];
+
+    if ($checkout_at !== '') {
+        $meta_updates['_chama_stay_checkout_at'] = $checkout_at;
+    }
+
+    foreach ($meta_updates as $meta_key => $meta_value) {
+        $current_meta = (string) get_post_meta($stay_id, $meta_key, true);
+
+        if ($current_meta !== $meta_value) {
+            update_post_meta($stay_id, $meta_key, $meta_value);
+        }
+    }
+
+    $access_code_hash = trim((string) get_post_meta($stay_id, '_chama_stay_access_code_hash', true));
+
+    if ($access_code_hash === '' || !wp_check_password($access_code, $access_code_hash, $stay_id)) {
+        update_post_meta($stay_id, '_chama_stay_access_code_hash', wp_hash_password($access_code));
+    }
+
+    $nights = chama_ops_calculate_stay_nights($check_in, $check_out);
+
+    if ($nights !== null) {
+        $existing_nights = (string) get_post_meta($stay_id, '_chama_stay_nights', true);
+
+        if ($existing_nights !== (string) $nights) {
+            update_post_meta($stay_id, '_chama_stay_nights', $nights);
+        }
+    }
+}
+add_action('init', 'chama_ops_ensure_demo_guest_login_stay', 20);
+
+/**
  * Clear all seeded sample data records.
  */
 function chama_ops_clear_sample_data(): void
@@ -8791,6 +8956,7 @@ function chama_ops_render_guest_auth_form_card(string $notice_key = '', string $
     $front_desk_tel = chama_ops_get_front_desk_tel_href();
     $notice_copy = chama_ops_get_guest_auth_notice_copy($notice_key);
     $logo_uri = '';
+    $demo_credentials = chama_ops_should_enable_demo_guest_login() ? chama_ops_get_demo_guest_credentials() : null;
 
     if (function_exists('chama_inn_get_logo_variant_uri')) {
         $logo_uri = (string) chama_inn_get_logo_variant_uri('hero');
@@ -8812,6 +8978,19 @@ function chama_ops_render_guest_auth_form_card(string $notice_key = '', string $
 
             <h1><?php esc_html_e('Guest sign in', 'chama-ops'); ?></h1>
             <p><?php esc_html_e('Enter your room number and access code provided at check-in.', 'chama-ops'); ?></p>
+
+            <?php if (is_array($demo_credentials)) : ?>
+                <p class="chama-order-meta chama-guest-auth-screen__demo">
+                    <?php
+                    printf(
+                        /* translators: 1: demo room number, 2: demo access code. */
+                        esc_html__('Demo access: Room %1$s | Access code %2$s', 'chama-ops'),
+                        esc_html((string) $demo_credentials['room']),
+                        esc_html((string) $demo_credentials['code'])
+                    );
+                    ?>
+                </p>
+            <?php endif; ?>
 
             <?php if ($notice_copy !== '') : ?>
                 <div class="chama-app-notice chama-app-notice--error">

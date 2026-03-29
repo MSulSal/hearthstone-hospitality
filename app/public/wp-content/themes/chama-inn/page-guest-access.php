@@ -5,11 +5,7 @@ if (!defined("ABSPATH")) {
 
 get_header();
 
-$hero_gallery_images = function_exists('chama_inn_get_home_hero_gallery_uris') ? chama_inn_get_home_hero_gallery_uris() : [];
-$login_background_path = 'assets/images/csi-assets/Sunny patio with vacancy sign.png';
-$hero_image_url = file_exists(get_theme_file_path($login_background_path))
-    ? get_theme_file_uri($login_background_path)
-    : ($hero_gallery_images[0] ?? get_theme_file_uri('assets/images/csi-assets/csi-31.jpg'));
+$hero_image_url = 'https://cdn.pixabay.com/photo/2020/06/29/17/54/courtyard-5354495_1280.jpg';
 $hero_style = $hero_image_url !== false
     ? ' style="background-image:url(' . esc_url($hero_image_url) . ');"'
     : '';
