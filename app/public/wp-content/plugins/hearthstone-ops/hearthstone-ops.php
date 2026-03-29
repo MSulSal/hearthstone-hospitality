@@ -5984,7 +5984,14 @@ function hearthstone_ops_get_available_room_service_items(): array
             return false;
         }
 
-        return (string) get_post_meta((int) $item->ID, '_hearthstone_room_service_available', true) === '1';
+        $availability = (string) get_post_meta((int) $item->ID, '_hearthstone_room_service_available', true);
+
+        // Backward-compatible default: treat existing items as available unless explicitly disabled.
+        if ($availability === '') {
+            return true;
+        }
+
+        return $availability === '1';
     }));
 }
 
@@ -10441,11 +10448,35 @@ function hearthstone_ops_seed_room_service_menu_items(): void
             : null;
 
         if ($existing instanceof WP_Post) {
-            $existing_image = (string) get_post_meta((int) $existing->ID, '_hearthstone_room_service_image_url', true);
+            $existing_id = (int) $existing->ID;
 
-            if ($existing_image === '' && isset($item['image_url'])) {
-                update_post_meta((int) $existing->ID, '_hearthstone_room_service_image_url', $item['image_url']);
+            $existing_price = (string) get_post_meta($existing_id, '_hearthstone_room_service_price', true);
+            if ($existing_price === '') {
+                update_post_meta($existing_id, '_hearthstone_room_service_price', $item['price']);
             }
+
+            $existing_prep_minutes = (string) get_post_meta($existing_id, '_hearthstone_room_service_prep_minutes', true);
+            if ($existing_prep_minutes === '') {
+                update_post_meta($existing_id, '_hearthstone_room_service_prep_minutes', (int) $item['prep_minutes']);
+            }
+
+            $existing_available = (string) get_post_meta($existing_id, '_hearthstone_room_service_available', true);
+            if ($existing_available === '') {
+                update_post_meta($existing_id, '_hearthstone_room_service_available', '1');
+            }
+
+            $existing_image = (string) get_post_meta($existing_id, '_hearthstone_room_service_image_url', true);
+            if ($existing_image === '' && isset($item['image_url'])) {
+                update_post_meta($existing_id, '_hearthstone_room_service_image_url', $item['image_url']);
+            }
+
+            if (trim((string) $existing->post_content) === '' && $item['description'] !== '') {
+                wp_update_post([
+                    'ID'           => $existing_id,
+                    'post_content' => $item['description'],
+                ]);
+            }
+
             continue;
         }
 
@@ -10856,5 +10887,4 @@ function hearthstone_ops_render_service_request_column(string $column, int $post
     }
 }
 add_action('manage_guest_service_request_posts_custom_column', 'hearthstone_ops_render_service_request_column', 10, 2);
-
 
