@@ -33,18 +33,18 @@ auth.json
 
 # ...but keep these tracked
 !/app/public/wp-content/themes/
-!/app/public/wp-content/themes/chama-inn/
-!/app/public/wp-content/themes/chama-inn/**
+!/app/public/wp-content/themes/hearthstone-hospitality/
+!/app/public/wp-content/themes/hearthstone-hospitality/**
 
 !/app/public/wp-content/plugins/
-!/app/public/wp-content/plugins/chama-core/
-!/app/public/wp-content/plugins/chama-core/**
+!/app/public/wp-content/plugins/hearthstone-core/
+!/app/public/wp-content/plugins/hearthstone-core/**
 
-!/app/public/wp-content/plugins/chama-ops/
-!/app/public/wp-content/plugins/chama-ops/**
+!/app/public/wp-content/plugins/hearthstone-ops/
+!/app/public/wp-content/plugins/hearthstone-ops/**
 
-!/app/public/wp-content/plugins/chama-pwa/
-!/app/public/wp-content/plugins/chama-pwa/**
+!/app/public/wp-content/plugins/hearthstone-pwa/
+!/app/public/wp-content/plugins/hearthstone-pwa/**
 
 !/app/public/wp-content/mu-plugins/
 !/app/public/wp-content/mu-plugins/**
@@ -59,18 +59,18 @@ auth.json
 
 # Ignore bundled / third-party plugins and themes you install through WP admin
 /app/public/wp-content/plugins/*
-!/app/public/wp-content/plugins/chama-core/
-!/app/public/wp-content/plugins/chama-core/**
-!/app/public/wp-content/plugins/chama-ops/
-!/app/public/wp-content/plugins/chama-ops/**
-!/app/public/wp-content/plugins/chama-pwa/
-!/app/public/wp-content/plugins/chama-pwa/**
+!/app/public/wp-content/plugins/hearthstone-core/
+!/app/public/wp-content/plugins/hearthstone-core/**
+!/app/public/wp-content/plugins/hearthstone-ops/
+!/app/public/wp-content/plugins/hearthstone-ops/**
+!/app/public/wp-content/plugins/hearthstone-pwa/
+!/app/public/wp-content/plugins/hearthstone-pwa/**
 !/app/public/wp-content/mu-plugins/
 !/app/public/wp-content/mu-plugins/**
 
 /app/public/wp-content/themes/*
-!/app/public/wp-content/themes/chama-inn/
-!/app/public/wp-content/themes/chama-inn/**
+!/app/public/wp-content/themes/hearthstone-hospitality/
+!/app/public/wp-content/themes/hearthstone-hospitality/**
 
 # Node / frontend build
 node_modules/

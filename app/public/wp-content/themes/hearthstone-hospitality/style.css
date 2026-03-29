@@ -1,0 +1,2418 @@
+/*
+Theme Name: Hearthstone Hospitality
+Theme URI: https://example.com
+Author: Your Name
+Description: Custom guest-stay app theme for Hearthstone Hospitality
+Version: 0.3.5
+Requires at least: 6.0
+Requires PHP: 8.1
+Text Domain: hearthstone-hospitality
+*/
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --hearthstone-bg: #f2e8d7;
+  --hearthstone-bg-soft: #f8f0e3;
+  --hearthstone-bg-deep: #d7ba90;
+  --hearthstone-surface: #fff8ee;
+  --hearthstone-shell-bg: #151719;
+  --hearthstone-shell-bg-soft: #212326;
+  --hearthstone-text: #201a15;
+  --hearthstone-text-soft: #443629;
+  --hearthstone-text-inverse: #f7f0e4;
+  --hearthstone-muted: #a39786;
+  --hearthstone-nav-ink: #f7efe1;
+  --hearthstone-accent: #b48a56;
+  --hearthstone-accent-soft: #d0ad7c;
+  --hearthstone-accent-strong: #8f6d3e;
+  --hearthstone-highlight: #c99a62;
+  --hearthstone-highlight-strong: #9e7443;
+  --hearthstone-garnet: #6a4d46;
+  --hearthstone-border: #be9a69;
+  --hearthstone-shell-glass: rgba(21, 23, 25, 0.88);
+  --hearthstone-shell-glass-soft: rgba(21, 23, 25, 0.7);
+  --hearthstone-shell-panel: rgba(21, 23, 25, 0.78);
+  --hearthstone-page-spotlight-top: color-mix(in srgb, var(--hearthstone-highlight) 14%, transparent 86%);
+  --hearthstone-page-spotlight-bottom: color-mix(in srgb, var(--hearthstone-accent) 16%, transparent 84%);
+  --hearthstone-page-wash-start: color-mix(in srgb, var(--hearthstone-shell-bg) 74%, transparent 26%);
+  --hearthstone-page-wash-end: color-mix(in srgb, var(--hearthstone-shell-bg-soft) 78%, transparent 22%);
+  --hearthstone-home-spotlight-top: color-mix(in srgb, var(--hearthstone-highlight) 18%, transparent 82%);
+  --hearthstone-home-spotlight-bottom: color-mix(in srgb, var(--hearthstone-accent) 14%, transparent 86%);
+  --hearthstone-home-wash-start: color-mix(in srgb, var(--hearthstone-shell-bg) 72%, transparent 28%);
+  --hearthstone-home-wash-end: color-mix(in srgb, var(--hearthstone-shell-bg-soft) 76%, transparent 24%);
+  --hearthstone-card-surface: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--hearthstone-surface) 92%, #fff 8%) 0%,
+    color-mix(in srgb, var(--hearthstone-bg-soft) 84%, #fff 16%) 100%
+  );
+  --hearthstone-space-xs: clamp(0.6rem, 0.45rem + 0.4vw, 0.9rem);
+  --hearthstone-space-sm: clamp(0.95rem, 0.7rem + 0.7vw, 1.35rem);
+  --hearthstone-space-md: clamp(1.2rem, 0.9rem + 1vw, 1.9rem);
+  --hearthstone-space-lg: clamp(1.8rem, 1.2rem + 1.8vw, 3rem);
+  --hearthstone-space-xl: clamp(2.6rem, 1.4rem + 3.2vw, 4.8rem);
+}
+
+body.hearthstone-scheme-sage-retreat {
+  --hearthstone-bg: #f6f1e8;
+  --hearthstone-bg-soft: #ece3d4;
+  --hearthstone-bg-deep: #e1d1ba;
+  --hearthstone-surface: #fbf8f2;
+  --hearthstone-text: #4b4036;
+  --hearthstone-text-soft: #3b3733;
+  --hearthstone-text-inverse: #f7f2ea;
+  --hearthstone-muted: #74837a;
+  --hearthstone-accent: #8e9b8b;
+  --hearthstone-accent-soft: #a8b5a7;
+  --hearthstone-accent-strong: #74837a;
+  --hearthstone-highlight: #b9895a;
+  --hearthstone-highlight-strong: #9a6a45;
+  --hearthstone-border: #d7c4aa;
+  --hearthstone-shell-bg: #363a35;
+  --hearthstone-shell-bg-soft: #454a44;
+  --hearthstone-nav-ink: #f5f1e8;
+  --hearthstone-shell-panel: rgba(54, 58, 53, 0.56);
+}
+
+body.hearthstone-scheme-rail-burgundy {
+  --hearthstone-bg: #f6efe5;
+  --hearthstone-bg-soft: #ebdece;
+  --hearthstone-bg-deep: #decaaf;
+  --hearthstone-surface: #fcf7ef;
+  --hearthstone-text: #493a33;
+  --hearthstone-text-soft: #3b3431;
+  --hearthstone-text-inverse: #f8f1e8;
+  --hearthstone-muted: #7a7a74;
+  --hearthstone-accent: #6a3e3d;
+  --hearthstone-accent-soft: #92716c;
+  --hearthstone-accent-strong: #583332;
+  --hearthstone-highlight: #b9895a;
+  --hearthstone-highlight-strong: #9a6a45;
+  --hearthstone-border: #d5c1a5;
+  --hearthstone-shell-bg: #3a3332;
+  --hearthstone-shell-bg-soft: #49403e;
+  --hearthstone-nav-ink: #f7efe6;
+  --hearthstone-shell-panel: rgba(58, 51, 50, 0.56);
+}
+
+body.hearthstone-scheme-desert-contrast {
+  --hearthstone-bg: #f5ecde;
+  --hearthstone-bg-soft: #e8d7c2;
+  --hearthstone-bg-deep: #d7bc99;
+  --hearthstone-surface: #fffaf3;
+  --hearthstone-text: #3f352f;
+  --hearthstone-text-soft: #332f2c;
+  --hearthstone-text-inverse: #f7f4ee;
+  --hearthstone-muted: #74837a;
+  --hearthstone-accent: #74837a;
+  --hearthstone-accent-soft: #98a59b;
+  --hearthstone-accent-strong: #5c6a62;
+  --hearthstone-highlight: #b9895a;
+  --hearthstone-highlight-strong: #9a6a45;
+  --hearthstone-border: #ceb89c;
+  --hearthstone-shell-bg: #3c342e;
+  --hearthstone-shell-bg-soft: #4b4239;
+  --hearthstone-nav-ink: #f7f1e7;
+  --hearthstone-shell-panel: rgba(60, 52, 46, 0.56);
+}
+
+body.hearthstone-scheme-moonstone-calm {
+  --hearthstone-bg: #f0f4f4;
+  --hearthstone-bg-soft: #e4ecec;
+  --hearthstone-bg-deep: #d3dedc;
+  --hearthstone-surface: #f9fcfb;
+  --hearthstone-text: #404f4b;
+  --hearthstone-text-soft: #33413f;
+  --hearthstone-text-inverse: #f4f9f7;
+  --hearthstone-muted: #74837a;
+  --hearthstone-accent: #6f8680;
+  --hearthstone-accent-soft: #9aaea9;
+  --hearthstone-accent-strong: #5c736d;
+  --hearthstone-highlight: #b9895a;
+  --hearthstone-highlight-strong: #9a6a45;
+  --hearthstone-border: #c9d5d2;
+  --hearthstone-shell-bg: #33403e;
+  --hearthstone-shell-bg-soft: #42514f;
+  --hearthstone-nav-ink: #eef5f3;
+  --hearthstone-shell-panel: rgba(51, 64, 62, 0.56);
+}
+
+body.hearthstone-scheme-alpine-stillness {
+  --hearthstone-bg: #eef3ef;
+  --hearthstone-bg-soft: #e2e9e3;
+  --hearthstone-bg-deep: #d1dcd3;
+  --hearthstone-surface: #f8fbf8;
+  --hearthstone-text: #424d46;
+  --hearthstone-text-soft: #33403b;
+  --hearthstone-text-inverse: #f4f8f4;
+  --hearthstone-muted: #74837a;
+  --hearthstone-accent: #74837a;
+  --hearthstone-accent-soft: #9faca2;
+  --hearthstone-accent-strong: #617066;
+  --hearthstone-highlight: #b9895a;
+  --hearthstone-highlight-strong: #9a6a45;
+  --hearthstone-border: #c7d2cb;
+  --hearthstone-shell-bg: #36403a;
+  --hearthstone-shell-bg-soft: #455149;
+  --hearthstone-nav-ink: #edf4ef;
+  --hearthstone-shell-panel: rgba(54, 64, 58, 0.56);
+}
+
+body.hearthstone-scheme-terracotta-dawn {
+  --hearthstone-bg: #f7efe3;
+  --hearthstone-bg-soft: #eedfcb;
+  --hearthstone-bg-deep: #e0c5a2;
+  --hearthstone-surface: #fff9f3;
+  --hearthstone-text: #4e4035;
+  --hearthstone-text-soft: #3b3531;
+  --hearthstone-text-inverse: #fff7ef;
+  --hearthstone-muted: #74837a;
+  --hearthstone-accent: #6f8680;
+  --hearthstone-accent-soft: #8e9b8b;
+  --hearthstone-accent-strong: #5d736e;
+  --hearthstone-highlight: #b9895a;
+  --hearthstone-highlight-strong: #9a6a45;
+  --hearthstone-border: #d6c0a0;
+  --hearthstone-shell-bg: #3f3731;
+  --hearthstone-shell-bg-soft: #4e453d;
+  --hearthstone-nav-ink: #f9f1e8;
+  --hearthstone-shell-panel: rgba(63, 55, 49, 0.56);
+}
+
+/* Use one app-wide palette (from assets/images/color-palette.png), regardless of selected scheme. */
+body[class*="hearthstone-scheme-"] {
+  --hearthstone-bg: #f2e8d7;
+  --hearthstone-bg-soft: #f8f0e3;
+  --hearthstone-bg-deep: #d7ba90;
+  --hearthstone-surface: #fff8ee;
+  --hearthstone-shell-bg: #151719;
+  --hearthstone-shell-bg-soft: #212326;
+  --hearthstone-text: #201a15;
+  --hearthstone-text-soft: #443629;
+  --hearthstone-text-inverse: #f7f0e4;
+  --hearthstone-muted: #a39786;
+  --hearthstone-nav-ink: #f7efe1;
+  --hearthstone-accent: #b48a56;
+  --hearthstone-accent-soft: #d0ad7c;
+  --hearthstone-accent-strong: #8f6d3e;
+  --hearthstone-highlight: #c99a62;
+  --hearthstone-highlight-strong: #9e7443;
+  --hearthstone-garnet: #6a4d46;
+  --hearthstone-border: #be9a69;
+  --hearthstone-shell-glass: rgba(21, 23, 25, 0.88);
+  --hearthstone-shell-glass-soft: rgba(21, 23, 25, 0.7);
+  --hearthstone-shell-panel: rgba(21, 23, 25, 0.78);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--hearthstone-shell-bg) 72%, transparent 28%) 0%,
+      color-mix(in srgb, var(--hearthstone-shell-bg-soft) 76%, transparent 24%) 100%
+    ),
+    url("https://cdn.pixabay.com/photo/2020/06/29/17/54/courtyard-5354495_1280.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--hearthstone-text);
+  font-family: "Manrope", "Segoe UI", Tahoma, Arial, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+}
+
+body.home,
+body.page-template-page-guest-access,
+body.page-guest-access,
+body.page-slug-guest-access {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+body.home {
+  display: flex;
+  flex-direction: column;
+}
+
+body.page-dining,
+body.page-restaurant-orders {
+  --hearthstone-page-spotlight-top: color-mix(in srgb, #d7a250 22%, transparent 78%);
+  --hearthstone-page-spotlight-bottom: color-mix(in srgb, #5e9ea6 18%, transparent 82%);
+}
+
+body.page-gift-shop {
+  --hearthstone-page-spotlight-top: color-mix(in srgb, #5ea0ac 22%, transparent 78%);
+  --hearthstone-page-spotlight-bottom: color-mix(in srgb, #cc934a 17%, transparent 83%);
+}
+
+body.page-help,
+body.page-front-desk-contact {
+  --hearthstone-page-spotlight-top: color-mix(in srgb, #6a9fb6 20%, transparent 80%);
+  --hearthstone-page-spotlight-bottom: color-mix(in srgb, #7eb1b4 16%, transparent 84%);
+  --hearthstone-page-wash-start: color-mix(in srgb, var(--hearthstone-shell-bg) 78%, transparent 22%);
+  --hearthstone-page-wash-end: color-mix(in srgb, var(--hearthstone-shell-bg-soft) 82%, transparent 18%);
+}
+
+body.page-my-stay {
+  --hearthstone-page-spotlight-top: color-mix(in srgb, #c99347 20%, transparent 80%);
+  --hearthstone-page-spotlight-bottom: color-mix(in srgb, #6d9ea4 15%, transparent 85%);
+}
+
+a,
+a:visited {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.wp-block-heading {
+  font-family: "Manrope", "Segoe UI", Tahoma, Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.005em;
+}
+
+p,
+li,
+input,
+select,
+textarea,
+button {
+  font-family: "Manrope", "Segoe UI", Tahoma, Arial, sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.screen-reader-text {
+  border: 0;
+  clip: rect(1px, 1px, 1px, 1px);
+  -webkit-clip-path: inset(50%);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  word-wrap: normal !important;
+}
+
+.screen-reader-text:focus {
+  background-color: #fff;
+  clip: auto !important;
+  -webkit-clip-path: none;
+  clip-path: none;
+  color: #000;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  height: auto;
+  left: 8px;
+  line-height: normal;
+  padding: 0.6rem 0.8rem;
+  text-decoration: none;
+  top: 8px;
+  width: auto;
+  z-index: 100000;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 70;
+  background: color-mix(in srgb, var(--hearthstone-shell-bg) 66%, transparent 34%);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  border-bottom: 1px solid var(--hearthstone-border);
+  border-bottom: 1px solid color-mix(in srgb, var(--hearthstone-border) 45%, transparent 55%);
+  box-shadow: 0 3px 14px rgba(10, 8, 7, 0.34);
+  isolation: isolate;
+}
+
+.admin-bar .site-header {
+  top: 32px;
+}
+
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      110deg,
+      color-mix(in srgb, var(--hearthstone-nav-ink) 8%, transparent 92%) 0%,
+      transparent 34%,
+      color-mix(in srgb, var(--hearthstone-accent-soft) 12%, transparent 88%) 62%,
+      transparent 100%
+    );
+}
+
+.site-header__inner {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0.64rem var(--hearthstone-space-sm);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 68rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 0;
+  justify-self: center;
+  width: auto;
+}
+
+.site-header__logo .custom-logo-link {
+  display: inline-flex;
+}
+
+.site-header__logo .custom-logo {
+  width: auto;
+  max-height: 62px;
+}
+
+.site-header__logo-link {
+  display: inline-flex;
+}
+
+.site-header__logo-image {
+  width: auto;
+  max-height: 132px;
+  filter: saturate(1.04) contrast(1.04);
+}
+
+.site-header__title {
+  font-family: "Manrope", "Segoe UI", Tahoma, Arial, sans-serif;
+  font-size: clamp(1.03rem, 0.98rem + 0.2vw, 1.14rem);
+  font-weight: 700;
+  color: var(--hearthstone-nav-ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-header__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  grid-column: 2 / 3;
+  justify-self: stretch;
+  width: 100%;
+  min-width: 0;
+}
+
+.site-header__actions {
+  grid-column: 3 / 4;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.site-header__logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.55rem;
+  padding: 0.52rem 1.08rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 44%, transparent 56%);
+  background: color-mix(in srgb, var(--hearthstone-shell-bg) 84%, #000 16%);
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 88%, var(--hearthstone-accent-soft) 12%);
+  font-size: 1.02rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(10, 8, 7, 0.2);
+  transition: none;
+}
+
+.site-header__logout:hover,
+.site-header__logout:focus-visible {
+  border-color: color-mix(in srgb, var(--hearthstone-border) 44%, transparent 56%);
+  background: color-mix(in srgb, var(--hearthstone-shell-bg) 84%, #000 16%);
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 88%, var(--hearthstone-accent-soft) 12%);
+  transform: none;
+}
+
+.site-header__menu-toggle {
+  display: none;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(248, 239, 228, 0.38);
+  background: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--hearthstone-surface) 22%, transparent 78%) 0%,
+    color-mix(in srgb, var(--hearthstone-accent-soft) 26%, transparent 74%) 100%
+  );
+  color: var(--hearthstone-nav-ink);
+  border-radius: 10px;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 6px 16px rgba(10, 8, 7, 0.24);
+  justify-self: end;
+  grid-column: 2 / 3;
+  display: none;
+  backdrop-filter: blur(6px) saturate(1.06);
+}
+
+.site-header__menu-toggle::before {
+  content: "";
+  width: 1.35rem;
+  height: 1.35rem;
+  display: block;
+  margin: 0 auto;
+  background-image: url("assets/images/icons/zia-menu.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: drop-shadow(0 1px 1px rgba(14, 12, 10, 0.38));
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.site-header__menu-toggle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.site-header__menu-toggle:hover,
+.site-header__menu-toggle:focus-visible {
+  border-color: rgba(255, 247, 237, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 8px 18px rgba(10, 8, 7, 0.28);
+}
+
+.site-header__menu-toggle-line {
+  display: none;
+}
+
+.has-js .site-header.is-open .site-header__menu-toggle::before {
+  transform: rotate(90deg) scale(0.95);
+  opacity: 0.92;
+}
+
+.site-header__nav {
+  width: 100%;
+  max-width: min(62rem, 100%);
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.site-header__nav ul {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: center;
+  justify-items: stretch;
+  gap: 0.3rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  width: 100%;
+}
+
+.site-header__nav ul::-webkit-scrollbar {
+  display: none;
+}
+
+.site-header__nav li {
+  min-width: 0;
+}
+
+.site-header__nav a {
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 88%, var(--hearthstone-accent-soft) 12%);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  padding: 0.32rem 0.62rem;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(14, 12, 10, 0.52);
+}
+
+.site-header__nav a:hover,
+.site-header__nav a:focus-visible,
+.site-header__nav .current-menu-item > a,
+.site-header__nav .current_page_item > a {
+  color: var(--hearthstone-nav-ink);
+  border-bottom-color: color-mix(in srgb, var(--hearthstone-nav-ink) 72%, var(--hearthstone-accent-soft) 28%);
+  opacity: 1;
+}
+
+.home .site-header {
+  position: sticky;
+  background: color-mix(in srgb, var(--hearthstone-shell-bg) 66%, transparent 34%);
+  border-bottom-color: color-mix(in srgb, var(--hearthstone-border) 45%, transparent 55%);
+}
+
+.home .site-header::before {
+  content: "";
+}
+
+.site-main {
+  min-height: 52vh;
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      var(--hearthstone-page-spotlight-top) 0%,
+      transparent 44%
+    ),
+    radial-gradient(
+      circle at 90% 100%,
+      var(--hearthstone-page-spotlight-bottom) 0%,
+      transparent 46%
+    ),
+    linear-gradient(
+      180deg,
+      var(--hearthstone-page-wash-start) 0%,
+      var(--hearthstone-page-wash-end) 100%
+    );
+  padding: clamp(1rem, 1.3vw, 1.4rem) 0 clamp(1.4rem, 1.8vw, 2rem);
+}
+
+.page-shell {
+  display: grid;
+  gap: clamp(0.7rem, 1vw, 1rem);
+}
+
+.page-shell__hero {
+  background: transparent;
+  border-bottom: 0;
+  padding: clamp(1.1rem, 2.3vw, 1.8rem) var(--hearthstone-space-sm) 0;
+}
+
+.page-shell__hero-inner {
+  width: min(66rem, 100%);
+  margin: 0 auto;
+  background: var(--hearthstone-card-surface);
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 68%, #fff 32%);
+  border-radius: 18px;
+  padding: clamp(1.1rem, 2.6vw, 1.75rem) clamp(1rem, 2vw, 1.6rem);
+  box-shadow: 0 16px 34px rgba(16, 13, 10, 0.2);
+}
+
+.page-shell__eyebrow {
+  margin: 0 0 0.6rem;
+  color: var(--hearthstone-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.page-shell__title {
+  margin: 0;
+  font-size: clamp(1.9rem, 4.2vw, 3.2rem);
+  line-height: 1.12;
+}
+
+.page-shell__subtitle {
+  margin: 0.95rem 0 0;
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+  color: var(--hearthstone-text-soft);
+}
+
+.page-shell__content {
+  background: transparent;
+}
+
+.page-shell__content-inner {
+  width: min(68rem, calc(100% - (var(--hearthstone-space-sm) * 2)));
+  margin: 0 auto;
+  padding: clamp(1rem, 1.8vw, 1.35rem);
+  background: var(--hearthstone-card-surface);
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 68%, #fff 32%);
+  border-radius: 18px;
+  box-shadow: 0 14px 32px rgba(16, 13, 10, 0.18);
+}
+
+.page-shell__content-inner p,
+.page-shell__content-inner li {
+  color: var(--hearthstone-text-soft);
+}
+
+.page-shell__content-inner .wp-block-button__link {
+  border-radius: 999px;
+}
+
+.index-post {
+  padding: 1rem 0;
+  border-top: 1px solid var(--hearthstone-border);
+}
+
+.index-post:first-of-type {
+  margin-top: 1rem;
+}
+
+.index-post__title {
+  margin: 0 0 0.45rem;
+}
+
+.index-post__excerpt p:last-child {
+  margin-bottom: 0;
+}
+
+.home-shell {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  padding: 0;
+  background: transparent;
+}
+
+.home-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      circle at 14% 0%,
+      var(--hearthstone-home-spotlight-top) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 88% 100%,
+      var(--hearthstone-home-spotlight-bottom) 0%,
+      transparent 48%
+    ),
+    linear-gradient(
+      180deg,
+      var(--hearthstone-home-wash-start) 0%,
+      var(--hearthstone-home-wash-end) 100%
+    );
+}
+
+.home-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.home .site-main {
+  padding-top: clamp(1rem, 1.3vw, 1.4rem);
+  padding-bottom: 0;
+  background: transparent;
+}
+
+.home-hero {
+  position: relative;
+  min-height: 100svh;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--hearthstone-space-lg) var(--hearthstone-space-sm) var(--hearthstone-space-xl);
+  background-color: var(--hearthstone-bg-soft);
+  background-size: cover;
+  background-position: center;
+  border-bottom: 0;
+  transition: background-image 0.8s ease-in-out;
+}
+
+.home-hero__overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  pointer-events: none;
+}
+
+.home-hero__overlay::before,
+.home-hero__overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.home-hero__content {
+  position: relative;
+  z-index: 1;
+  width: min(58rem, 100%);
+  text-align: center;
+  color: var(--hearthstone-text);
+}
+
+.home-hero__logo-wrap {
+  margin: 0 auto var(--hearthstone-space-sm);
+  display: flex;
+  justify-content: center;
+}
+
+.home-hero__logo-wrap .custom-logo {
+  width: min(340px, 75vw);
+  height: auto;
+}
+
+.home-hero__brand-image {
+  width: min(420px, 86vw);
+  height: auto;
+}
+
+.home-hero__eyebrow {
+  margin: 0 0 var(--hearthstone-space-xs);
+  color: var(--hearthstone-accent);
+  font-size: clamp(0.75rem, 0.63rem + 0.35vw, 0.93rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.home-hero__title {
+  margin: 0;
+  font-size: clamp(2rem, 5.5vw, 4.4rem);
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+.home-hero__subtitle {
+  margin: var(--hearthstone-space-sm) auto 0;
+  max-width: 48rem;
+  font-size: clamp(1rem, 2.4vw, 1.28rem);
+  color: var(--hearthstone-text-soft);
+}
+
+.home-hero[style*="background-image"] .home-hero__overlay {
+  display: block;
+}
+
+.home-hero[style*="background-image"] {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-color: rgba(20, 18, 16, 0.92);
+}
+
+.home-hero[style*="background-image"] .home-hero__overlay::before {
+  background: rgba(236, 206, 145, 0.2);
+  mix-blend-mode: color;
+}
+
+.home-hero[style*="background-image"] .home-hero__overlay::after {
+  background:
+    radial-gradient(ellipse at center, rgba(20, 18, 16, 0) 28%, rgba(20, 18, 16, 0.3) 100%),
+    linear-gradient(180deg, rgba(20, 18, 16, 0.12) 0%, rgba(20, 18, 16, 0.28) 100%);
+}
+
+.home-hero[style*="background-image"] .home-hero__content,
+.home-hero[style*="background-image"] .home-hero__title {
+  color: var(--hearthstone-text-inverse);
+}
+
+.home-hero[style*="background-image"] .home-hero__content {
+  background: rgba(24, 22, 20, 0.12);
+  border: 1px solid rgba(247, 244, 238, 0.24);
+  border-radius: 16px;
+  padding: clamp(0.9rem, 1.2vw, 1.2rem) clamp(1rem, 2vw, 1.4rem);
+  box-shadow: 0 10px 30px rgba(15, 13, 11, 0.24);
+}
+
+.home-hero[style*="background-image"] .home-hero__eyebrow {
+  color: #f8e8d8;
+}
+
+.home-hero[style*="background-image"] .home-hero__subtitle {
+  color: #f2e8dd;
+  text-shadow: 0 1px 1px rgba(46, 44, 42, 0.28);
+}
+
+.home-content {
+  background: var(--hearthstone-surface);
+  color: var(--hearthstone-text);
+}
+
+.home-content__inner {
+  width: min(70rem, 100%);
+  margin: 0 auto;
+  padding: var(--hearthstone-space-md) var(--hearthstone-space-sm) var(--hearthstone-space-xl);
+}
+
+.home-content .wp-block-heading,
+.home-content p,
+.home-content ul,
+.home-content ol,
+.home-content .wp-block-group,
+.home-content .wp-block-columns,
+.home-content .wp-block-buttons,
+.home-content .wp-block-quote {
+  width: min(100%, 72rem);
+  margin-top: 0;
+  margin-bottom: var(--hearthstone-space-sm);
+}
+
+.home-content h2,
+.home-content h3,
+.home-content h4 {
+  color: var(--hearthstone-text);
+  line-height: 1.22;
+}
+
+.home-content p {
+  color: var(--hearthstone-text-soft);
+  font-size: clamp(1rem, 0.95rem + 0.2vw, 1.08rem);
+}
+
+.home-content ul,
+.home-content ol {
+  color: var(--hearthstone-text-soft);
+}
+
+.home-content .alignfull {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.home-content .alignwide {
+  width: min(76rem, 100%);
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.home-content .wp-block-heading {
+  margin-top: 0;
+}
+
+.home-content .wp-block-buttons {
+  margin-top: var(--hearthstone-space-xs);
+}
+
+.home-content .wp-block-button__link {
+  border-radius: 999px;
+  padding: 0.74rem 1.4rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.home-content .wp-block-button.is-style-outline .wp-block-button__link {
+  border-color: var(--hearthstone-accent-strong);
+  color: var(--hearthstone-accent-strong);
+  background-color: transparent;
+}
+
+.home-content .wp-block-button__link:not(.has-background) {
+  background: var(--hearthstone-accent);
+  color: var(--hearthstone-text-inverse);
+}
+
+.home-content .wp-block-button__link:hover,
+.home-content .wp-block-button__link:focus-visible {
+  background: var(--hearthstone-accent-strong);
+  color: var(--hearthstone-text-inverse);
+}
+
+.home-content .wp-block-quote {
+  border-left: 4px solid var(--hearthstone-highlight);
+  margin: var(--hearthstone-space-sm) 0 0;
+  padding: 0.45rem 0 0.45rem 1rem;
+  color: var(--hearthstone-text);
+  font-style: italic;
+}
+
+.home-content .wp-block-separator {
+  border-color: var(--hearthstone-border);
+}
+
+.home-content .wp-block-group[class*="hearthstone-home-"] {
+  border-top: 1px solid var(--hearthstone-border);
+}
+
+.home-content .hearthstone-home-trust,
+.home-content .hearthstone-home-trust p,
+.home-content .hearthstone-home-trust li,
+.home-content .hearthstone-home-trust .wp-block-heading {
+  color: var(--hearthstone-text-inverse);
+}
+
+.home-content .hearthstone-home-trust .wp-block-quote {
+  border-left-color: var(--hearthstone-highlight);
+  color: var(--hearthstone-text-inverse);
+}
+
+.home-content .hearthstone-card {
+  height: 100%;
+  background: rgba(248, 239, 226, 0.92);
+  border: 1px solid var(--hearthstone-border);
+  border-radius: 16px;
+  padding: clamp(1rem, 0.88rem + 0.4vw, 1.35rem);
+}
+
+.home-content .hearthstone-card .wp-block-heading {
+  margin-bottom: 0.5rem;
+}
+
+.home-content--app-shell {
+  background: transparent;
+  padding-top: clamp(1rem, 1.8vw, 1.6rem);
+  padding-bottom: clamp(1.3rem, 2vw, 2rem);
+}
+
+.home .home-shell,
+.home .home-page,
+.home .home-content--app-shell,
+.home .home-content__inner--app-shell {
+  min-height: 0;
+}
+
+.home .home-shell {
+  flex: 1 0 auto;
+}
+
+.home .home-content--app-shell {
+  min-height: calc(100dvh - 8.25rem);
+  padding-top: 0.72rem;
+  padding-bottom: 0;
+}
+
+.home-content__inner--app-shell {
+  width: min(68rem, calc(100% - (var(--hearthstone-space-sm) * 2)));
+  margin: 0 auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.guest-auth-shell {
+  min-height: 100dvh;
+}
+
+.guest-auth-shell__backdrop {
+  position: relative;
+  min-height: 100dvh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: var(--hearthstone-shell-bg);
+  display: grid;
+  place-items: center;
+}
+
+body.admin-bar .guest-auth-shell__backdrop {
+  min-height: calc(100vh - 32px);
+}
+
+.guest-auth-shell__overlay {
+  display: none;
+}
+
+.guest-auth-shell__inner {
+  width: min(28rem, calc(100% - 2rem));
+  position: relative;
+  z-index: 2;
+}
+
+.hearthstone-guest-auth-screen {
+  margin: 0;
+}
+
+.hearthstone-guest-auth-screen__card {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 42%, transparent 58%);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--hearthstone-shell-panel) 88%, transparent 12%);
+  box-shadow: 0 12px 30px rgba(10, 8, 7, 0.28);
+  backdrop-filter: blur(8px) saturate(1.08);
+  -webkit-backdrop-filter: blur(8px) saturate(1.08);
+  padding: clamp(1rem, 2.2vw, 1.5rem);
+}
+
+.hearthstone-guest-auth-screen__card::before {
+  content: none;
+}
+
+.hearthstone-guest-auth-screen__card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hearthstone-guest-auth-screen__brand {
+  margin: 0 auto 0.65rem;
+  text-align: center;
+}
+
+.hearthstone-guest-auth-screen__brand img {
+  width: min(17rem, 100%);
+  height: auto;
+}
+
+.hearthstone-guest-auth-screen__card h1 {
+  margin: 0 0 0.4rem;
+  color: var(--hearthstone-nav-ink);
+  text-align: center;
+  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+}
+
+.hearthstone-guest-auth-screen__card > p {
+  margin: 0 0 0.8rem;
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 88%, var(--hearthstone-accent-soft) 12%);
+  text-align: center;
+}
+
+.hearthstone-guest-auth-screen__demo {
+  margin: 0 0 0.9rem;
+  text-align: center;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 90%, var(--hearthstone-accent-soft) 10%);
+}
+
+.hearthstone-guest-auth-screen .hearthstone-order-form {
+  margin-top: 0.25rem;
+}
+
+.hearthstone-guest-auth-screen .hearthstone-form-field label {
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 90%, var(--hearthstone-accent-soft) 10%);
+}
+
+.hearthstone-guest-auth-screen .hearthstone-form-field input,
+.hearthstone-guest-auth-screen .hearthstone-form-field select,
+.hearthstone-guest-auth-screen .hearthstone-form-field textarea {
+  background: color-mix(in srgb, var(--hearthstone-surface) 94%, #fff 6%);
+}
+
+.hearthstone-guest-auth-screen__support {
+  margin-top: 0.85rem;
+  text-align: center;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.hearthstone-guest-auth-screen__support p {
+  margin: 0;
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 84%, var(--hearthstone-accent-soft) 16%);
+}
+
+.hearthstone-guest-auth-screen__support a {
+  color: var(--hearthstone-nav-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.hearthstone-guest-auth-screen__support a:hover,
+.hearthstone-guest-auth-screen__support a:focus-visible {
+  text-decoration: underline;
+}
+
+.hearthstone-guest-entry,
+.hearthstone-guest-home,
+.hearthstone-guest-my-stay,
+.hearthstone-guest-state {
+  width: min(68rem, 100%);
+  margin: 0 auto;
+}
+
+.hearthstone-guest-entry__card,
+.hearthstone-guest-state__card {
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 68%, #fff 32%);
+  border-radius: 18px;
+  background: var(--hearthstone-card-surface);
+  box-shadow: 0 14px 32px rgba(16, 13, 10, 0.18);
+  padding: clamp(1rem, 1.8vw, 1.5rem);
+}
+
+.hearthstone-guest-entry__eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--hearthstone-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.hearthstone-guest-entry h2,
+.hearthstone-guest-state h2 {
+  margin: 0 0 0.45rem;
+}
+
+.hearthstone-guest-entry p,
+.hearthstone-guest-state p {
+  margin: 0;
+  color: var(--hearthstone-text-soft);
+}
+
+.hearthstone-guest-entry__details {
+  margin-top: 0.95rem;
+}
+
+.hearthstone-guest-entry__details summary {
+  cursor: pointer;
+  list-style: none;
+  border: 1px solid var(--hearthstone-border);
+  border-radius: 999px;
+  padding: 0.56rem 0.9rem;
+  font-weight: 600;
+  color: var(--hearthstone-text);
+  width: fit-content;
+  background: rgba(248, 239, 226, 0.85);
+}
+
+.hearthstone-guest-entry__details summary::-webkit-details-marker {
+  display: none;
+}
+
+.hearthstone-guest-entry__details[open] summary {
+  margin-bottom: 0.9rem;
+}
+
+.hearthstone-form-field--inline label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 500;
+}
+
+.hearthstone-form-field--inline input[type="checkbox"] {
+  width: auto;
+}
+
+.hearthstone-guest-entry__support {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.hearthstone-guest-entry__support a {
+  font-weight: 600;
+  color: var(--hearthstone-accent-strong);
+  text-decoration: none;
+}
+
+.hearthstone-guest-entry__support a:hover,
+.hearthstone-guest-entry__support a:focus-visible {
+  text-decoration: underline;
+}
+
+.hearthstone-guest-home__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.hearthstone-guest-home__bullet-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--hearthstone-text-soft);
+  display: grid;
+  gap: 0.32rem;
+}
+
+.hearthstone-guest-home__orders {
+  margin-top: 14px;
+}
+
+.guest-mobile-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 80;
+  background: color-mix(in srgb, var(--hearthstone-shell-bg) 64%, transparent 36%);
+  border-top: 1px solid color-mix(in srgb, var(--hearthstone-border) 45%, transparent 55%);
+  box-shadow: 0 -8px 18px rgba(8, 7, 6, 0.24);
+  backdrop-filter: blur(12px) saturate(1.08);
+  -webkit-backdrop-filter: blur(12px) saturate(1.08);
+}
+
+.guest-mobile-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.45rem 0.65rem;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.guest-mobile-nav__item a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.18rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  min-height: 3.1rem;
+  padding: 0.34rem 0.3rem;
+  text-decoration: none;
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 72%, var(--hearthstone-accent-soft) 28%);
+}
+
+.guest-mobile-nav__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  opacity: 0.92;
+  color: currentColor;
+}
+
+.guest-mobile-nav__label {
+  font-size: 0.63rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.guest-mobile-nav__icon.hearthstone-icon-shopping-bag::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 7px;
+  bottom: 2px;
+  background: currentColor;
+  border-radius: 3px 3px 4px 4px;
+}
+
+.guest-mobile-nav__icon.hearthstone-icon-shopping-bag::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 2px;
+  height: 7px;
+  border: 1.8px solid currentColor;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.guest-mobile-nav__item.is-active a {
+  border-color: color-mix(in srgb, var(--hearthstone-accent-soft) 52%, transparent 48%);
+  background: color-mix(in srgb, var(--hearthstone-accent-soft) 18%, transparent 82%);
+  color: var(--hearthstone-nav-ink);
+}
+
+.guest-mobile-nav__item.is-active .guest-mobile-nav__icon {
+  opacity: 1;
+}
+
+.guest-mobile-nav__item.is-logout a {
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 80%, var(--hearthstone-accent-soft) 20%);
+}
+
+.hearthstone-service-app__layout {
+  display: grid;
+  gap: clamp(16px, 2.2vw, 28px);
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.9fr);
+  align-items: start;
+}
+
+.hearthstone-service-app__catalog,
+.hearthstone-service-app__panel {
+  min-width: 0;
+}
+
+.hearthstone-service-app__heading {
+  margin: 0 0 0.75rem;
+}
+
+.hearthstone-shopfront__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 0.9rem;
+}
+
+.hearthstone-shopfront__intro {
+  min-width: 0;
+}
+
+.hearthstone-shopfront__title {
+  margin-bottom: 0.2rem;
+}
+
+.hearthstone-shopfront__search-wrap {
+  width: min(320px, 100%);
+}
+
+.hearthstone-shopfront__search {
+  width: 100%;
+  border: 1px solid var(--hearthstone-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--hearthstone-surface) 90%, #fff 10%);
+  color: var(--hearthstone-text);
+  padding: 0.62rem 0.72rem;
+}
+
+.hearthstone-shopfront__search::placeholder {
+  color: color-mix(in srgb, var(--hearthstone-text-soft) 75%, transparent 25%);
+}
+
+.hearthstone-shopfront__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+}
+
+.hearthstone-shopfront__filter {
+  border: 1px solid var(--hearthstone-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--hearthstone-surface) 88%, #fff 12%);
+  color: var(--hearthstone-text-soft);
+  padding: 0.34rem 0.68rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.hearthstone-shopfront__filter-count {
+  border-radius: 999px;
+  padding: 0.05rem 0.36rem;
+  background: color-mix(in srgb, var(--hearthstone-border) 82%, transparent 18%);
+  color: var(--hearthstone-text-soft);
+  font-size: 0.75rem;
+}
+
+.hearthstone-shopfront__filter.is-active {
+  color: var(--hearthstone-text);
+  border-color: color-mix(in srgb, var(--hearthstone-accent-soft) 66%, var(--hearthstone-border) 34%);
+  background: color-mix(in srgb, var(--hearthstone-accent-soft) 20%, #fff 80%);
+}
+
+.hearthstone-shopfront__filter.is-active .hearthstone-shopfront__filter-count {
+  background: color-mix(in srgb, var(--hearthstone-accent-soft) 28%, #fff 72%);
+  color: var(--hearthstone-text);
+}
+
+.hearthstone-order-grid.hearthstone-order-grid--shop {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.hearthstone-order-card.hearthstone-shop-card {
+  border-radius: 18px;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hearthstone-order-card__media.hearthstone-shop-card__media {
+  margin: 0;
+  border-bottom: 1px solid var(--hearthstone-border);
+  aspect-ratio: 16 / 11;
+}
+
+.hearthstone-shop-card__body {
+  padding: 14px;
+  display: grid;
+  gap: 0.56rem;
+}
+
+.hearthstone-shop-card__category {
+  width: fit-content;
+  background: color-mix(in srgb, var(--hearthstone-surface) 72%, #fff 28%);
+}
+
+.hearthstone-shop-card__meta {
+  margin-top: 0;
+}
+
+.hearthstone-shop-card__add-btn {
+  border: 1px solid color-mix(in srgb, var(--hearthstone-accent-soft) 74%, var(--hearthstone-border) 26%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--hearthstone-accent-soft) 18%, #fff 82%);
+  color: var(--hearthstone-text);
+  padding: 0.32rem 0.72rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hearthstone-shop-card__add-btn:hover,
+.hearthstone-shop-card__add-btn:focus-visible {
+  background: color-mix(in srgb, var(--hearthstone-accent-soft) 34%, #fff 66%);
+}
+
+.hearthstone-shop-card__stepper {
+  margin-top: 0;
+}
+
+.hearthstone-shop-card__stepper .hearthstone-step-clear {
+  margin-left: 0;
+}
+
+.hearthstone-shopfront__empty {
+  margin-top: 0.9rem;
+  border: 1px dashed var(--hearthstone-border);
+  border-radius: 12px;
+  padding: 0.72rem 0.8rem;
+  background: color-mix(in srgb, var(--hearthstone-surface) 84%, #fff 16%);
+}
+
+.hearthstone-service-app__section-title {
+  margin: 1.15rem 0 0.65rem;
+  color: var(--hearthstone-accent-strong);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hearthstone-app-notice {
+  border-radius: 10px;
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.hearthstone-app-notice--success {
+  border: 1px solid color-mix(in srgb, var(--hearthstone-accent-soft) 46%, #fff 54%);
+  background: color-mix(in srgb, var(--hearthstone-accent-soft) 14%, #fff 86%);
+}
+
+.hearthstone-app-notice--error {
+  border: 1px solid color-mix(in srgb, #b25a56 44%, #fff 56%);
+  background: color-mix(in srgb, #b25a56 11%, #fff 89%);
+}
+
+.hearthstone-order-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 0;
+}
+
+.hearthstone-order-card {
+  border: 1px solid var(--hearthstone-border);
+  background: var(--hearthstone-card-surface);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 10px 24px rgba(62, 50, 43, 0.08);
+  overflow: hidden;
+}
+
+.hearthstone-order-card__media {
+  margin: -14px -14px 12px;
+  border-bottom: 1px solid var(--hearthstone-border);
+  background: var(--hearthstone-bg-soft);
+  aspect-ratio: 16 / 10;
+}
+
+.hearthstone-order-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hearthstone-order-card h3,
+.hearthstone-order-card h4 {
+  margin-top: 0;
+  margin-bottom: 0.4rem;
+}
+
+.hearthstone-order-meta {
+  margin: 0;
+  color: var(--hearthstone-text-soft);
+  font-size: 0.9rem;
+}
+
+.hearthstone-order-card__meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 0.65rem;
+}
+
+.hearthstone-order-price {
+  margin: 0;
+  font-size: 1.04rem;
+  font-weight: 700;
+  color: var(--hearthstone-accent-strong);
+}
+
+.hearthstone-order-chip {
+  margin: 0;
+  border: 1px solid var(--hearthstone-border);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.78rem;
+  color: var(--hearthstone-text-soft);
+  background: color-mix(in srgb, var(--hearthstone-surface) 90%, #fff 10%);
+}
+
+.hearthstone-item-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.78rem;
+}
+
+.hearthstone-step-btn,
+.hearthstone-step-clear {
+  border: 1px solid var(--hearthstone-border);
+  background: var(--hearthstone-surface);
+  color: var(--hearthstone-text);
+  border-radius: 10px;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.hearthstone-step-btn:hover,
+.hearthstone-step-clear:hover {
+  background: var(--hearthstone-bg-soft);
+}
+
+.hearthstone-step-qty {
+  min-width: 1.4rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--hearthstone-accent-strong);
+}
+
+.hearthstone-step-clear {
+  margin-left: auto;
+  color: #8a4c49;
+}
+
+.hearthstone-step-clear .dashicons,
+.hearthstone-cart-remove .dashicons {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+}
+
+.hearthstone-cart-summary {
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 78%, #fff 22%);
+  border-radius: 14px;
+  padding: 0.75rem;
+  background:
+    linear-gradient(
+      170deg,
+      color-mix(in srgb, var(--hearthstone-surface) 92%, #fff 8%) 0%,
+      color-mix(in srgb, var(--hearthstone-bg-soft) 80%, #fff 20%) 100%
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  max-height: min(42vh, 360px);
+  overflow: auto;
+}
+
+.hearthstone-cart-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.58rem;
+}
+
+.hearthstone-cart-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.56rem;
+  padding: 0.52rem 0.58rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 56%, transparent 44%);
+  background: color-mix(in srgb, var(--hearthstone-surface) 84%, #fff 16%);
+}
+
+.hearthstone-cart-line__info {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.hearthstone-cart-line__info strong {
+  line-height: 1.3;
+  font-size: 0.93rem;
+  color: var(--hearthstone-text);
+  overflow-wrap: anywhere;
+}
+
+.hearthstone-cart-line__info span {
+  color: var(--hearthstone-text-soft);
+  font-size: 0.82rem;
+}
+
+.hearthstone-cart-remove {
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 62%, transparent 38%);
+  border-radius: 8px;
+  width: 1.8rem;
+  height: 1.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--hearthstone-surface) 74%, #fff 26%);
+  color: #8a4c49;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.hearthstone-cart-remove:hover {
+  background: color-mix(in srgb, var(--hearthstone-highlight) 18%, var(--hearthstone-surface) 82%);
+  transform: translateY(-1px);
+}
+
+.hearthstone-cart-total {
+  margin: 0.9rem 0 1rem;
+  padding-top: 0.68rem;
+  border-top: 1px solid color-mix(in srgb, var(--hearthstone-border) 56%, transparent 44%);
+  color: var(--hearthstone-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.hearthstone-order-panel {
+  position: sticky;
+  top: 92px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 72%, #fff 28%);
+  background: color-mix(in srgb, var(--hearthstone-surface) 92%, #fff 8%);
+  padding: 14px;
+  box-shadow: 0 14px 30px rgba(34, 30, 26, 0.12);
+}
+
+.hearthstone-order-form {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.74rem;
+}
+
+.hearthstone-form-field {
+  margin: 0;
+}
+
+.hearthstone-form-field label {
+  display: block;
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--hearthstone-text);
+}
+
+.hearthstone-form-field input,
+.hearthstone-form-field select,
+.hearthstone-form-field textarea {
+  width: 100%;
+  border: 1px solid var(--hearthstone-border);
+  border-radius: 12px;
+  background: var(--hearthstone-surface);
+  color: var(--hearthstone-text);
+  padding: 0.6rem 0.7rem;
+}
+
+.hearthstone-form-field textarea {
+  resize: vertical;
+}
+
+.hearthstone-order-submit {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--hearthstone-shell-bg-soft) 78%, var(--hearthstone-shell-bg) 22%);
+  color: var(--hearthstone-text-inverse);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 0.74rem 0.95rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.hearthstone-order-submit[data-checkout-mode="ops"] {
+  background: color-mix(in srgb, var(--hearthstone-shell-bg-soft) 76%, var(--hearthstone-accent-strong) 24%);
+  color: var(--hearthstone-text-inverse);
+}
+
+.hearthstone-order-submit[data-checkout-mode="woocommerce"] {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--hearthstone-accent-strong) 78%, #0f1d2a 22%) 0%,
+    color-mix(in srgb, var(--hearthstone-accent) 82%, #142431 18%) 100%
+  );
+  color: var(--hearthstone-text-inverse);
+}
+
+.hearthstone-order-submit.is-mode-active {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--hearthstone-accent-soft) 54%, transparent 46%),
+    0 10px 20px rgba(17, 24, 34, 0.24);
+  border-color: color-mix(in srgb, var(--hearthstone-accent-soft) 46%, #fff 54%);
+}
+
+.hearthstone-order-submit:hover,
+.hearthstone-order-submit:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(18, 24, 35, 0.2);
+}
+
+.hearthstone-order-submit:focus-visible {
+  outline: 0;
+  border-color: color-mix(in srgb, var(--hearthstone-accent-soft) 68%, #fff 32%);
+}
+
+.hearthstone-order-submit:disabled {
+  background: color-mix(in srgb, var(--hearthstone-muted) 56%, #9ea5aa 44%);
+  color: color-mix(in srgb, var(--hearthstone-text-inverse) 86%, #d7d7d7 14%);
+  border-color: transparent;
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.hearthstone-order-actions {
+  margin-top: 0.2rem;
+  display: grid;
+  gap: 0.52rem;
+}
+
+.hearthstone-order-actions .wp-block-button {
+  width: 100%;
+}
+
+.hearthstone-order-actions .wp-block-button__link {
+  width: 100%;
+  text-align: center;
+}
+
+.hearthstone-app-confirmation {
+  margin-bottom: 0.95rem;
+}
+
+.hearthstone-active-order-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.72rem;
+}
+
+.hearthstone-active-order-item {
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 62%, transparent 38%);
+  border-radius: 13px;
+  padding: 0.72rem 0.78rem;
+  background: color-mix(in srgb, var(--hearthstone-surface) 88%, #fff 12%);
+  box-shadow: 0 8px 20px rgba(30, 24, 19, 0.08);
+}
+
+.hearthstone-active-order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin-bottom: 0.45rem;
+}
+
+.hearthstone-active-order-header strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.hearthstone-order-type-pill {
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 72%, #fff 28%);
+  padding: 0.15rem 0.56rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hearthstone-text-soft);
+  background: color-mix(in srgb, var(--hearthstone-bg-soft) 72%, #fff 28%);
+}
+
+.hearthstone-active-order-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.52rem;
+}
+
+.hearthstone-order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.14rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.hearthstone-order-status-badge.is-submitted {
+  color: #3b4f5e;
+  border-color: #b8c8d3;
+  background: #e8f1f6;
+}
+
+.hearthstone-order-status-badge.is-confirmed {
+  color: #4f4a24;
+  border-color: #ddd08f;
+  background: #f7f0d3;
+}
+
+.hearthstone-order-status-badge.is-preparing {
+  color: #5a3d28;
+  border-color: #e6bf98;
+  background: #f9e8d7;
+}
+
+.hearthstone-order-status-badge.is-ready {
+  color: #2c4b38;
+  border-color: #a9ceb8;
+  background: #e4f3ea;
+}
+
+.hearthstone-order-status-badge.is-delivering {
+  color: #2e4f58;
+  border-color: #9fc2cb;
+  background: #e2f0f4;
+}
+
+.hearthstone-order-status-badge.is-completed {
+  color: #334233;
+  border-color: #b5c9b5;
+  background: #e8f0e8;
+}
+
+.hearthstone-order-status-badge.is-cancelled {
+  color: #6a3b3b;
+  border-color: #d9a8a8;
+  background: #f8e5e5;
+}
+
+.hearthstone-order-actions--inline {
+  margin-top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.48rem;
+}
+
+.hearthstone-orders-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.55rem;
+}
+
+.hearthstone-orders-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.hearthstone-orders-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  margin-left: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 68%, #fff 32%);
+  background: color-mix(in srgb, var(--hearthstone-bg-soft) 75%, #fff 25%);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--hearthstone-text);
+}
+
+.hearthstone-orders-live__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #4f8c63;
+  box-shadow: 0 0 0 0 rgba(79, 140, 99, 0.6);
+  animation: hearthstonePulseLiveDot 2.2s infinite;
+}
+
+.hearthstone-order-refresh-btn {
+  min-height: 1.72rem;
+  padding: 0.24rem 0.58rem;
+  font-size: 0.75rem;
+}
+
+.hearthstone-order-empty {
+  padding: 0.4rem 0.1rem 0.2rem;
+}
+
+.hearthstone-order-track-toggle {
+  min-width: 7.5rem;
+}
+
+.hearthstone-order-track-details {
+  margin-top: 0.5rem;
+}
+
+.hearthstone-order-track-details[hidden] {
+  display: none !important;
+}
+
+@keyframes hearthstonePulseLiveDot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 140, 99, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 9px rgba(79, 140, 99, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 140, 99, 0);
+  }
+}
+
+@media (max-width: 720px) {
+  .hearthstone-orders-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hearthstone-orders-live {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.hearthstone-order-action-form {
+  margin: 0;
+}
+
+.hearthstone-order-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border: 1px solid color-mix(in srgb, var(--hearthstone-border) 72%, #fff 28%);
+  border-radius: 10px;
+  padding: 0.36rem 0.66rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--hearthstone-text);
+  background: color-mix(in srgb, var(--hearthstone-surface) 78%, #fff 22%);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.hearthstone-order-action-btn:hover,
+.hearthstone-order-action-btn:focus-visible {
+  background: color-mix(in srgb, var(--hearthstone-bg-soft) 70%, #fff 30%);
+  transform: translateY(-1px);
+}
+
+.hearthstone-order-action-btn.is-danger {
+  color: #fff;
+  background: color-mix(in srgb, #8d4f4f 84%, #6f3232 16%);
+  border-color: color-mix(in srgb, #8d4f4f 70%, #4d2525 30%);
+}
+
+.hearthstone-order-action-btn.is-danger:hover,
+.hearthstone-order-action-btn.is-danger:focus-visible {
+  background: color-mix(in srgb, #a75f5f 82%, #7b3a3a 18%);
+}
+
+.home-content .hearthstone-brand-mark {
+  margin: 0 auto 1rem;
+  text-align: center;
+}
+
+.home-content .hearthstone-brand-mark img {
+  width: min(420px, 86vw);
+  height: auto;
+}
+
+.hearthstone-photo-frame {
+  margin-bottom: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--hearthstone-border);
+  background: var(--hearthstone-bg-soft);
+}
+
+.hearthstone-photo-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: sepia(16%) saturate(88%) hue-rotate(-12deg) brightness(1.02);
+}
+
+.hearthstone-photo-frame.is-stucco-tint img {
+  filter: sepia(34%) saturate(78%) hue-rotate(-30deg) brightness(1.05);
+}
+
+.home-content .hearthstone-mini-metric {
+  display: inline-block;
+  margin-right: 0.55rem;
+  margin-bottom: 0.45rem;
+  padding: 0.32rem 0.56rem;
+  border-radius: 999px;
+  border: 1px solid var(--hearthstone-highlight);
+  background: var(--hearthstone-bg-soft);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--hearthstone-accent-strong);
+}
+
+.home-content .hearthstone-home-trust .hearthstone-mini-metric {
+  border-color: rgba(247, 244, 238, 0.45);
+  background: rgba(247, 244, 238, 0.14);
+  color: var(--hearthstone-text-inverse);
+}
+
+.home-content .wp-block-table {
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+.site-footer {
+  margin: 0;
+  padding: 16px;
+  background: color-mix(in srgb, var(--hearthstone-shell-bg-soft) 92%, #000 8%);
+  border-top: 1px solid color-mix(in srgb, var(--hearthstone-border) 38%, transparent 62%);
+}
+
+body.home .site-footer {
+  margin-top: auto;
+}
+
+.site-footer__inner {
+  width: min(74rem, 100%);
+  margin: 0 auto;
+}
+
+.site-footer__brand {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.site-footer__logo-image {
+  height: 56px;
+  width: auto;
+}
+
+.site-footer__text {
+  margin: 0;
+  font-size: 0.92rem;
+  color: color-mix(in srgb, var(--hearthstone-nav-ink) 78%, var(--hearthstone-muted) 22%);
+}
+
+@media (max-width: 980px) {
+  .hearthstone-service-app__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hearthstone-shopfront__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hearthstone-shopfront__search-wrap {
+    width: 100%;
+  }
+
+  .hearthstone-order-panel {
+    position: static;
+    top: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-bar .site-header {
+    top: 0;
+  }
+
+  body.admin-bar .guest-auth-shell__backdrop {
+    min-height: calc(100vh - 46px);
+  }
+
+  .site-header__logo-image {
+    max-height: 82px;
+  }
+
+  .site-header__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    align-items: center;
+    justify-items: stretch;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .site-header__brand {
+    justify-content: flex-start;
+    width: auto;
+    grid-column: 1;
+  }
+
+  .site-header__title {
+    display: none;
+  }
+
+  .site-header__menu-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .site-header__actions {
+    display: none;
+  }
+
+  .site-header__panel {
+    display: none;
+    grid-column: 1 / -1;
+    position: static;
+    width: 100%;
+    margin-top: 0.15rem;
+    padding: 0.45rem 0.55rem;
+    border: 1px solid rgba(248, 239, 228, 0.24);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--hearthstone-shell-bg) 62%, transparent 38%);
+    backdrop-filter: blur(12px) saturate(1.08);
+    -webkit-backdrop-filter: blur(12px) saturate(1.08);
+    box-shadow: 0 10px 20px rgba(10, 8, 7, 0.22);
+  }
+
+  body.has-guest-mobile-nav .site-header__inner {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  body.has-guest-mobile-nav .site-header__brand {
+    justify-content: center;
+    width: 100%;
+  }
+
+  body.has-guest-mobile-nav .site-header__menu-toggle,
+  body.has-guest-mobile-nav .site-header__panel,
+  body.has-guest-mobile-nav .site-header__actions {
+    display: none !important;
+  }
+
+  .has-js .site-header__panel {
+    display: none;
+  }
+
+  .has-js .site-header.is-open .site-header__panel {
+    display: block;
+  }
+
+  .site-header__nav {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .site-header__nav ul {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .site-header__nav li {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .site-header__nav a {
+    border: 0;
+    border-bottom: 1px solid rgba(248, 239, 228, 0.2);
+    background: transparent;
+    border-radius: 0;
+    width: 100%;
+    display: block;
+    padding: 0.6rem 0.2rem;
+    font-size: 0.94rem;
+    line-height: 1.2;
+    color: color-mix(in srgb, var(--hearthstone-nav-ink) 90%, var(--hearthstone-accent-soft) 10%);
+    text-shadow: 0 1px 2px rgba(14, 12, 10, 0.42);
+    opacity: 1;
+  }
+
+  .site-header__nav li:last-child a {
+    border-bottom: 0;
+  }
+
+  .site-header__nav .current-menu-item > a,
+  .site-header__nav .current_page_item > a {
+    background: color-mix(in srgb, var(--hearthstone-nav-ink) 11%, transparent 89%);
+    border-bottom-color: color-mix(in srgb, var(--hearthstone-nav-ink) 44%, transparent 56%);
+    color: var(--hearthstone-nav-ink);
+  }
+
+  body {
+    padding-bottom: 0;
+  }
+
+  body.has-guest-mobile-nav {
+    padding-bottom: 0;
+  }
+
+  body.has-guest-mobile-nav .site-main {
+    padding-bottom: 4.6rem;
+  }
+
+  body.home.has-guest-mobile-nav .site-main {
+    padding-bottom: 0;
+  }
+
+  .guest-mobile-nav {
+    display: block;
+  }
+
+  .hearthstone-guest-home__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero {
+    min-height: 100svh;
+    min-height: 100vh;
+    background-position: center top;
+    padding-top: clamp(1rem, 4vw, 1.8rem);
+    padding-bottom: clamp(1.25rem, 5vw, 2.1rem);
+  }
+
+  .home-shell {
+    background-attachment: scroll;
+  }
+
+  body.home {
+    background-attachment: scroll;
+  }
+
+  body {
+    background-attachment: scroll;
+  }
+
+  .home-content__inner {
+    padding-bottom: clamp(2rem, 6vw, 2.75rem);
+  }
+
+  .home-content .alignfull {
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
+  .home-content .wp-block-columns {
+    gap: var(--hearthstone-space-sm);
+  }
+
+  .site-footer__brand {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .site-header__title {
+    white-space: normal;
+  }
+
+  .home-hero__logo-wrap .custom-logo {
+    width: min(16rem, 82vw);
+  }
+
+  .home-content .wp-block-button {
+    width: 100%;
+  }
+
+  .home-content .wp-block-button__link {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (min-width: 1440px) {
+  .home-hero {
+    min-height: 100svh;
+    min-height: 100vh;
+  }
+
+  .home-content__inner {
+    width: min(74rem, 100%);
+  }
+}
