@@ -5975,6 +5975,18 @@ function hearthstone_ops_get_available_room_service_items(): array
         'order'          => 'ASC',
     ]);
 
+    if (empty($items)) {
+        hearthstone_ops_seed_room_service_menu_items(true);
+
+        $items = get_posts([
+            'post_type'      => 'room_service_item',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ]);
+    }
+
     if (!is_array($items)) {
         return [];
     }
@@ -10386,15 +10398,20 @@ add_action('admin_post_hearthstone_ops_submit_service_request', 'hearthstone_ops
 /**
  * Seed starter room-service menu items for demos.
  */
-function hearthstone_ops_seed_room_service_menu_items(): void
+function hearthstone_ops_seed_room_service_menu_items(bool $force = false): void
 {
-    if (!is_admin() || !current_user_can('manage_options')) {
+    if (!$force && (!is_admin() || !current_user_can('manage_options'))) {
         return;
     }
 
     $seed_version = (int) get_option('hearthstone_ops_room_service_seed_version', 0);
+    $has_existing_items = !empty(get_posts([
+        'post_type'      => 'room_service_item',
+        'posts_per_page' => 1,
+        'post_status'    => ['publish', 'draft', 'pending', 'private'],
+    ]));
 
-    if ($seed_version >= 2) {
+    if ($seed_version >= 2 && $has_existing_items) {
         return;
     }
 
@@ -10887,4 +10904,3 @@ function hearthstone_ops_render_service_request_column(string $column, int $post
     }
 }
 add_action('manage_guest_service_request_posts_custom_column', 'hearthstone_ops_render_service_request_column', 10, 2);
-
