@@ -654,29 +654,24 @@ function hearthstone_hospitality_get_packaged_logo_uri(): string
 
 function hearthstone_hospitality_get_home_hero_gallery_uris(): array
 {
-    $relative_paths = [
-        // Home hero fixed image.
-        "assets/images/csi-assets/csi-1.png",
+    $remote_uris = [
+        "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg?auto=compress&cs=tinysrgb&w=1920",
     ];
 
     $uris = [];
 
-    foreach ($relative_paths as $relative_path) {
-        $absolute_path = get_theme_file_path($relative_path);
-
-        if (!file_exists($absolute_path)) {
+    foreach ($remote_uris as $uri) {
+        if (!is_string($uri) || trim($uri) === "") {
             continue;
         }
 
-        $uris[] = (string) get_theme_file_uri($relative_path);
+        $uris[] = trim($uri);
     }
 
     if (empty($uris)) {
-        $fallback_path = "assets/images/csi-assets/csi-31.jpg";
-
-        if (file_exists(get_theme_file_path($fallback_path))) {
-            $uris[] = (string) get_theme_file_uri($fallback_path);
-        }
+        $uris[] = "https://cdn.pixabay.com/photo/2020/06/29/17/54/courtyard-5354495_1280.jpg";
     }
 
     return array_values(array_unique($uris));
@@ -1505,8 +1500,6 @@ function hearthstone_hospitality_migrate_seeded_copy(): void
                 "Clean, comfortable, cozy, and right across from the station.",
                 "Quietly luxurious stays across from the Cumbres and Toltec depot",
                 "hearthstone-brand-mark",
-                "csi-32.jpg",
-                "csi-30.jpg",
                 "Review themes consistently mention clean rooms, friendly hospitality, and easy train-station convenience.",
                 "Welcome to your stay app",
                 "Use this app to place orders, request service, and get help from the front desk while you are at the property.",

@@ -54,19 +54,19 @@ return <<<'HTML'
 <!-- wp:columns {"style":{"spacing":{"blockGap":{"left":"16px"}}}} -->
 <div class="wp-block-columns"><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"hearthstone-photo-frame"} -->
-<figure class="wp-block-image size-large hearthstone-photo-frame"><img src="/wp-content/themes/hearthstone-hospitality/assets/images/csi-assets/csi-20.jpg" alt="Courtyard seating area at Hearthstone Hospitality"/></figure>
+<figure class="wp-block-image size-large hearthstone-photo-frame"><img src="https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1400" alt="Premium guest suite preview"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"hearthstone-photo-frame"} -->
-<figure class="wp-block-image size-large hearthstone-photo-frame"><img src="/wp-content/themes/hearthstone-hospitality/assets/images/csi-assets/csi-7.jpg" alt="Walkway bench and room-front details"/></figure>
+<figure class="wp-block-image size-large hearthstone-photo-frame"><img src="https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1400" alt="Guest room detail preview"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column -->
 
 <!-- wp:column -->
 <div class="wp-block-column"><!-- wp:image {"sizeSlug":"large","linkDestination":"none","className":"hearthstone-photo-frame"} -->
-<figure class="wp-block-image size-large hearthstone-photo-frame"><img src="/wp-content/themes/hearthstone-hospitality/assets/images/csi-assets/csi-21.jpg" alt="Fireplace room feature"/></figure>
+<figure class="wp-block-image size-large hearthstone-photo-frame"><img src="https://images.pexels.com/photos/338504/pexels-photo-338504.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1400" alt="Boutique comfort amenities preview"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns -->

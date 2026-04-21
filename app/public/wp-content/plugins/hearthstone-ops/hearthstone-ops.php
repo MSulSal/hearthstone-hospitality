@@ -5967,17 +5967,7 @@ add_action('admin_print_footer_scripts', 'hearthstone_ops_render_guest_phone_for
  */
 function hearthstone_ops_get_available_room_service_items(): array
 {
-    $items = get_posts([
-        'post_type'      => 'room_service_item',
-        'posts_per_page' => -1,
-        'post_status'    => 'publish',
-        'orderby'        => 'title',
-        'order'          => 'ASC',
-    ]);
-
-    if (empty($items)) {
-        hearthstone_ops_seed_room_service_menu_items(true);
-
+    $query_items = static function (): array {
         $items = get_posts([
             'post_type'      => 'room_service_item',
             'posts_per_page' => -1,
@@ -5985,13 +5975,26 @@ function hearthstone_ops_get_available_room_service_items(): array
             'orderby'        => 'title',
             'order'          => 'ASC',
         ]);
+
+        return is_array($items) ? $items : [];
+    };
+
+    $items = $query_items();
+
+    if (empty($items)) {
+        hearthstone_ops_seed_room_service_menu_items(true);
+        $items = $query_items();
     }
 
-    if (!is_array($items)) {
+    $published_items = array_values(array_filter($items, static function ($item): bool {
+        return $item instanceof WP_Post;
+    }));
+
+    if (empty($published_items)) {
         return [];
     }
 
-    return array_values(array_filter($items, static function ($item): bool {
+    $available_items = array_values(array_filter($published_items, static function ($item): bool {
         if (!$item instanceof WP_Post) {
             return false;
         }
@@ -6005,6 +6008,14 @@ function hearthstone_ops_get_available_room_service_items(): array
 
         return $availability === '1';
     }));
+
+    if (!empty($available_items)) {
+        return $available_items;
+    }
+
+    // Fallback for demo/white-label snapshots: if all items were toggled unavailable,
+    // still render the catalog so screenshots and walkthroughs do not appear broken.
+    return $published_items;
 }
 
 /**
