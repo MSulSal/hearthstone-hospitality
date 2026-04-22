@@ -1596,6 +1596,34 @@ body.admin-bar .guest-auth-shell__backdrop {
   margin-top: 14px;
 }
 
+.hearthstone-guest-help-center .hearthstone-order-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hearthstone-guest-help-center .hearthstone-order-card h3,
+.hearthstone-guest-help-center .hearthstone-order-card .hearthstone-order-meta {
+  margin: 0;
+}
+
+.hearthstone-guest-help-center .hearthstone-order-actions.wp-block-buttons {
+  margin: 0.15rem 0 0;
+  width: 100%;
+}
+
+.hearthstone-guest-help-center .hearthstone-order-actions .wp-block-button {
+  width: 100%;
+  margin: 0;
+}
+
+.hearthstone-guest-help-center .hearthstone-order-actions .wp-block-button__link {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .hearthstone-service-request-app {
   margin: 0 auto;
   max-width: 900px;
