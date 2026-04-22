@@ -50,6 +50,7 @@ Text Domain: hearthstone-hospitality
   --hearthstone-space-md: clamp(1.2rem, 0.9rem + 1vw, 1.9rem);
   --hearthstone-space-lg: clamp(1.8rem, 1.2rem + 1.8vw, 3rem);
   --hearthstone-space-xl: clamp(2.6rem, 1.4rem + 3.2vw, 4.8rem);
+  --hearthstone-mobile-nav-height: 5.05rem;
   --hearthstone-bg-image-app: url("https://cdn.pixabay.com/photo/2020/06/29/17/54/courtyard-5354495_1280.jpg");
   --hearthstone-bg-image-auth: url("https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=1920");
   --hearthstone-bg-image-home: url("https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&w=1920");
@@ -1326,6 +1327,8 @@ body.admin-bar .guest-auth-shell__backdrop {
   right: 0;
   bottom: 0;
   z-index: 80;
+  min-height: var(--hearthstone-mobile-nav-height);
+  padding-bottom: env(safe-area-inset-bottom);
   background: color-mix(in srgb, var(--hearthstone-shell-bg) 64%, transparent 36%);
   border-top: 1px solid color-mix(in srgb, var(--hearthstone-border) 45%, transparent 55%);
   box-shadow: 0 -8px 18px rgba(8, 7, 6, 0.24);
@@ -1371,11 +1374,12 @@ body.admin-bar .guest-auth-shell__backdrop {
 
 .guest-mobile-nav__label {
   font-size: 0.63rem;
-  line-height: 1;
+  line-height: 1.08;
   font-weight: 700;
   letter-spacing: 0.01em;
   text-transform: none;
-  white-space: nowrap;
+  text-align: center;
+  white-space: normal;
 }
 
 .guest-mobile-nav__icon.hearthstone-icon-shopping-bag::before {
@@ -2193,6 +2197,23 @@ body.admin-bar .guest-auth-shell__backdrop {
     width: 100%;
     justify-content: space-between;
   }
+
+  .hearthstone-cart-line {
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .hearthstone-order-actions--inline {
+    width: 100%;
+  }
+
+  .hearthstone-order-actions--inline .hearthstone-order-action-form {
+    flex: 1 1 calc(50% - 0.24rem);
+  }
+
+  .hearthstone-order-actions--inline .hearthstone-order-action-btn {
+    width: 100%;
+  }
 }
 
 .hearthstone-order-action-form {
@@ -2485,11 +2506,7 @@ body.home .site-footer {
   }
 
   body.has-guest-mobile-nav .site-main {
-    padding-bottom: 4.6rem;
-  }
-
-  body.home.has-guest-mobile-nav .site-main {
-    padding-bottom: 0;
+    padding-bottom: calc(var(--hearthstone-mobile-nav-height) + env(safe-area-inset-bottom) + 0.4rem);
   }
 
   .guest-mobile-nav {
@@ -2536,6 +2553,54 @@ body.home .site-footer {
   .site-footer__brand {
     flex-direction: column;
     gap: 0.5rem;
+  }
+}
+
+@media (max-width: 560px) {
+  :root {
+    --hearthstone-mobile-nav-height: 7.9rem;
+  }
+
+  .guest-mobile-nav__list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.36rem 0.42rem;
+    padding: 0.4rem 0.52rem;
+  }
+
+  .guest-mobile-nav__item a {
+    min-height: 2.8rem;
+    padding: 0.26rem 0.22rem;
+  }
+
+  .guest-mobile-nav__icon {
+    width: 17px;
+    height: 17px;
+    font-size: 17px;
+    line-height: 17px;
+  }
+
+  .guest-mobile-nav__label {
+    font-size: 0.56rem;
+  }
+
+  .hearthstone-order-actions--inline .hearthstone-order-action-form {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-height: 760px) {
+  body.home,
+  body.page-template-page-guest-access,
+  body.page-guest-access,
+  body.page-slug-guest-access {
+    height: auto;
+    min-height: 100dvh;
+    overflow: auto;
+  }
+
+  .home .home-content--app-shell {
+    min-height: auto;
+    padding-bottom: calc(var(--hearthstone-mobile-nav-height) + env(safe-area-inset-bottom) + 0.6rem);
   }
 }
 
