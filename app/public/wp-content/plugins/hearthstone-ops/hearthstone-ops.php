@@ -2948,6 +2948,9 @@ function hearthstone_ops_render_overview_page(): void
     $notice_checkout_enabled = isset($_GET['hearthstone_ops_checkout_enabled'])
         ? sanitize_key((string) wp_unslash($_GET['hearthstone_ops_checkout_enabled']))
         : '';
+    $notice_demo_login_enabled = isset($_GET['hearthstone_ops_demo_login_enabled'])
+        ? sanitize_key((string) wp_unslash($_GET['hearthstone_ops_demo_login_enabled']))
+        : '';
     $seeded_guest_login = get_transient('hearthstone_ops_seeded_guest_login');
     $seeded_guest_room = '';
     $seeded_guest_code = '';
@@ -3010,6 +3013,10 @@ function hearthstone_ops_render_overview_page(): void
             'message' => __('Card-checkout update could not be applied due to an invalid target.', 'hearthstone-ops'),
             'type'    => 'notice-error',
         ],
+        'demo_guest_login_visibility_updated' => [
+            'message' => __('Demo guest login visibility was updated.', 'hearthstone-ops'),
+            'type'    => 'notice-success',
+        ],
     ];
 
     $recent_guests = get_posts([
@@ -3043,6 +3050,7 @@ function hearthstone_ops_render_overview_page(): void
     $booked_total           = (int) ($stay_status_summary['booked'] ?? 0);
     $room_service_metrics   = hearthstone_ops_get_room_service_order_metrics();
     $wc_checkout_readiness  = hearthstone_ops_get_wc_checkout_readiness();
+    $demo_guest_login_enabled = hearthstone_ops_should_enable_demo_guest_login();
     $sample_data_counts     = hearthstone_ops_get_sample_data_counts();
     $persistent_guest_count = max(0, $guest_total - (int) $sample_data_counts['guest']);
     $persistent_stay_count  = max(0, $stay_total - (int) $sample_data_counts['stay']);
@@ -3187,6 +3195,17 @@ function hearthstone_ops_render_overview_page(): void
                             $toggle_label
                         );
                     }
+                    if ($notice_key === 'demo_guest_login_visibility_updated') {
+                        $visibility_label = $notice_demo_login_enabled === '1'
+                            ? __('visible', 'hearthstone-ops')
+                            : __('hidden', 'hearthstone-ops');
+
+                        $notice_message .= ' ' . sprintf(
+                            /* translators: %s is the visibility state for demo login credentials. */
+                            __('Guest-login demo credentials are now %s on the auth screen.', 'hearthstone-ops'),
+                            $visibility_label
+                        );
+                    }
 
                     echo esc_html($notice_message);
                     ?>
@@ -3319,6 +3338,35 @@ function hearthstone_ops_render_overview_page(): void
                     <strong><?php esc_html_e('Guest App Home', 'hearthstone-ops'); ?></strong><br>
                     <?php esc_html_e('Primary QR landing surface for active guests.', 'hearthstone-ops'); ?><br>
                     <a href="<?php echo esc_url($action_links['app_home']); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('Open App Home', 'hearthstone-ops'); ?></a>
+                </div>
+                <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
+                    <strong><?php esc_html_e('Demo Guest Login Prompt', 'hearthstone-ops'); ?></strong><br>
+                    <?php echo esc_html($demo_guest_login_enabled ? __('Visible', 'hearthstone-ops') : __('Hidden', 'hearthstone-ops')); ?><br>
+                    <?php if ($demo_guest_login_enabled) : ?>
+                        <?php $demo_credentials = hearthstone_ops_get_demo_guest_credentials(); ?>
+                        <?php
+                        printf(
+                            /* translators: 1: demo room number, 2: demo access code. */
+                            esc_html__('Room %1$s | Access code %2$s', 'hearthstone-ops'),
+                            esc_html((string) $demo_credentials['room']),
+                            esc_html((string) $demo_credentials['code'])
+                        );
+                        ?><br>
+                    <?php endif; ?>
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin-top:8px;">
+                        <?php wp_nonce_field('hearthstone_ops_update_demo_login_visibility_action', 'hearthstone_ops_update_demo_login_visibility_nonce'); ?>
+                        <input type="hidden" name="action" value="hearthstone_ops_update_demo_login_visibility">
+                        <input type="hidden" name="hearthstone_ops_demo_login_enabled" value="<?php echo esc_attr($demo_guest_login_enabled ? '0' : '1'); ?>">
+                        <button type="submit" class="button button-secondary">
+                            <?php
+                            echo esc_html(
+                                $demo_guest_login_enabled
+                                    ? __('Hide demo login prompt', 'hearthstone-ops')
+                                    : __('Show demo login prompt', 'hearthstone-ops')
+                            );
+                            ?>
+                        </button>
+                    </form>
                 </div>
                 <div style="padding:12px;border:1px solid #dcdcde;background:#f9f9f9;">
                     <strong><?php esc_html_e('Restaurant Orders', 'hearthstone-ops'); ?></strong><br>
@@ -4389,8 +4437,18 @@ function hearthstone_ops_get_demo_guest_credentials(): array
  */
 function hearthstone_ops_should_enable_demo_guest_login(): bool
 {
+    if (defined('HEARTHSTONE_OPS_ENABLE_DEMO_GUEST_LOGIN')) {
+        return (bool) HEARTHSTONE_OPS_ENABLE_DEMO_GUEST_LOGIN;
+    }
+
+    // Backward-compatible alias for older environments.
     if (defined('CHAMA_OPS_ENABLE_DEMO_GUEST_LOGIN')) {
         return (bool) CHAMA_OPS_ENABLE_DEMO_GUEST_LOGIN;
+    }
+
+    $stored_override = get_option('hearthstone_ops_enable_demo_guest_login', null);
+    if ($stored_override !== null) {
+        return in_array((string) $stored_override, ['1', 'yes', 'true', 'on'], true);
     }
 
     $environment = function_exists('wp_get_environment_type')
@@ -6589,6 +6647,32 @@ function hearthstone_ops_update_wc_checkout_toggle(): void
     exit;
 }
 add_action('admin_post_hearthstone_ops_update_wc_checkout_toggle', 'hearthstone_ops_update_wc_checkout_toggle');
+
+/**
+ * Toggle demo guest-login credentials visibility on the auth screen.
+ */
+function hearthstone_ops_update_demo_login_visibility(): void
+{
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('You do not have permission to update demo guest login settings.', 'hearthstone-ops'), '', ['response' => 403]);
+    }
+
+    check_admin_referer('hearthstone_ops_update_demo_login_visibility_action', 'hearthstone_ops_update_demo_login_visibility_nonce');
+
+    $enabled = isset($_POST['hearthstone_ops_demo_login_enabled'])
+        ? sanitize_key((string) wp_unslash($_POST['hearthstone_ops_demo_login_enabled']))
+        : '0';
+
+    $normalized_enabled = $enabled === '1' ? '1' : '0';
+    update_option('hearthstone_ops_enable_demo_guest_login', $normalized_enabled, false);
+
+    wp_safe_redirect(add_query_arg([
+        'hearthstone_ops_notice'             => 'demo_guest_login_visibility_updated',
+        'hearthstone_ops_demo_login_enabled' => $normalized_enabled,
+    ], wp_get_referer() ?: admin_url('admin.php?page=hearthstone-ops-overview')));
+    exit;
+}
+add_action('admin_post_hearthstone_ops_update_demo_login_visibility', 'hearthstone_ops_update_demo_login_visibility');
 
 /**
  * Ensure WooCommerce cart/session objects are ready for checkout redirects.
